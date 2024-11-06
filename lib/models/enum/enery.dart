@@ -1,0 +1,1 @@
+enum Enery { gasoline, electric }
