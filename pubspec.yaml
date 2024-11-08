@@ -82,6 +82,7 @@ flutter:
       - assets/images/calendar.png
       - assets/images/sh.png
       - assets/images/fast-delivery.png
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 
@@ -111,3 +112,4 @@ flutter:
       - family: AppIcons 
         fonts:
           - asset: assets/fonts/AppIcons.ttf
+

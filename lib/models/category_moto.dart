@@ -1,30 +1,31 @@
 class CategoryMoto {
-  // Private attributes
-  final String _name;
-  final bool _isHide;
+  final String name;
+  final bool isHide;
 
-  // Constructor with named parameters
-  CategoryMoto({required String name, required bool isHide})
-      : _name = name,
-        _isHide = isHide;
+  // Constructor
+  CategoryMoto({
+    required this.name,
+    required this.isHide,
+  });
 
-  // Factory method to create an object from JSON
+  // Factory constructor to create a CategoryMoto from JSON (Firestore response)
   factory CategoryMoto.fromJson(Map<String, dynamic> json) {
+    // Check if required fields exist in the JSON
+    if (json['name'] == null || json['isHide'] == null) {
+      throw Exception('Name or isHide is missing in JSON data');
+    }
+
     return CategoryMoto(
       name: json['name'],
       isHide: json['isHide'],
     );
   }
 
-  // Method to convert the object to JSON
+  // Method to convert CategoryMoto to JSON (for sending to Firestore)
   Map<String, dynamic> toJson() {
     return {
-      'name': _name,
-      'isHide': _isHide,
+      'name': name,
+      'isHide': isHide,
     };
   }
-
-  // Getters to access private attributes
-  String get name => _name;
-  bool get isHide => _isHide;
 }

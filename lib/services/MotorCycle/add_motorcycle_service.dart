@@ -17,7 +17,7 @@ class AddMotorcycleService {
     required String energy,
     required double vehicleMass,
     required List<String> imagesMoto,
-    bool isActive = true,
+    bool isActive = false,
     bool isHide = false,
   }) async {
     // Prepare the request body

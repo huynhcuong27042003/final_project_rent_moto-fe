@@ -1,7 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api
 
 import 'package:final_project_rent_moto_fe/screens/CategoryMoto/list_category_screen.dart';
-import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -23,7 +22,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: LoginScreen(),
+      home: ListCategoryScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
