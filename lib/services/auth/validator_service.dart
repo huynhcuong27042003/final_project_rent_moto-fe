@@ -18,16 +18,19 @@ class ValidatorService {
   }
 
   bool isValidCode(String code) {
-    // Kiểm tra code có đúng 6 ký tự
     if (code.length != 6) return false;
-
-    // Kiểm tra có ít nhất 1 chữ và 1 số
-    bool hasLetters = code.contains(RegExp(r'[A-Z]')); // Chỉ cho phép chữ hoa
-    bool hasDigits = code.contains(RegExp(r'[0-9]'));
-
-    // Kiểm tra tất cả chữ cái phải là chữ hoa
     bool allUppercase = !code.contains(RegExp(r'[a-z]'));
 
-    return hasLetters && hasDigits && allUppercase;
+    return allUppercase;
+  }
+
+  bool isValidLICNumber(String licNumber) {
+    // Kiểm tra LICNumber có đúng 12 ký tự và tất cả là số
+    return RegExp(r'^[0-9]{12}$').hasMatch(licNumber);
+  }
+
+  bool isValidPhoneNumber(String phoneNumber) {
+    // Kiểm tra LICNumber có đúng 12 ký tự và tất cả là số
+    return RegExp(r'^[0-9]{10}$').hasMatch(phoneNumber);
   }
 }

@@ -1,10 +1,15 @@
+import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_enter_info_screen.dart';
+import 'package:final_project_rent_moto_fe/services/auth/signup_service.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/error_notification.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/success_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/services/auth/validator_service.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/button_auth.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/text_field_password_auth.dart';
 
 class SignupEnterPasswordBody extends StatefulWidget {
-  const SignupEnterPasswordBody({super.key});
+  final String email;
+  const SignupEnterPasswordBody({super.key, required this.email});
 
   @override
   State<SignupEnterPasswordBody> createState() =>
@@ -17,13 +22,14 @@ class _SignupEnterPasswordBodyState extends State<SignupEnterPasswordBody> {
   final _controllerPasswordCF = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final _validatorService = ValidatorService();
+  final _signupService = SignupService();
   bool _obscureText = true;
   bool _obscureTextCF = true;
   @override
   void initState() {
     super.initState();
     setState(() {
-      _controllerUsername.text = 'huynhminhcuong.270403@gmail.com';
+      _controllerUsername.text = widget.email;
     });
   }
 
@@ -105,7 +111,31 @@ class _SignupEnterPasswordBodyState extends State<SignupEnterPasswordBody> {
           ButtonAuth(
             text: "CONTINUE",
             onPressed: () {
-              if (_formKey.currentState!.validate()) {}
+              if (_formKey.currentState!.validate()) {
+                if (_controllerPassword.text.trim() ==
+                    _controllerPasswordCF.text.trim()) {
+                  _signupService.register(
+                      context,
+                      _controllerUsername.text.trim(),
+                      _controllerPassword.text.trim());
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SuccessNotification(
+                              text: "Update password successfully.")
+                          .buildSnackBar());
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          SignupEnterInfoScreen(email: widget.email),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const ErrorNotification(
+                              text: "Confirmation password is incorrect.")
+                          .buildSnackBar());
+                }
+              }
             },
           )
         ],

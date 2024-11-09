@@ -2,7 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/signup/signup_change_avatar/signup_change_avatar_body.dart';
 
 class SignupChangeAvatarScreen extends StatefulWidget {
-  const SignupChangeAvatarScreen({super.key});
+  final String email;
+
+  const SignupChangeAvatarScreen({
+    super.key,
+    required this.email,
+  });
 
   @override
   State<SignupChangeAvatarScreen> createState() =>
@@ -21,7 +26,9 @@ class _SignupChangeAvatarScreenState extends State<SignupChangeAvatarScreen> {
         ),
         backgroundColor: const Color(0xFFFFAD15),
       ),
-      body: const SignupChangeAvatarBody(),
+      body: SignupChangeAvatarBody(
+        email: widget.email,
+      ),
     );
   }
 }

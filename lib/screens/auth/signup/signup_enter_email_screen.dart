@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/signup/signup_enter_email/signup_enter_email_body.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/signup/signup_enter_email/signup_enter_email_header.dart';
+import 'package:flutter/material.dart';
 
 class SignupEnterEmailScreen extends StatefulWidget {
   const SignupEnterEmailScreen({super.key});

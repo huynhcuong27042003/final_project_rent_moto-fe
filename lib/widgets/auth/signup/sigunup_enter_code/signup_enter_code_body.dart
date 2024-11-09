@@ -1,12 +1,18 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_enter_password_screen.dart';
+import 'package:final_project_rent_moto_fe/services/auth/sendmail_service.dart';
+import 'package:final_project_rent_moto_fe/services/auth/signup_service.dart';
 import 'package:final_project_rent_moto_fe/services/auth/validator_service.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/button_auth.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/text_field_username_auth.dart';
+import 'package:flutter/material.dart';
 
 class SignupEnterCodeBody extends StatefulWidget {
-  const SignupEnterCodeBody({super.key});
+  final String email; // Thêm biến email
+
+  const SignupEnterCodeBody(
+      {super.key, required this.email}); // Cập nhật constructor để nhận email
 
   @override
   State<SignupEnterCodeBody> createState() => _SignupEnterCodeBodyState();
@@ -16,6 +22,8 @@ class _SignupEnterCodeBodyState extends State<SignupEnterCodeBody> {
   final _controllerCode = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   final _validatorService = ValidatorService();
+  final _sendmailService = SendMailService();
+  final _signupService = SignupService();
   int _seconds = 60;
   Timer? _timer;
   @override
@@ -104,8 +112,11 @@ class _SignupEnterCodeBodyState extends State<SignupEnterCodeBody> {
                         onPressed: () {
                           setState(() {
                             _seconds = 60; // Reset lại thời gian đếm ngược
-                            startTimer(); // Bắt đầu lại Timer
+                            startTimer();
+                            // Bắt đầu lại Timer
                           });
+                          _sendmailService.sendCodeByMail(
+                              context, widget.email);
                         },
                         child: const Text(
                           "Send",
@@ -121,7 +132,10 @@ class _SignupEnterCodeBodyState extends State<SignupEnterCodeBody> {
           ButtonAuth(
             text: "CONTINUE",
             onPressed: () {
-              if (_formKey.currentState!.validate()) {}
+              if (_formKey.currentState!.validate()) {
+                _signupService.verifyCode(
+                    widget.email, _controllerCode.text.trim(), context);
+              }
             },
           )
         ],
