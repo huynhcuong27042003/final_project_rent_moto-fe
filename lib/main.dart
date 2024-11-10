@@ -1,6 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api
 
-import 'package:final_project_rent_moto_fe/screens/MotorCycle/list_motorcycle.dart';
+import 'package:final_project_rent_moto_fe/screens/MotorCycle/add_motorcycle.dart';
+import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycles_list_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -21,8 +22,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home:MotorcycleListScreen(),
+    return MaterialApp(
+      home: MotorcyclesListScreen(),
       debugShowCheckedModeBanner: false,
     );
   }

@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api, avoid_print
+// ignore_for_file: library_private_types_in_public_api, unused_field
 
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/screens/CategoryMoto/add_category_screen.dart';
@@ -17,14 +17,23 @@ class _ListCategoryScreenState extends State<ListCategoryScreen> {
   final FetchCategoryService _fetchService = FetchCategoryService();
   final UpdateCategoryService _updateService = UpdateCategoryService();
 
+  late Future<List<Map<String, dynamic>>> _categoryMotosFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Khởi tạo Future ban đầu để tải danh sách
+    _categoryMotosFuture = _fetchCategoryMotos();
+  }
+
   void _showUpdateDialog(Map<String, dynamic> moto) {
     final String? id = moto['id'] as String?;
 
     if (id == null) {
-      // Handle the case where the ID is null
       print("Error: 'id' is null for moto: $moto");
       return; // Exit the function or show a message
     }
+
     showDialog(
       context: context,
       builder: (ctx) {
@@ -34,42 +43,60 @@ class _ListCategoryScreenState extends State<ListCategoryScreen> {
           currentIsHide: moto['isHide'],
           onUpdate: (id, name, isHide) async {
             try {
+              // Cập nhật danh mục moto qua service
               await _updateService.updateCategoryMoto(id, name, isHide);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.white),
-                        SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            'Updated category moto',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+
+              // Sau khi cập nhật thành công, làm mới lại danh sách
+              setState(() {
+                _categoryMotosFuture =
+                    _fetchCategoryMotos(); // Tạo lại Future mỗi lần dữ liệu thay đổi
+              });
+
+              // Hiển thị thông báo thành công
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.white),
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          'Updated category moto',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
-                    ),
-                    backgroundColor: Colors.green,
-                    duration: const Duration(seconds: 3),
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                      ),
+                    ],
                   ),
-                );
-              }
+                  backgroundColor: Colors.green,
+                  duration: const Duration(seconds: 3),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              );
             } catch (e) {
-              // Handle error
+              print("Error updating category: $e");
             }
           },
         );
       },
     );
+  }
+
+  // Method to fetch category motos
+  Future<List<Map<String, dynamic>>> _fetchCategoryMotos() async {
+    try {
+      return await _fetchService
+          .fetchCategories(); // Fetch data from the service
+    } catch (error) {
+      print("Error fetching categories: $error");
+      return []; // Return empty list in case of error
+    }
   }
 
   @override
@@ -94,9 +121,9 @@ class _ListCategoryScreenState extends State<ListCategoryScreen> {
         child: Column(
           children: [
             Expanded(
-              child: StreamBuilder<List<Map<String, dynamic>>>(
-                stream:
-                    _fetchService.fetchCategoryMotos(), // Get the Stream here
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                future:
+                    _fetchCategoryMotos(), // Fetch category motos from the service
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
