@@ -1,3 +1,4 @@
+import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_infor_user.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_background.dart';
 import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_infor_motos.dart';
@@ -20,6 +21,7 @@ class _RentHomeScreenState extends State<RentHomeScreen> {
         child: Stack(
           children: [
             const RentHomeBackground(),
+            const RentHomeInforUser(),
             const RentHomeSearchMotos(),
             Container(
               margin: const EdgeInsets.only(top: 400, left: 20),

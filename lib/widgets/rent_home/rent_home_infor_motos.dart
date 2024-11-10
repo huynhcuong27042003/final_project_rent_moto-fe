@@ -86,7 +86,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                 borderRadius: BorderRadius.circular(50),
                               ),
                               child: const Icon(
-                                AppIcons.heart,
+                                Icons.favorite_border_sharp,
                                 size: 18,
                               ),
                             ),
