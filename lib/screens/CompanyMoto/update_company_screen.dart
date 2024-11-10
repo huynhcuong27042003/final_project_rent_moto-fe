@@ -2,6 +2,7 @@
 
 // ignore_for_file: library_private_types_in_public_api
 
+import 'package:final_project_rent_moto_fe/services/CompanyMoto/update_company_service.dart';
 import 'package:flutter/material.dart';
 
 class UpdateCompanyScreen extends StatefulWidget {
@@ -25,6 +26,7 @@ class UpdateCompanyScreen extends StatefulWidget {
 class _UpdateCompanyScreenState extends State<UpdateCompanyScreen> {
   late TextEditingController nameController;
   late bool isHide;
+  final UpdateCompanyService _updateCompanyService = UpdateCompanyService();
 
   @override
   void initState() {
@@ -40,13 +42,72 @@ class _UpdateCompanyScreenState extends State<UpdateCompanyScreen> {
     super.dispose();
   }
 
+  Future<void> _handleUpdate() async {
+    try {
+      // Call the update service
+      await _updateCompanyService.updateCompanyMoto(
+          widget.id, nameController.text, isHide);
+
+      // If successful, show a success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Company motto updated successfully!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+
+      // Call the onUpdate callback to notify the parent widget
+      widget.onUpdate(widget.id, nameController.text, isHide);
+      Navigator.of(context).pop(); // Close the dialog after updating
+    } catch (e) {
+      // Handle any errors and show an error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Failed to update: $e',
+              style: const TextStyle(fontSize: 16),
+            ),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text(
         'Update Company Motto',
-        style:
-            TextStyle(color: Colors.blue), // Set the title color to blue
+        style: TextStyle(color: Colors.blue), // Set the title color to blue
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -58,7 +119,7 @@ class _UpdateCompanyScreenState extends State<UpdateCompanyScreen> {
           const SizedBox(height: 12),
           SwitchListTile(
             title: const Text(
-              'Hiden',
+              'Hidden',
               style: TextStyle(color: Colors.blue),
             ),
             value: isHide,
@@ -92,11 +153,7 @@ class _UpdateCompanyScreenState extends State<UpdateCompanyScreen> {
           ),
         ),
         TextButton(
-          onPressed: () {
-            widget.onUpdate(
-                widget.id, nameController.text, isHide); // Pass updated data
-            Navigator.of(context).pop(); // Close dialog after update
-          },
+          onPressed: _handleUpdate, // Call the update function
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             backgroundColor: Colors.blue, // Background color for Update button

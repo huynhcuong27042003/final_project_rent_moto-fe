@@ -1,11 +1,16 @@
 // ignore_for_file: library_private_types_in_public_api
 
+<<<<<<< HEAD
 import 'package:final_project_rent_moto_fe/screens/CategoryMoto/list_category_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_change_avatar_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_enter_info_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/home/rent_home/rent_home_screen.dart';
+=======
+import 'package:final_project_rent_moto_fe/screens/MotorCycle/add_motorcycle.dart';
+import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycles_list_screen.dart';
+>>>>>>> Bin
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -26,8 +31,13 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return const MaterialApp(
       home: RentHomeScreen(),
+=======
+    return MaterialApp(
+      home: MotorcyclesListScreen(),
+>>>>>>> Bin
       debugShowCheckedModeBanner: false,
     );
   }

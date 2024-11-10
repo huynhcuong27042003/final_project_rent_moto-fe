@@ -1,6 +1,7 @@
 import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_change_avatar_screen.dart';
 import 'package:final_project_rent_moto_fe/services/auth/signup_service.dart';
 import 'package:final_project_rent_moto_fe/widgets/notification/success_notification.dart';
+
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/services/auth/validator_service.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/button_auth.dart';

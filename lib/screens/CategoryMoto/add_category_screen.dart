@@ -1,5 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api, avoid_print, use_build_context_synchronously, unused_element
 
+import 'package:final_project_rent_moto_fe/widgets/notification/error_notification.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/success_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/screens/CategoryMoto/list_category_screen.dart';
 import 'package:final_project_rent_moto_fe/services/CategoryMoto/add_category_service.dart';
@@ -25,51 +27,15 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       bool success = await _service.addCategoryMoto(_name, _isHide);
 
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 10),
-                Text(
-                  'Category moto added!',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        const SuccessNotification(text: "Category moto added!")
+            .buildSnackBar();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const ListCategoryScreen()),
         ); // Optionally navigate back after adding
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.error, color: Colors.white),
-                SizedBox(width: 10),
-                Text(
-                  'Failed to add company moto.',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            duration: const Duration(seconds: 3),
-          ),
-        );
+        const ErrorNotification(text: "Failed to add company moto.!")
+            .buildSnackBar();
       }
     }
   }

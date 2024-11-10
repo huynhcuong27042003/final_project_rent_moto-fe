@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api, avoid_print
+// ignore_for_file: library_private_types_in_public_api, unused_field
 
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/screens/CompanyMoto/add_company_moto.dart';
@@ -17,11 +17,19 @@ class _ListCompanyScreenState extends State<ListCompanyScreen> {
   final FetchCompanyService _fetchService = FetchCompanyService();
   final UpdateCompanyService _updateService = UpdateCompanyService();
 
+  late Future<List<Map<String, dynamic>>> _companyMotosFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Khởi tạo Future ban đầu để tải danh sách
+    _companyMotosFuture = _fetchCompanyMotos();
+  }
+
   void _showUpdateDialog(Map<String, dynamic> company) {
     final String? id = company['id'] as String?;
 
     if (id == null) {
-      // Handle the case where the ID is null
       print("Error: 'id' is null for company: $company");
       return; // Exit the function or show a message
     }
@@ -30,13 +38,22 @@ class _ListCompanyScreenState extends State<ListCompanyScreen> {
       context: context,
       builder: (ctx) {
         return UpdateCompanyScreen(
-          id: id,
+          id: company['id'],
           currentName: company['name'],
           currentIsHide: company['isHide'],
           onUpdate: (id, name, isHide) async {
             try {
+              // Cập nhật công ty moto qua service
               await _updateService.updateCompanyMoto(id, name, isHide);
+
+              // Sau khi cập nhật thành công, làm mới lại danh sách
               if (mounted) {
+                setState(() {
+                  // Làm mới Future của danh sách công ty bằng cách gọi lại _fetchCompanyMotos()
+                  _companyMotosFuture = _fetchCompanyMotos();
+                });
+
+                // Hiển thị thông báo thành công
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: const Row(
@@ -64,13 +81,32 @@ class _ListCompanyScreenState extends State<ListCompanyScreen> {
                   ),
                 );
               }
+              // Làm mới lại danh sách sau khi cập nhật
+              if (mounted) {
+                setState(() {
+                  // Làm mới Future của danh sách công ty bằng cách gọi lại _fetchCompanyMotos()
+                  _companyMotosFuture = _fetchCompanyMotos();
+                });
+              }
             } catch (e) {
               // Handle error
+              print("Error updating company: $e");
             }
           },
         );
       },
     );
+  }
+
+  // Method to fetch company motos
+  Future<List<Map<String, dynamic>>> _fetchCompanyMotos() async {
+    try {
+      return await _fetchService
+          .fetchCompanies(); // Fetch data from the service
+    } catch (error) {
+      print("Error fetching companies: $error");
+      return []; // Return empty list in case of error
+    }
   }
 
   @override
@@ -95,9 +131,9 @@ class _ListCompanyScreenState extends State<ListCompanyScreen> {
         child: Column(
           children: [
             Expanded(
-              child: StreamBuilder<List<Map<String, dynamic>>>(
-                stream:
-                    _fetchService.fetchCompanyMotos(), // Get the Stream here
+              child: FutureBuilder<List<Map<String, dynamic>>>(
+                // Sử dụng FutureBuilder
+                future: _companyMotosFuture, // Fetch company motos từ service
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -111,7 +147,7 @@ class _ListCompanyScreenState extends State<ListCompanyScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'No company mottos available.',
+                            'No company motos available.',
                             style: TextStyle(
                                 fontSize: 18, color: Colors.grey[600]),
                           ),
@@ -190,5 +226,3 @@ class _ListCompanyScreenState extends State<ListCompanyScreen> {
     );
   }
 }
-
-
