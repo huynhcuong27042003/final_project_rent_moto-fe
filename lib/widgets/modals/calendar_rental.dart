@@ -44,6 +44,8 @@ class _BookingScreenState extends State<BookingScreen>
     tempReturnDate = selectedReturnDate!;
     selectedPickupTime = widget.pickupTime;
     selectedReturnTime = widget.returnTime;
+    print("Ngày nhận: $selectedPickupDate");
+    print("Ngày trả: $selectedReturnDate");
     // Nếu rentalPeriod chứa thông tin về thời gian, hãy phân tách để lấy pickupTime và returnTime
     // Giả sử rentalPeriod có dạng "pickupTime - returnTime"
   }
@@ -224,12 +226,12 @@ class _BookingScreenState extends State<BookingScreen>
                 final day = index - (firstWeekday - 2);
                 DateTime currentDay = DateTime(
                     selectedPickupDate.year, selectedPickupDate.month, day);
-
+                print("Current Day: $currentDay");
                 // Các điều kiện để xác định màu sắc ngày
 
-                bool isSelectedPickup = currentDay == tempPickupDate;
+                bool isSelectedPickup = DateTime.now() == tempPickupDate;
                 bool isSelectedReturn =
-                    tempReturnDate != null && currentDay == tempReturnDate;
+                    tempReturnDate != null && DateTime.now() == tempReturnDate;
                 bool isBeforeToday = currentDay
                     .isBefore(DateTime.now().subtract(const Duration(days: 1)));
                 bool isBetween = isBetweenSelectedDates(currentDay);

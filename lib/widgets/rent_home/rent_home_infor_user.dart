@@ -27,7 +27,7 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
         setState(() {
-          isLoggedIn = false;
+          isLoggedIn = true;
         });
 
         final userEmail = currentUser.email;
