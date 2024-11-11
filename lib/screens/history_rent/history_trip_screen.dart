@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/screens/history_rent/my_trip_screen.dart';
 
-
 class HistoryTripScreen extends StatefulWidget {
   const HistoryTripScreen({super.key});
 
@@ -58,6 +57,7 @@ class _HistoryTripScreenState extends State<HistoryTripScreen>
       body: const Center(
         child: Text('Nội dung lịch sử chuyến đi sẽ hiển thị ở đây.'),
       ),
+      // bottomNavigationBar: CustomBottomNavigationBar(),
     );
   }
 }

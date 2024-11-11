@@ -31,8 +31,7 @@ class _MyWidgetState extends State<MyTripScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor:
-            const Color.fromARGB(255, 244, 156, 33), // Màu nền AppBar
+        backgroundColor: const Color(0xFFF49C21), // Màu nền AppBar
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
