@@ -1,6 +1,10 @@
+<<<<<<< HEAD
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:final_project_rent_moto_fe/screens/history_rent/history_trip_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/history_rent/my_trip_screen.dart';
+=======
+import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_infor_user.dart';
+>>>>>>> main
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_background.dart';
 import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_infor_motos.dart';
@@ -18,6 +22,7 @@ class RentHomeScreen extends StatefulWidget {
 class _RentHomeScreenState extends State<RentHomeScreen> {
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return SingleChildScrollView(
       child: Stack(
         children: [
@@ -31,6 +36,24 @@ class _RentHomeScreenState extends State<RentHomeScreen> {
                 RentHomeInforMotos(),
                 RentHomeMotoRental(),
               ],
+=======
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            const RentHomeBackground(),
+            const RentHomeInforUser(),
+            const RentHomeSearchMotos(),
+            Container(
+              margin: const EdgeInsets.only(top: 400, left: 20),
+              child: const Column(
+                children: [
+                  RentHomePromo(),
+                  RentHomeInforMotos(),
+                  RentHomeMotoRental()
+                ],
+              ),
+>>>>>>> main
             ),
           ),
         ],

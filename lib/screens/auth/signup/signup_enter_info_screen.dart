@@ -3,7 +3,8 @@ import 'package:final_project_rent_moto_fe/widgets/auth/signup/signup_enter_info
 import 'package:final_project_rent_moto_fe/widgets/auth/signup/signup_enter_info/signup_enter_infor_header.dart';
 
 class SignupEnterInfoScreen extends StatefulWidget {
-  const SignupEnterInfoScreen({super.key});
+  final String email;
+  const SignupEnterInfoScreen({super.key, required this.email});
 
   @override
   State<SignupEnterInfoScreen> createState() => _SignupEnterInfoScreenState();
@@ -22,14 +23,16 @@ class _SignupEnterInfoScreenState extends State<SignupEnterInfoScreen> {
         ),
         backgroundColor: const Color(0xFFFFAD15),
       ),
-      body: const Column(
+      body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
+          const SizedBox(
             height: 150,
             child: SignupEnterInforHeader(),
           ),
-          SignupEnterInforBody(),
+          SignupEnterInforBody(
+            email: widget.email,
+          ),
         ],
       ),
     );

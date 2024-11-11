@@ -1,10 +1,8 @@
-// lib/services/company_moto_update_service.dart
-
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class UpdateCategoryService {
-  final String baseUrl = 'http://10.0.2.2:3000/api/categoryMoto/'; 
+  final String baseUrl = 'http://10.0.2.2:3000/api/categoryMoto/';
 // Adjust URL if needed
 
   Future<void> updateCategoryMoto(String id, String name, bool isHide) async {

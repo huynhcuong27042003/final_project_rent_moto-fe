@@ -3,7 +3,8 @@ import 'package:final_project_rent_moto_fe/widgets/auth/signup/signup_enter_pass
 import 'package:final_project_rent_moto_fe/widgets/auth/signup/signup_enter_password/signup_enter_password_header.dart';
 
 class SignupEnterPasswordScreen extends StatefulWidget {
-  const SignupEnterPasswordScreen({super.key});
+  final String eamil;
+  const SignupEnterPasswordScreen({super.key, required this.eamil});
 
   @override
   State<SignupEnterPasswordScreen> createState() =>
@@ -23,14 +24,16 @@ class _SignupEnterPasswordScreenState extends State<SignupEnterPasswordScreen> {
         ),
         backgroundColor: const Color(0xFFFFAD15),
       ),
-      body: const Column(
+      body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
+          const SizedBox(
             height: 150,
             child: SignupEnterPasswordHeader(),
           ),
-          SignupEnterPasswordBody(),
+          SignupEnterPasswordBody(
+            email: widget.eamil,
+          ),
         ],
       ),
     );

@@ -1,8 +1,45 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class SignupChangAvatarInfor extends StatelessWidget {
-  const SignupChangAvatarInfor({super.key});
+class SignupChangAvatarInfor extends StatefulWidget {
+  final String email;
+  const SignupChangAvatarInfor({super.key, required this.email});
 
+  @override
+  State<SignupChangAvatarInfor> createState() => _SignupChangAvatarInforState();
+}
+
+class _SignupChangAvatarInforState extends State<SignupChangAvatarInfor> {
+  Map<String, dynamic>? userData; // Dùng để lưu dữ liệu người dùng
+
+  // Hàm fetchDataUser để lấy thông tin người dùng theo email
+  Future<void> fetchDataUser() async {
+    try {
+      // Truy vấn Firebase Firestore với email
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: widget.email)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Lấy dữ liệu từ document đầu tiên tìm thấy
+        var userData = querySnapshot.docs.first.data() as Map<String, dynamic>;
+        setState(() {
+          this.userData = {
+            'gplx': userData['information']['gplx'] ?? 'No information',
+            'name': userData['information']['name'] ?? 'No information',
+            'phoneNumber': userData['phoneNumber'] ?? 'No information',
+            'dayOfBirth':
+                userData['information']['dayOfBirth'] ?? 'No information',
+          };
+        });
+      }
+    } catch (error) {
+      print('Lỗi khi lấy dữ liệu người dùng: $error');
+    }
+  }
+
+  // Hàm tạo widget thông tin
   Widget fieldInfoRow(String title, String sub) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,7 +67,23 @@ class SignupChangAvatarInfor extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+    fetchDataUser(); // Gọi hàm fetchDataUser để lấy dữ liệu khi màn hình được mở
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (userData == null) {
+      return const CircularProgressIndicator(); // Hiển thị khi chưa có dữ liệu
+    }
+
+    // Lấy dữ liệu từ userData
+    final licenseNumber = userData!['gplx'];
+    final fullName = userData!['name'];
+    final phoneNumber = userData!['phoneNumber'];
+    final dateOfBirth = userData!['dayOfBirth'];
+
     return Container(
       height: 200,
       width: 350,
@@ -50,8 +103,6 @@ class SignupChangAvatarInfor extends StatelessWidget {
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize:
-                MainAxisSize.max, // Đảm bảo row chiếm toàn bộ không gian
             children: [
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -68,7 +119,7 @@ class SignupChangAvatarInfor extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(
-                      height: 20,
+                      height: 10,
                     ),
                     const Align(
                       alignment: Alignment.topCenter,
@@ -84,20 +135,23 @@ class SignupChangAvatarInfor extends StatelessWidget {
                     const SizedBox(
                       height: 20,
                     ),
-                    // Gọi fieldInfoRow ở đây
-                    fieldInfoRow("Full name", "HUỲNH MINH CƯỜNG"),
+                    fieldInfoRow("Full name", fullName),
                     const SizedBox(
-                      height: 10,
+                      height: 5,
+                    ),
+                    fieldInfoRow("License number", licenseNumber),
+                    const SizedBox(
+                      height: 5,
                     ),
                     Row(
                       children: [
-                        // Column cho Date of birth
-                        fieldInfoRow("Date of birth", "27/04/2003"),
-                        const SizedBox(width: 60), // Thêm khoảng cách
-                        // Column cho Genre
-                        fieldInfoRow("Genre", "Male"),
+                        fieldInfoRow("Phone number", phoneNumber),
+                        const SizedBox(
+                          width: 30,
+                        ),
+                        fieldInfoRow("Date of birth", dateOfBirth),
                       ],
-                    ),
+                    )
                   ],
                 ),
               ),
