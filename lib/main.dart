@@ -1,6 +1,3 @@
-import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
-import 'package:final_project_rent_moto_fe/screens/home/rent_home/rent_home_screen.dart';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -22,7 +19,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: LoginScreen(),
+      home: Dashboard(),
       debugShowCheckedModeBanner: false,
     );
   }
