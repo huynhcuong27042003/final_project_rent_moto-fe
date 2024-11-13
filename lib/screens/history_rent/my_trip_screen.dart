@@ -1,7 +1,6 @@
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/screens/history_rent/history_trip_screen.dart';
-import 'package:final_project_rent_moto_fe/screens/home/rent_home/rent_home_screen.dart';
 
 // Import trang HistoryTripScreen
 
