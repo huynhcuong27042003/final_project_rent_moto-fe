@@ -1,6 +1,8 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:final_project_rent_moto_fe/screens/history_rent/my_trip_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/home/rent_home/rent_home_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/users/user_infor_myaccount_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/users/user_infor_screen.dart';
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {
@@ -16,8 +18,7 @@ class _DashboardState extends State<Dashboard> {
   final List<Widget> _screens = [
     const RentHomeScreen(), // Trang Home
     const MyTripScreen(),
-    // const HistoryTripScreen(), // Trang MyTrip
-    const ProfileScreen(), // Trang Profile (bạn cần tự tạo trang này)
+    const UserInforScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -45,20 +46,6 @@ class _DashboardState extends State<Dashboard> {
           Icon(Icons.account_box_sharp, size: 30, color: Colors.white),
         ],
         onTap: _onItemTapped,
-      ),
-    );
-  }
-}
-
-// Trang Profile (Bạn cần tạo trang Profile phù hợp với ứng dụng của bạn)
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Text("Profile Page"),
       ),
     );
   }
