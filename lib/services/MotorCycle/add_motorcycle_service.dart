@@ -17,8 +17,9 @@ class AddMotorcycleService {
     required String energy,
     required double vehicleMass,
     required List<String> imagesMoto,
-    bool isActive = false,
-    bool isHide = false,
+    required String email, // <-- New email parameter
+    bool isActive = true,
+    bool isHide = true,
   }) async {
     // Prepare the request body
     final Map<String, dynamic> requestBody = {
@@ -33,6 +34,7 @@ class AddMotorcycleService {
         'vehicleMass': vehicleMass,
         'imagesMoto': imagesMoto,
       },
+      'email': email, // <-- Changed 'ownerEmail' to 'email'
       'isActive': isActive,
       'isHide': isHide,
     };

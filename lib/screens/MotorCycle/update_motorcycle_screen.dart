@@ -86,12 +86,14 @@ class _UpdateMotorcycleScreenState extends State<UpdateMotorcycleScreen> {
   Future<void> fetchCompanyMotos() async {
     List<String> companyMotos =
         await updateMotorcycleService.fetchCompanyMotos();
-    setState(() {
-      companyMotoList = companyMotos;
-      if (companyMotoList.isNotEmpty && selectedCompanyMoto == null) {
-        selectedCompanyMoto = companyMotoList[0];
-      }
-    });
+    if (mounted) {
+      setState(() {
+        companyMotoList = companyMotos;
+        if (companyMotoList.isNotEmpty && selectedCompanyMoto == null) {
+          selectedCompanyMoto = companyMotoList[0];
+        }
+      });
+    }
   }
 
   Future<void> fetchCategories() async {
@@ -116,66 +118,6 @@ class _UpdateMotorcycleScreenState extends State<UpdateMotorcycleScreen> {
     super.dispose();
   }
 
-  // Hàm để gửi yêu cầu cập nhật thông tin xe
-  // Future<void> updateMotorcycle() async {
-  //   List<String> finalImageUrls = [];
-
-  //   // Nếu có ảnh mới được chọn, thay thế ảnh cũ bằng ảnh mới
-  //   if (selectedImages.isNotEmpty) {
-  //     for (var imageFile in selectedImages) {
-  //       try {
-  //         // Upload ảnh mới và lấy URL
-  //         String imageUrl =
-  //             await imagePickerService.uploadImageToFirebase(imageFile);
-  //         finalImageUrls
-  //             .add(imageUrl); // Thêm ảnh mới vào danh sách thay thế ảnh cũ
-  //       } catch (e) {
-  //         print("Error uploading image: $e");
-  //       }
-  //     }
-  //   } else {
-  //     // Nếu không có ảnh mới, giữ lại ảnh cũ từ Firestore
-  //     finalImageUrls = List.from(imageUrls); // Giữ lại ảnh cũ từ Firestore
-  //   }
-
-  //   final updates = {
-  //     'numberPlate': numberPlateController.text,
-  //     'companyMoto': {'name': selectedCompanyMoto},
-  //     'category': {'name': selectedCategory},
-  //     'informationMoto': {
-  //       'nameMoto': nameMotoController.text,
-  //       'price': double.tryParse(priceController.text) ?? 0.0,
-  //       'description': descriptionController.text,
-  //       'energy': energyController.text,
-  //       'vehicleMass': double.tryParse(vehicleMassController.text) ?? 0.0,
-  //       'images': finalImageUrls, // Cập nhật với các ảnh cũ và ảnh mới
-  //     },
-  //     'isActive': isActive, // Cập nhật trạng thái isActive
-  //     'isHide': isHide,
-  //   };
-
-  //   try {
-  //     // Gọi UpdateMotorcycleService để cập nhật thông tin
-  //     final updatedMotorcycle =
-  //         await UpdateMotorcycleService().updateMotorcycle(
-  //       widget.motorcycle['id'],
-  //       updates,
-  //     );
-  //     // Sau khi cập nhật thành công, hiển thị thông báo
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Motorcycle updated successfully!')),
-  //       );
-  //     }
-  //   } catch (e) {
-  //     // Nếu có lỗi, hiển thị thông báo lỗi
-  //     if (mounted) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Failed to update motorcycle: $e')),
-  //       );
-  //     }
-  //   }
-  // }
   Future<void> updateMotorcycle() async {
     await updateMotorcycleLogic(
       context: context,

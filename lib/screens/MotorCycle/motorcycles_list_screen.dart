@@ -1,6 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api
 
-import 'package:final_project_rent_moto_fe/screens/MotorCycle/accept_motor_rental_post_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/MotorCycle/update_motorcycle_screen.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/fetch_motorcycle_service.dart';
 import 'package:flutter/material.dart';
 
@@ -105,7 +105,7 @@ class _MotorcyclesListScreenState extends State<MotorcyclesListScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => AcceptMotorRentalPostScreen(
+                            builder: (context) => UpdateMotorcycleScreen(
                               motorcycle:
                                   motorcycle, // Pass the motorcycle data
                             ),

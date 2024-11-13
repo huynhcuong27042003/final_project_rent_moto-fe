@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class FetchMotorcycleService {
-  final String apiUrl = 'http://10.0.2.2:3000/api/motorcycle';
+class FetchMotorcycleIsacceptService {
+  final String apiUrl = 'http://10.0.2.2:3000/api/homepage';
 
   // Hàm lấy danh sách xe máy từ API
   Future<List<dynamic>> fetchMotorcycle({String? id}) async {
