@@ -7,13 +7,13 @@ class DetailMotoBodyEvaluate extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
+      children: const [
+        Text(
           'Đánh giá',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
-        const ListTile(
+        SizedBox(height: 8),
+        ListTile(
           leading: CircleAvatar(
             backgroundImage: AssetImage('assets/images/sh.png'),
           ),
@@ -37,8 +37,8 @@ class DetailMotoBodyEvaluate extends StatelessWidget {
             'Xe chạy rất tốt, tiết kiệm nhiên liệu!',
           ),
         ),
-        const Divider(),
-        const ListTile(
+        Divider(),
+        ListTile(
           leading: CircleAvatar(
             backgroundImage: AssetImage('assets/images/sh.png'),
           ),

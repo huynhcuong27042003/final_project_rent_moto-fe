@@ -1,3 +1,4 @@
+import 'package:final_project_rent_moto_fe/widgets/auth/users/user_infor_myaccount_form.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -39,11 +40,11 @@ class _UserInforBodyState extends State<UserInforBody> {
             avatarUrl = userData['information']?['avatar'];
           });
         } else {
-          print("No user found with this email.");
+          print("Không tìm thấy người dùng với email này.");
         }
       }
     } catch (e) {
-      print("Error fetching user data: $e");
+      print("Lỗi khi lấy dữ liệu người dùng: $e");
     }
   }
 
@@ -53,7 +54,7 @@ class _UserInforBodyState extends State<UserInforBody> {
 
     return Stack(
       children: [
-        // Background Image (1/4 screen height)
+        // Hình nền (chiếm 1/4 chiều cao màn hình)
         Container(
           height: screenHeight * 0.23,
           decoration: BoxDecoration(
@@ -67,15 +68,15 @@ class _UserInforBodyState extends State<UserInforBody> {
           ),
         ),
 
-        // Scrollable Main Content
+        // Nội dung chính có thể cuộn
         SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             child: Column(
               children: [
-                SizedBox(height: screenHeight * 0.2), // Push avatar down
+                SizedBox(height: screenHeight * 0.2), // Đẩy avatar xuống
 
-                // Avatar and Name
+                // Avatar và tên người dùng
                 CircleAvatar(
                   radius: 50,
                   backgroundImage: avatarUrl != null
@@ -85,9 +86,9 @@ class _UserInforBodyState extends State<UserInforBody> {
 
                 SizedBox(height: 16),
 
-                // User Name
+                // Tên người dùng
                 Text(
-                  userName ?? 'User Name',
+                  userName ?? 'Tên người dùng',
                   style: TextStyle(
                     fontSize: 18.0,
                     fontWeight: FontWeight.bold,
@@ -95,7 +96,7 @@ class _UserInforBodyState extends State<UserInforBody> {
                   ),
                 ),
 
-                // First Rounded Box for Main Menu Items
+                // Hộp tròn đầu tiên cho các mục menu chính
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Container(
@@ -107,7 +108,7 @@ class _UserInforBodyState extends State<UserInforBody> {
                           color: Colors.grey.withOpacity(0.2),
                           spreadRadius: 2,
                           blurRadius: 5,
-                          offset: Offset(0, 3), // changes position of shadow
+                          offset: Offset(0, 3), // thay đổi vị trí bóng
                         ),
                       ],
                     ),
@@ -131,7 +132,6 @@ class _UserInforBodyState extends State<UserInforBody> {
                   ),
                 ),
 
-                // Second Rounded Box for Account Actions
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Container(
@@ -155,29 +155,25 @@ class _UserInforBodyState extends State<UserInforBody> {
                   ),
                 ),
 
-                // Centered Logout Button with 10px margin on top and bottom
-                SizedBox(height: 10), // 10px space above the logout button
+                SizedBox(height: 10),
                 ElevatedButton.icon(
-                  onPressed: () {
-                    // Handle logout action
-                  },
-                  icon: Icon(Icons.logout,
-                      color: Colors.red), // Red icon for logout
+                  onPressed: () {},
+                  icon: Icon(Icons.logout, color: Colors.red),
                   label: Text(
                     'Đăng xuất',
                     style: TextStyle(color: Colors.red),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white, // White background
+                    backgroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
                     ),
-                    side: BorderSide(color: Colors.red), // Red border
+                    side: BorderSide(color: Colors.red),
                     padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   ),
                 ),
-                SizedBox(height: 10), // 10px space below the logout button
+                SizedBox(height: 10),
               ],
             ),
           ),
@@ -192,7 +188,12 @@ class _UserInforBodyState extends State<UserInforBody> {
       title: Text(title),
       trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
       onTap: () {
-        // Handle tap event
+        if (title == 'Tài khoản của tôi') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => UserInforMyaccount()),
+          );
+        }
       },
     );
   }

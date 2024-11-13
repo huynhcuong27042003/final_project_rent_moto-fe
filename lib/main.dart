@@ -24,7 +24,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: DetailMotoScreen(),
+      home: LoginScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
