@@ -1,4 +1,5 @@
 import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_enter_email_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/home/rent_home/rent_home_screen.dart';
 import 'package:final_project_rent_moto_fe/services/auth/login_service.dart';
 import 'package:final_project_rent_moto_fe/services/auth/validator_service.dart';
@@ -34,7 +35,7 @@ class _LoginFormState extends State<LoginForm> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => RentHomeScreen(),
+            builder: (context) => Dashboard(),
           ),
         );
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_enter_password_screen.dart';
 import 'package:final_project_rent_moto_fe/services/auth/sendmail_service.dart';
 import 'package:final_project_rent_moto_fe/services/auth/signup_service.dart';
 import 'package:final_project_rent_moto_fe/services/auth/validator_service.dart';
