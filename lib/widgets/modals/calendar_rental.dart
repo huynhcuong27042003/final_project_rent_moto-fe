@@ -226,12 +226,11 @@ class _BookingScreenState extends State<BookingScreen>
                 final day = index - (firstWeekday - 2);
                 DateTime currentDay = DateTime(
                     selectedPickupDate.year, selectedPickupDate.month, day);
-                print("Current Day: $currentDay");
                 // Các điều kiện để xác định màu sắc ngày
 
-                bool isSelectedPickup = DateTime.now() == tempPickupDate;
+                bool isSelectedPickup = currentDay == tempPickupDate;
                 bool isSelectedReturn =
-                    tempReturnDate != null && DateTime.now() == tempReturnDate;
+                    tempReturnDate != null && currentDay == tempReturnDate;
                 bool isBeforeToday = currentDay
                     .isBefore(DateTime.now().subtract(const Duration(days: 1)));
                 bool isBetween = isBetweenSelectedDates(currentDay);

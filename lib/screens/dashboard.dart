@@ -1,3 +1,4 @@
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:final_project_rent_moto_fe/screens/history_rent/my_trip_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/home/rent_home/rent_home_screen.dart';
 import 'package:flutter/material.dart';
@@ -28,12 +29,13 @@ class _DashboardState extends State<Dashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
       ),
       bottomNavigationBar: CurvedNavigationBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         buttonBackgroundColor: const Color(0xFFF49C21),
         color: const Color(0xFFF49C21),
         animationDuration: const Duration(milliseconds: 300),

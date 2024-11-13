@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RentHomeInforUser extends StatefulWidget {
   const RentHomeInforUser({super.key});
@@ -13,12 +14,20 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
   String? userName;
   String? phoneNumber;
   String? avatarUrl;
-  bool isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
-    fetchDataUser();
+    checkLoginStatus();
+  }
+
+  Future<void> checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool isLogin = prefs.getBool('isLogin') ?? false;
+
+    if (isLogin) {
+      fetchDataUser();
+    }
   }
 
   Future<void> fetchDataUser() async {
@@ -26,10 +35,6 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
       // Lấy currentUser từ FirebaseAuth
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
-        setState(() {
-          isLoggedIn = true;
-        });
-
         final userEmail = currentUser.email;
 
         // Truy vấn thông tin người dùng từ Firestore
@@ -46,10 +51,6 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
             avatarUrl = userData['information']['avatar'];
           });
         }
-      } else {
-        setState(() {
-          isLoggedIn = false;
-        });
       }
     } catch (e) {
       print("Lỗi khi lấy thông tin người dùng: $e");
@@ -75,13 +76,12 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
               children: [
                 CircleAvatar(
                   maxRadius: 25,
-                  backgroundImage: isLoggedIn && avatarUrl != null
-                      ? NetworkImage(avatarUrl!)
-                      : null,
-                  child: !isLoggedIn ? const Icon(Icons.person) : null,
+                  backgroundImage:
+                      avatarUrl != null ? NetworkImage(avatarUrl!) : null,
+                  child: avatarUrl == null ? const Icon(Icons.person) : null,
                 ),
                 const SizedBox(width: 15),
-                isLoggedIn
+                avatarUrl != null
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -113,7 +113,7 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
                       ),
               ],
             ),
-            if (isLoggedIn)
+            if (avatarUrl != null)
               Row(
                 children: [
                   IconButton(

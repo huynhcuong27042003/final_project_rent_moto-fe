@@ -1,3 +1,4 @@
+import 'package:final_project_rent_moto_fe/widgets/modals/search_location.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/calendar_rental.dart';
 import 'package:intl/intl.dart';
@@ -17,6 +18,24 @@ class _RentHomeSearchMotosState extends State<RentHomeSearchMotos> {
   String returnTime = "22:00";
   // Khai báo TextEditingController để gán chuỗi hiển thị
   final TextEditingController rentalPeriodController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
+  void _selectLocation(BuildContext context) async {
+    final selectedLocation = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SearchLocation(),
+      ),
+    );
+
+    if (selectedLocation != null) {
+      // Cập nhật controller với địa điểm đã chọn (subtitle)
+      setState(() {
+        locationController.text =
+            selectedLocation ?? 'Unknown'; // Cập nhật với subtitle
+        print(locationController.text);
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -115,22 +134,26 @@ class _RentHomeSearchMotosState extends State<RentHomeSearchMotos> {
                           ],
                         ),
                         Container(
-                          padding: const EdgeInsets.only(top: 7, left: 12),
-                          height: 20,
-                          child: TextFormField(
-                            decoration: const InputDecoration(
-                              hintText:
-                                  'Enter the location where you want to rent a motorbike',
-                              hintStyle: TextStyle(
-                                  fontSize: 12, color: Colors.black87),
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none),
-                            ),
-                            style: const TextStyle(
-                                fontSize: 14,
+                          padding: const EdgeInsets.only(left: 12),
+                          height:
+                              20, // Cố định chiều cao để không cho TextFormField xuống dòng
+                          child: GestureDetector(
+                            onTap: () {
+                              _selectLocation(
+                                  context); // Trigger location selection
+                            },
+                            child: Text(
+                              locationController.text.isNotEmpty
+                                  ? locationController.text
+                                  : 'Enter the location where you want to rent a motorbike',
+                              overflow: TextOverflow
+                                  .ellipsis, // Hiển thị dấu ba chấm khi chuỗi quá dài
+                              style: const TextStyle(
+                                fontSize: 12,
                                 color: Colors.black,
-                                fontWeight: FontWeight.w500),
-                            readOnly: true,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
                         ),
                       ],

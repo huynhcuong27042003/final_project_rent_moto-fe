@@ -48,18 +48,18 @@ class _SignupEnterEmailBodyState extends State<SignupEnterEmailBody> {
             text: "CONTINUE",
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
-                // Check if the user exists asynchronously
+                // Kiểm tra nếu người dùng đã tồn tại
                 bool userExists = await _signupService
                     .checkIfUserExists(_controllerUserName.text.trim());
 
                 if (!userExists) {
-                  // Send the verification code if the user does not exist
+                  // Gửi mã xác minh nếu người dùng không tồn tại
                   await _sendMailService.sendCodeByMail(
                     context,
                     _controllerUserName.text.trim(),
                   );
 
-                  // Navigate to the next screen after sending the verification code
+                  // Chuyển sang trang tiếp theo sau khi gửi mã xác minh
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -69,10 +69,11 @@ class _SignupEnterEmailBodyState extends State<SignupEnterEmailBody> {
                     ),
                   );
                 } else {
-                  // Show an error notification if the user already exists
+                  // Hiển thị thông báo lỗi nếu người dùng đã tồn tại
                   ScaffoldMessenger.of(context).showSnackBar(
-                      const ErrorNotification(text: "Email is exist")
-                          .buildSnackBar());
+                    const ErrorNotification(text: "Email is exist")
+                        .buildSnackBar(),
+                  );
                 }
               }
             },

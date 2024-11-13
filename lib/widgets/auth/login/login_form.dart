@@ -1,4 +1,6 @@
+import 'package:final_project_rent_moto_fe/screens/auth/forgot_password/forgot_password_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_enter_email_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/home/rent_home/rent_home_screen.dart';
 import 'package:final_project_rent_moto_fe/services/auth/login_service.dart';
 import 'package:final_project_rent_moto_fe/services/auth/validator_service.dart';
@@ -7,6 +9,7 @@ import 'package:final_project_rent_moto_fe/widgets/auth/button_link_auth.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/text_field_password_auth.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/text_field_username_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
@@ -31,10 +34,12 @@ class _LoginFormState extends State<LoginForm> {
       final response = await _loginService.login(email, password);
       // Kiểm tra nếu đăng nhập thành công
       if (response != null) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setBool('isLogin', true);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => RentHomeScreen(),
+            builder: (context) => Dashboard(),
           ),
         );
         ScaffoldMessenger.of(context).showSnackBar(
@@ -134,7 +139,14 @@ class _LoginFormState extends State<LoginForm> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TextButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ForgotPasswordScreen(),
+                    ),
+                  );
+                },
                 child: const Text(
                   "Forgot password?",
                   style: TextStyle(
