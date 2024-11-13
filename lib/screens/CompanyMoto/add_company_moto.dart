@@ -1,7 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api, avoid_print, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:final_project_rent_moto_fe/screens/CompanyMoto/list_company_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/companyMoto/list_company_screen.dart';
 import 'package:final_project_rent_moto_fe/services/CompanyMoto/add_company_service.dart';
 
 class AddCompanyMotoPage extends StatefulWidget {

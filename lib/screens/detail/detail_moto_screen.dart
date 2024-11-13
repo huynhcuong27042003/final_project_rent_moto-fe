@@ -1,8 +1,8 @@
 import 'package:final_project_rent_moto_fe/widgets/Detail_moto/Detail_moto_appbar.dart';
 import 'package:final_project_rent_moto_fe/widgets/Detail_moto/detail_moto_body_Evaluate.dart';
-import 'package:final_project_rent_moto_fe/widgets/Detail_moto/detail_moto_body_characteristic.dart';
-import 'package:final_project_rent_moto_fe/widgets/Detail_moto/detail_moto_body_location.dart';
-import 'package:final_project_rent_moto_fe/widgets/Detail_moto/detail_moto_bottomnav.dart';
+import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_body_characteristic.dart';
+import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_body_location.dart';
+import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_bottomnav.dart';
 import 'package:flutter/material.dart';
 
 class DetailMotoScreen extends StatelessWidget {

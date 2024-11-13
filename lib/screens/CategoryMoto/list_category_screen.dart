@@ -1,8 +1,8 @@
 // ignore_for_file: library_private_types_in_public_api, unused_field
 
 import 'package:flutter/material.dart';
-import 'package:final_project_rent_moto_fe/screens/CategoryMoto/add_category_screen.dart';
-import 'package:final_project_rent_moto_fe/screens/CategoryMoto/update_category_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/categoryMoto/add_category_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/categoryMoto/update_category_screen.dart';
 import 'package:final_project_rent_moto_fe/services/CategoryMoto/fetch_category_service.dart';
 import 'package:final_project_rent_moto_fe/services/CategoryMoto/update_category_service.dart';
 

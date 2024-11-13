@@ -3,9 +3,8 @@
 import 'package:final_project_rent_moto_fe/widgets/notification/error_notification.dart';
 import 'package:final_project_rent_moto_fe/widgets/notification/success_notification.dart';
 import 'package:flutter/material.dart';
-import 'package:final_project_rent_moto_fe/screens/CategoryMoto/list_category_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/categoryMoto/list_category_screen.dart';
 import 'package:final_project_rent_moto_fe/services/CategoryMoto/add_category_service.dart';
-
 
 class AddCategoryScreen extends StatefulWidget {
   const AddCategoryScreen({super.key});
@@ -27,8 +26,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       bool success = await _service.addCategoryMoto(_name, _isHide);
 
       if (success) {
-        const SuccessNotification(text: "Category moto added!")
-            .buildSnackBar();
+        const SuccessNotification(text: "Category moto added!").buildSnackBar();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const ListCategoryScreen()),

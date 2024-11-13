@@ -1,7 +1,9 @@
+import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/users/user_infor_myaccount_form.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserInforBody extends StatefulWidget {
   const UserInforBody({super.key});
@@ -15,11 +17,20 @@ class _UserInforBodyState extends State<UserInforBody> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String? userName;
   String? avatarUrl;
+  bool isLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
+    _checkLoginStatus();
     _fetchUserNameAndAvatar();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isLoggedIn = prefs.getBool('isLogin') ?? false;
+    });
   }
 
   Future<void> _fetchUserNameAndAvatar() async {
@@ -52,133 +63,156 @@ class _UserInforBodyState extends State<UserInforBody> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Stack(
-      children: [
-        // Hình nền (chiếm 1/4 chiều cao màn hình)
-        Container(
-          height: screenHeight * 0.23,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/image_background1.jpg'),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Container(
-            color: Colors.black.withOpacity(0.2),
-          ),
-        ),
-
-        // Nội dung chính có thể cuộn
-        SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-            child: Column(
+    return SingleChildScrollView(
+      child: isLoggedIn
+          ? Stack(
               children: [
-                SizedBox(height: screenHeight * 0.2), // Đẩy avatar xuống
-
-                // Avatar và tên người dùng
-                CircleAvatar(
-                  radius: 50,
-                  backgroundImage: avatarUrl != null
-                      ? NetworkImage(avatarUrl!)
-                      : AssetImage('assets/avatar.png') as ImageProvider,
+                Container(
+                  height: screenHeight * 0.27,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/image_background1.jpg'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Container(
+                    color: Colors.black.withOpacity(0.2),
+                  ),
                 ),
-
-                SizedBox(height: 16),
-
-                // Tên người dùng
+                Padding(
+                  padding:
+                      const EdgeInsets.only(left: 5, right: 5, bottom: 100),
+                  child: Column(
+                    children: [
+                      SizedBox(height: screenHeight * 0.2),
+                      CircleAvatar(
+                        radius: 50,
+                        backgroundImage: avatarUrl != null
+                            ? NetworkImage(avatarUrl!)
+                            : AssetImage('assets/avatar.png') as ImageProvider,
+                      ),
+                      SizedBox(height: 16),
+                      Text(
+                        userName ?? 'Tên người dùng',
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.2),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              _buildMenuItem(
+                                  Icons.person, 'Tài khoản của tôi', context),
+                              Divider(indent: 30.0, endIndent: 30.0),
+                              _buildMenuItem(Icons.car_rental,
+                                  'Đăng ký cho thuê xe', context),
+                              Divider(indent: 30.0, endIndent: 30.0),
+                              _buildMenuItem(
+                                  Icons.favorite, 'Xe yêu thích', context),
+                              Divider(indent: 30.0, endIndent: 30.0),
+                              _buildMenuItem(Icons.location_on,
+                                  'Địa chỉ của tôi', context),
+                              Divider(indent: 30.0, endIndent: 30.0),
+                              _buildMenuItem(Icons.card_membership,
+                                  'Giấy phép lái xe', context),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.2),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              _buildMenuItem(
+                                  Icons.lock, 'Đổi mật khẩu', context),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool('isLogin', false);
+                          await FirebaseAuth.instance.signOut();
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Dashboard()),
+                          );
+                        },
+                        icon: Icon(Icons.logout, color: Colors.red),
+                        label: Text(
+                          'Đăng xuất',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          side: BorderSide(color: Colors.red),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
                 Text(
-                  userName ?? 'Tên người dùng',
-                  style: TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
+                  'Welcome to RentalApp',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-
-                // Hộp tròn đầu tiên cho các mục menu chính
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: Offset(0, 3), // thay đổi vị trí bóng
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        _buildMenuItem(
-                            Icons.person, 'Tài khoản của tôi', context),
-                        Divider(indent: 30.0, endIndent: 30.0),
-                        _buildMenuItem(
-                            Icons.car_rental, 'Đăng ký cho thuê xe', context),
-                        Divider(indent: 30.0, endIndent: 30.0),
-                        _buildMenuItem(Icons.favorite, 'Xe yêu thích', context),
-                        Divider(indent: 30.0, endIndent: 30.0),
-                        _buildMenuItem(
-                            Icons.location_on, 'Địa chỉ của tôi', context),
-                        Divider(indent: 30.0, endIndent: 30.0),
-                        _buildMenuItem(
-                            Icons.card_membership, 'Giấy phép lái xe', context),
-                      ],
-                    ),
-                  ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              Dashboard()), // Thay Dashboard bằng màn hình đăng nhập
+                    );
+                  },
+                  child: Text('Đăng nhập'),
                 ),
-
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        _buildMenuItem(Icons.lock, 'Đổi mật khẩu', context),
-                      ],
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 10),
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: Icon(Icons.logout, color: Colors.red),
-                  label: Text(
-                    'Đăng xuất',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    side: BorderSide(color: Colors.red),
-                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  ),
-                ),
-                SizedBox(height: 10),
               ],
             ),
-          ),
-        ),
-      ],
     );
   }
 

@@ -38,7 +38,7 @@ class _MyWidgetState extends State<MyTripScreen>
           children: [
             Padding(
               padding:
-                  const EdgeInsets.only(left: 0), // khoảng cách trái bằng 0
+                  const EdgeInsets.only(bottom: 100), // khoảng cách trái bằng 0
               child: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.black),
                 onPressed: () {

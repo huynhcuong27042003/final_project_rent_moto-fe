@@ -1,8 +1,8 @@
 // ignore_for_file: library_private_types_in_public_api, unused_field
 
 import 'package:flutter/material.dart';
-import 'package:final_project_rent_moto_fe/screens/CompanyMoto/add_company_moto.dart';
-import 'package:final_project_rent_moto_fe/screens/CompanyMoto/update_company_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/companyMoto/add_company_moto.dart';
+import 'package:final_project_rent_moto_fe/screens/companyMoto/update_company_screen.dart';
 import 'package:final_project_rent_moto_fe/services/CompanyMoto/fetch_company_service.dart';
 import 'package:final_project_rent_moto_fe/services/CompanyMoto/update_company_service.dart';
 
