@@ -1,4 +1,6 @@
+import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
+import 'package:final_project_rent_moto_fe/widgets/auth/button_auth.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/users/user_infor_myaccount_form.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -63,9 +65,9 @@ class _UserInforBodyState extends State<UserInforBody> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return SingleChildScrollView(
-      child: isLoggedIn
-          ? Stack(
+    return isLoggedIn
+        ? SingleChildScrollView(
+            child: Stack(
               children: [
                 Container(
                   height: screenHeight * 0.27,
@@ -189,31 +191,11 @@ class _UserInforBodyState extends State<UserInforBody> {
                       SizedBox(height: 10),
                     ],
                   ),
-                ),
-              ],
-            )
-          : Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Welcome to RentalApp',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              Dashboard()), // Thay Dashboard bằng màn hình đăng nhập
-                    );
-                  },
-                  child: Text('Đăng nhập'),
-                ),
+                )
               ],
             ),
-    );
+          )
+        : LoginScreen();
   }
 
   Widget _buildMenuItem(IconData icon, String title, BuildContext context) {

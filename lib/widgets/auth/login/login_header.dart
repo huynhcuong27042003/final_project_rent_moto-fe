@@ -13,11 +13,11 @@ class _LoginHeaderState extends State<LoginHeader> {
     return Stack(
       children: [
         Positioned(
-          top: -650,
+          top: -700,
           right: -200,
           child: Container(
             width: 900,
-            height: 800,
+            height: 900,
             decoration: const BoxDecoration(
               color: Color(0xFFFFAD15),
               shape: BoxShape.circle,
@@ -25,7 +25,7 @@ class _LoginHeaderState extends State<LoginHeader> {
           ),
         ),
         const Positioned(
-          top: 0,
+          top: 20,
           left: 30,
           child: Text(
             'Welcome',
@@ -38,7 +38,7 @@ class _LoginHeaderState extends State<LoginHeader> {
           ),
         ),
         const Positioned(
-          top: 30, // Điều chỉnh vị trí của văn bản
+          top: 50, // Điều chỉnh vị trí của văn bản
           right: 90, // Điều chỉnh vị trí của văn bản
           child: Text(
             'Back!',
@@ -51,7 +51,7 @@ class _LoginHeaderState extends State<LoginHeader> {
           ),
         ),
         const Positioned(
-          top: 100, // Điều chỉnh vị trí của văn bản
+          top: 120, // Điều chỉnh vị trí của văn bản
           left: 20, // Điều chỉnh vị trí của văn bản
           child: Text(
             'Please sign in to continue!',
