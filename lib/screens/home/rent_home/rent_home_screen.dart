@@ -1,9 +1,12 @@
+<<<<<<< HEAD
 import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
+=======
+import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_infor_motos.dart';
+>>>>>>> Bin
 import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_infor_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_background.dart';
-import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_infor_motos.dart';
 import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_moto_rental.dart';
 import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_promo.dart';
 import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_search_motos.dart';

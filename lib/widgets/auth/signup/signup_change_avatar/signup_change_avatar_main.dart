@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'dart:io';
 import 'package:final_project_rent_moto_fe/services/auth/signup_service.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -6,8 +8,7 @@ import 'package:image_picker/image_picker.dart';
 
 class SignupChangeAvatarMain extends StatefulWidget {
   final String email;
-  const SignupChangeAvatarMain({Key? key, required this.email})
-      : super(key: key);
+  const SignupChangeAvatarMain({super.key, required this.email});
 
   @override
   _SignupChangeAvatarMainState createState() => _SignupChangeAvatarMainState();

@@ -1,24 +1,23 @@
 // // ignore_for_file: library_private_types_in_public_api
 // ignore_for_file: library_private_types_in_public_api, avoid_print, use_build_context_synchronously, unnecessary_nullable_for_final_variable_declarations
-
 import 'dart:io';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:final_project_rent_moto_fe/services/MotorCycle/image_picker_addform_service.dart';
+import 'package:final_project_rent_moto_fe/services/MotorCycle/update_motorcycle_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/add_motorcycle_service.dart';
 import 'package:image_picker/image_picker.dart';
 
-class MotorcycleForm extends StatefulWidget {
-  const MotorcycleForm({super.key});
+class AddMotorcycleScreen extends StatefulWidget {
+  const AddMotorcycleScreen({super.key});
 
   @override
-  _MotorcycleFormState createState() => _MotorcycleFormState();
+  _AddMotorcycleScreenState createState() => _AddMotorcycleScreenState();
 }
 
-class _MotorcycleFormState extends State<MotorcycleForm> {
+class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Form field controllers
   final TextEditingController numberPlateController = TextEditingController();
   final TextEditingController nameMotoController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
@@ -33,84 +32,50 @@ class _MotorcycleFormState extends State<MotorcycleForm> {
   List<XFile>? imagesMoto = [];
 
   final AddMotorcycleService addMotorcycleService = AddMotorcycleService();
-  final ImagePicker imagePicker = ImagePicker();
+  final UpdateMotorcycleService updateMotorcycleService =
+      UpdateMotorcycleService();
+  final ImagePickerAddformService imagePickerAddformService =
+      ImagePickerAddformService();
 
   @override
   void initState() {
     super.initState();
-    fetchCompanyMotos();
-    fetchCategories();
+    fetchData();
   }
 
-  Future<void> fetchCompanyMotos() async {
-    try {
-      QuerySnapshot querySnapshot =
-          await FirebaseFirestore.instance.collection('companyMotos').get();
-      setState(() {
-        companyMotoList =
-            querySnapshot.docs.map((doc) => doc['name'] as String).toList();
-      });
-    } catch (error) {
-      print("Error fetching company motos: $error");
-    }
-  }
-
-  Future<void> fetchCategories() async {
-    try {
-      QuerySnapshot querySnapshot =
-          await FirebaseFirestore.instance.collection('categoryMotos').get();
-      setState(() {
-        categoryList =
-            querySnapshot.docs.map((doc) => doc['name'] as String).toList();
-      });
-    } catch (error) {
-      print("Error fetching categories: $error");
+  Future<void> fetchData() async {
+    companyMotoList = await updateMotorcycleService.fetchCompanyMotos();
+    categoryList = await updateMotorcycleService.fetchCategories();
+    if (mounted) {
+      setState(() {});
     }
   }
 
   Future<void> pickImages() async {
-    try {
-      final List<XFile>? selectedImages = await imagePicker.pickMultiImage();
-      if (selectedImages != null) {
-        setState(() {
-          imagesMoto = selectedImages;
-        });
-      }
-    } catch (error) {
-      print("Error picking images: $error");
+    final selectedImages = await imagePickerAddformService.pickImages();
+    if (selectedImages.isNotEmpty) {
+      setState(() {
+        imagesMoto = selectedImages;
+      });
     }
   }
 
   Future<List<String>> uploadImagesToFirebase(List<XFile> images) async {
-    List<String> downloadUrls = [];
-
-    for (var image in images) {
-      try {
-        File file = File(image.path);
-        print("Uploading image from path: ${image.path}");
-
-        // Generate a unique file name with a timestamp
-        String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
-        Reference ref =
-            FirebaseStorage.instance.ref().child('motorcycle_images/$fileName');
-
-        // Upload the file to Firebase Storage
-        await ref.putFile(file);
-
-        // Retrieve and store the download URL
-        String downloadUrl = await ref.getDownloadURL();
-        downloadUrls.add(downloadUrl);
-        print("Uploaded image URL: $downloadUrl");
-      } catch (error) {
-        print("Error uploading image: $error");
-      }
-    }
-
-    return downloadUrls;
+    return await imagePickerAddformService.uploadImagesToFirebase(images);
   }
 
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
+      final User? currentUser = FirebaseAuth.instance.currentUser;
+      final String email = currentUser?.email ?? '';
+
+      if (email.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Email is required to submit form.')),
+        );
+        return;
+      }
+
       // Get values from the form
       final String numberPlate = numberPlateController.text;
       final String companyMotoName = selectedCompanyMoto!;
@@ -121,6 +86,14 @@ class _MotorcycleFormState extends State<MotorcycleForm> {
       final String energy = energyController.text;
       final double vehicleMass =
           double.tryParse(vehicleMassController.text) ?? 0.0;
+
+      // Check if email is missing
+      if (email.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Email is required to submit form.')),
+        );
+        return;
+      }
 
       // Upload images and obtain their URLs
       List<String> imageUrls = await uploadImagesToFirebase(imagesMoto!);
@@ -138,6 +111,7 @@ class _MotorcycleFormState extends State<MotorcycleForm> {
           energy: energy,
           vehicleMass: vehicleMass,
           imagesMoto: imageUrls,
+          email: email, // Pass email to addMotorcycle
         );
 
         if (success) {
@@ -164,6 +138,9 @@ class _MotorcycleFormState extends State<MotorcycleForm> {
 
   @override
   Widget build(BuildContext context) {
+    final User? currentUser = FirebaseAuth.instance.currentUser;
+    final String email = currentUser?.email ?? '';
+    // Corrected access to email here
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Motorcycle'),
@@ -178,7 +155,41 @@ class _MotorcycleFormState extends State<MotorcycleForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Motorcycle Details Card
+                TextFormField(
+                  initialValue: email,
+                  decoration: InputDecoration(
+                    labelText: 'Owner Email',
+                    labelStyle: TextStyle(
+                      color: Colors.teal, // Change the label text color
+                      fontWeight: FontWeight.bold, // Make the label bold
+                    ),
+                    hintText: 'Email will be displayed here',
+                    hintStyle: TextStyle(
+                        color:
+                            Colors.grey), // Hint style for better readability
+                    filled: true, // Add a background color to the field
+                    fillColor: Colors.grey[200], // Light grey background
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Colors.teal,
+                          width: 1.5), // Border color when not focused
+                      borderRadius: BorderRadius.circular(8), // Rounded corners
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          color: Colors.teal,
+                          width: 2), // Border color when focused
+                      borderRadius: BorderRadius.circular(8), // Rounded corners
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: Colors.black, // Text color
+                    fontSize: 16, // Adjust font size for better readability
+                  ),
+                  readOnly:
+                      true, // Make the field read-only so users cannot edit the email
+                ),
+
                 Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -207,7 +218,6 @@ class _MotorcycleFormState extends State<MotorcycleForm> {
                               ? 'Please enter a number plate'
                               : null,
                         ),
-                        // Company Name
                         DropdownButtonFormField<String>(
                           value: selectedCompanyMoto,
                           decoration:
@@ -217,12 +227,11 @@ class _MotorcycleFormState extends State<MotorcycleForm> {
                                   const DropdownMenuItem(
                                       child: Text("No companies available"))
                                 ]
-                              : companyMotoList.map((String company) {
-                                  return DropdownMenuItem<String>(
-                                    value: company,
-                                    child: Text(company),
-                                  );
-                                }).toList(),
+                              : companyMotoList
+                                  .map((String company) =>
+                                      DropdownMenuItem<String>(
+                                          value: company, child: Text(company)))
+                                  .toList(),
                           onChanged: (value) {
                             setState(() {
                               selectedCompanyMoto = value;
@@ -232,7 +241,6 @@ class _MotorcycleFormState extends State<MotorcycleForm> {
                               ? 'Please select a company name'
                               : null,
                         ),
-                        // Category Name
                         DropdownButtonFormField<String>(
                           value: selectedCategory,
                           decoration:
@@ -242,12 +250,12 @@ class _MotorcycleFormState extends State<MotorcycleForm> {
                                   const DropdownMenuItem(
                                       child: Text("No categories available"))
                                 ]
-                              : categoryList.map((String category) {
-                                  return DropdownMenuItem<String>(
-                                    value: category,
-                                    child: Text(category),
-                                  );
-                                }).toList(),
+                              : categoryList
+                                  .map((String category) =>
+                                      DropdownMenuItem<String>(
+                                          value: category,
+                                          child: Text(category)))
+                                  .toList(),
                           onChanged: (value) {
                             setState(() {
                               selectedCategory = value;
@@ -270,8 +278,6 @@ class _MotorcycleFormState extends State<MotorcycleForm> {
                   ),
                 ),
                 const SizedBox(height: 20),
-
-                // Pricing and Specifications Card
                 Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),

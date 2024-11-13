@@ -1,12 +1,12 @@
-import 'package:final_project_rent_moto_fe/widgets/Detail_moto/Detail_moto_appbar.dart';
-import 'package:final_project_rent_moto_fe/widgets/Detail_moto/detail_moto_body_Evaluate.dart';
-import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_body_characteristic.dart';
-import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_body_location.dart';
-import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_bottomnav.dart';
+import 'package:final_project_rent_moto_fe/screens/Detail_moto/detail_moto.dart';
+import 'package:final_project_rent_moto_fe/screens/Detail_moto/detail_moto_appbar.dart';
+import 'package:final_project_rent_moto_fe/screens/Detail_moto/detail_moto_information.dart';
+import 'package:final_project_rent_moto_fe/screens/Detail_moto/detail_moto_body_location.dart';
+import 'package:final_project_rent_moto_fe/screens/Detail_moto/detail_moto_bottomnav.dart';
 import 'package:flutter/material.dart';
 
 class DetailMotoScreen extends StatelessWidget {
-  const DetailMotoScreen({Key? key}) : super(key: key);
+  const DetailMotoScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,9 @@ class DetailMotoScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: const [
-            DetailMotoBodyCharacteristic(),
+            DetailMotoBodyCharacteristic(
+              motorcycle: {},
+            ),
             SizedBox(height: 16),
             DetailMotoBodyLocation(),
             SizedBox(height: 16),
