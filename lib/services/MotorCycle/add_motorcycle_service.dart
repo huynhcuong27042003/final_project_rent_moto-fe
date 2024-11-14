@@ -17,9 +17,17 @@ class AddMotorcycleService {
     required String energy,
     required double vehicleMass,
     required List<String> imagesMoto,
-    required String email, // <-- New email parameter
+    required String email,
     bool isActive = true,
     bool isHide = true,
+    // String? streetName,
+    // String? district,
+    // String? city,
+    // String? country,
+    required String streetName,
+    required String district,
+    required String city,
+    required String country,
   }) async {
     // Prepare the request body
     final Map<String, dynamic> requestBody = {
@@ -34,26 +42,52 @@ class AddMotorcycleService {
         'vehicleMass': vehicleMass,
         'imagesMoto': imagesMoto,
       },
-      'email': email, // <-- Changed 'ownerEmail' to 'email'
+      'email': email,
       'isActive': isActive,
       'isHide': isHide,
+      'address': {
+        'streetName': streetName,
+        'district': district,
+        'city': city,
+        'country': country,
+      },
     };
 
+    // if (streetName != null &&
+    //     district != null &&
+    //     city != null &&
+    //     country != null) {
+    //   requestBody['address'] = {
+    //     'streetName': streetName,
+    //     'district': district,
+    //     'city': city,
+    //     'country': country,
+    //   };
+    // } else {
+    //   print('Address fields missing');
+    // }
+
     try {
-      // Sending the POST request
       final response = await http.post(
         Uri.parse(baseUrl),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(requestBody), // Convert request body to JSON
+        body: jsonEncode(requestBody),
       );
 
-      // Return true if the request was successful (status code 201)
-      return response.statusCode == 201;
+      // Debugging: Print the response
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 201) {
+        return true;
+      } else {
+        return false;
+      }
     } catch (error) {
       print("Error adding motorcycle: $error");
-      return false; // Return false if an error occurred
+      return false;
     }
   }
 }

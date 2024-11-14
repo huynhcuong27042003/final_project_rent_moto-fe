@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/image_picker_addform_service.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/update_motorcycle_service.dart';
+import 'package:final_project_rent_moto_fe/widgets/modals/search_location.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/add_motorcycle_service.dart';
@@ -24,6 +25,12 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController energyController = TextEditingController();
   final TextEditingController vehicleMassController = TextEditingController();
+
+  // New controllers for address
+  final TextEditingController streetNameController = TextEditingController();
+  final TextEditingController districtController = TextEditingController();
+  final TextEditingController cityController = TextEditingController();
+  final TextEditingController countryController = TextEditingController();
 
   String? selectedCompanyMoto;
   String? selectedCategory;
@@ -64,6 +71,39 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
     return await imagePickerAddformService.uploadImagesToFirebase(images);
   }
 
+  final TextEditingController locationController = TextEditingController();
+
+  void _selectLocation(BuildContext context) async {
+    // Open the SearchLocation widget and await the selected address
+    final selectedLocation = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SearchLocation(),
+      ),
+    );
+
+    // If the user selected a location, update the locationController and address fields
+    if (selectedLocation != null) {
+      setState(() {
+        locationController.text = selectedLocation;
+        print(locationController.text); // Check if it's updated
+
+        // Assuming selectedLocation contains a string with components: "street, district, city, country"
+        final addressParts = selectedLocation
+            .split(','); // Example: "street, district, city, country"
+
+        if (addressParts.length >= 4) {
+          streetNameController.text = addressParts[0].trim();
+          districtController.text = addressParts[1].trim();
+          cityController.text = addressParts[2].trim();
+          countryController.text = addressParts[3].trim();
+        } else {
+          print('Error: Selected location does not contain expected parts.');
+        }
+      });
+    }
+  }
+
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       final User? currentUser = FirebaseAuth.instance.currentUser;
@@ -87,13 +127,11 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
       final double vehicleMass =
           double.tryParse(vehicleMassController.text) ?? 0.0;
 
-      // Check if email is missing
-      if (email.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Email is required to submit form.')),
-        );
-        return;
-      }
+      // Get address data
+      final String streetName = streetNameController.text;
+      final String district = districtController.text;
+      final String city = cityController.text;
+      final String country = countryController.text;
 
       // Upload images and obtain their URLs
       List<String> imageUrls = await uploadImagesToFirebase(imagesMoto!);
@@ -111,7 +149,12 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
           energy: energy,
           vehicleMass: vehicleMass,
           imagesMoto: imageUrls,
-          email: email, // Pass email to addMotorcycle
+          email: email,
+          streetName: streetName,
+          district: district,
+          city: city,
+          country: country,
+          // Pass email to addMotorcycle
         );
 
         if (success) {
@@ -189,6 +232,25 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                   readOnly:
                       true, // Make the field read-only so users cannot edit the email
                 ),
+
+                TextFormField(
+                  controller: locationController,
+                  decoration: const InputDecoration(
+                    labelText: 'Location',
+                    hintText:
+                        'Enter the location where you want to rent a motorbike',
+                  ),
+                  readOnly: true,
+                  onTap: () =>
+                      _selectLocation(context), // Open the location picker
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please select a location.';
+                    }
+                    return null;
+                  },
+                ),
+                // Other address fields
 
                 Card(
                   shape: RoundedRectangleBorder(
