@@ -88,6 +88,7 @@ class _FormSelectDayMonthYearState extends State<FormSelectDayMonthYear> {
               child: Text(
                 "Đặt ngày",
                 style: TextStyle(
+                  decoration: TextDecoration.none,
                   color: Colors.white,
                   fontSize: 25,
                 ),

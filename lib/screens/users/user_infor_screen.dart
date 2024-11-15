@@ -1,5 +1,5 @@
 // user_infor_screen.dart
-import 'package:final_project_rent_moto_fe/widgets/auth/users/user_infor_body.dart';
+import 'package:final_project_rent_moto_fe/widgets/users/user_infor_body.dart';
 import 'package:flutter/material.dart';
 
 class UserInforScreen extends StatelessWidget {
