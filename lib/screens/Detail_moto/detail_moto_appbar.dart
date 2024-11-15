@@ -1,30 +1,28 @@
 import 'package:flutter/material.dart';
 
 class DetailMotoAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const DetailMotoAppBar({Key? key}) : super(key: key);
+  final Map<String, dynamic> motorcycle;
+
+  const DetailMotoAppBar({super.key, required this.motorcycle});
 
   @override
   Widget build(BuildContext context) {
+    var info = motorcycle['informationMoto'] ?? {};
+
     return AppBar(
       backgroundColor: const Color.fromARGB(255, 255, 173, 21),
       elevation: 0,
       title: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              // Navigator.pushAndRemoveUntil(
-              //   context,
-              //   MaterialPageRoute(builder: (context) => const Dashboard()),
-              //   (Route<dynamic> route) => false,
-              // );
-            },
-          ),
-          const Expanded(
+          // IconButton(
+          //   icon: const Icon(Icons.arrow_back, color: Colors.white),
+          //   onPressed: () {},
+          // ),
+          Expanded(
             child: Center(
               child: Text(
-                '70D1-75491',
+                "${motorcycle['numberPlate'] ?? 'Unknown'}",
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,

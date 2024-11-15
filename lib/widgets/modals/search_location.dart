@@ -24,9 +24,11 @@ class _SearchLocationState extends State<SearchLocation> {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      setState(() {
-        locations = data;
-      });
+      if (mounted) {
+        setState(() {
+          locations = data;
+        });
+      }
     }
   }
 

@@ -7,16 +7,21 @@ class DetailMotoBodyCharacteristic extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var info = motorcycle['informationMoto'] ?? {};
+
     return Column(
       children: [
+        // Image section with dynamic image loading
         Container(
           decoration: BoxDecoration(
             color: Colors.grey[200],
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
-            child: Image.asset(
-              "assets/images/moto.jpg",
+            child: Image.network(
+              info['images'] != null && info['images'].isNotEmpty
+                  ? info['images'][0] // Use the first image if available
+                  : '', // If no image, use an empty string
               height: 200,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -29,22 +34,24 @@ class DetailMotoBodyCharacteristic extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 5),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10.0),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
+                    // Motorcycle Name (dynamic)
                     Text(
-                      'FUTURE 2021',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      info['nameMoto'] ?? 'Motorcycle Name',
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Row(
                       children: [
-                        Icon(Icons.attach_money, color: Colors.green),
+                        const Icon(Icons.attach_money, color: Colors.green),
+                        // Dynamic price
                         Text(
-                          '10\$ \\ 1 ngày',
-                          style: TextStyle(
+                          '${info['price'] ?? "0"}\$ / day',
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -56,26 +63,33 @@ class DetailMotoBodyCharacteristic extends StatelessWidget {
               ),
               Row(
                 children: [
-                  const Icon(Icons.star, color: Colors.yellow),
+                  const Icon(Icons.star,
+                      color: Colors.yellow), // Star icon for rating
                   const SizedBox(width: 2),
                   const Text(
-                    '5.0',
+                    '5.0', // Rating score
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 8),
                   Image.asset(
-                    'assets/images/fast-delivery.png',
+                    'assets/images/fast-delivery.png', // Delivery icon
                     width: 24,
                     height: 24,
                   ),
                   const Text(
-                    '10 trip',
+                    '10 trip', // Number of trips
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
+              const Text(
+                'Đặc điểm', // Features
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
+
+              // Motorcycle Features
               Container(
                 decoration: BoxDecoration(
                   color:
@@ -83,33 +97,64 @@ class DetailMotoBodyCharacteristic extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8.0),
                 ),
                 padding: const EdgeInsets.all(8.0),
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: 8),
+                    // Color Feature
                     Row(
                       children: [
+                        const Icon(Icons.color_lens,
+                            color: Color.fromARGB(
+                                255, 255, 173, 21)), // Color icon
+                        const SizedBox(width: 8),
+                        Text(
+                          "Vehicle Mass: ${info['vehicleMass'] ?? "Unknown"} kg",
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Engine Capacity Feature
+                    const Row(
+                      children: [
                         Icon(Icons.motorcycle,
-                            color: Color.fromARGB(255, 255, 173, 21)),
+                            color: Color.fromARGB(
+                                255, 255, 173, 21)), // Engine icon
                         SizedBox(width: 8),
                         Text(
-                          'Phân khối: 110cc',
+                          'Phân khối: 120cc', // Engine size
                           style: TextStyle(fontSize: 16),
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
+                    const SizedBox(height: 8),
+                    // Fuel consumption
+                    Row(
+                      children: [
+                        Icon(Icons.local_gas_station,
+                            color:
+                                Color.fromARGB(255, 255, 173, 21)), // Fuel icon
+                        SizedBox(width: 8),
+                        Text(
+                          "Energy: ${info['energy'] ?? "Unknown"}",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
               const Text(
-                'Mô tả',
+                'Description',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              const Text(
-                'Future FI là một mẫu xe máy rất phổ biến, tiết kiệm nhiên liệu và phù hợp cho việc di chuyển hàng ngày. Xe có thiết kế hiện đại và nhiều tính năng tiện ích.',
+              // Description (dynamic)
+              Text(
+                info['description'] ?? 'No description available.',
               ),
             ],
           ),

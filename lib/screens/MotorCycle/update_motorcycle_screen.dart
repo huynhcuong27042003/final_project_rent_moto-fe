@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:final_project_rent_moto_fe/screens/motorCycle/update_motorcycle_logic.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/image_picker_service.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/update_motorcycle_service.dart';
+import 'package:final_project_rent_moto_fe/widgets/modals/search_location.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -33,6 +34,11 @@ class _UpdateMotorcycleScreenState extends State<UpdateMotorcycleScreen> {
   late TextEditingController descriptionController;
   late TextEditingController energyController;
   late TextEditingController vehicleMassController;
+  final TextEditingController locationController = TextEditingController();
+  final TextEditingController streetNameController = TextEditingController();
+  final TextEditingController districtController = TextEditingController();
+  final TextEditingController cityController = TextEditingController();
+  final TextEditingController countryController = TextEditingController();
 
   List<File> selectedImages = [];
   List<String> imageUrls = []; // To store image URLs from Firebase
@@ -57,6 +63,7 @@ class _UpdateMotorcycleScreenState extends State<UpdateMotorcycleScreen> {
         text: widget.motorcycle['informationMoto']['energy']);
     vehicleMassController = TextEditingController(
         text: widget.motorcycle['informationMoto']['vehicleMass'].toString());
+
     // Fetch image URLs from Firestore
     if (widget.motorcycle['informationMoto']['images'] != null) {
       imageUrls =
@@ -67,9 +74,41 @@ class _UpdateMotorcycleScreenState extends State<UpdateMotorcycleScreen> {
     isActive = widget.motorcycle['isActive'] ?? false;
     isHide = widget.motorcycle['isHide'] ?? false;
 
+    // Initialize address-related controllers with existing address data
+    streetNameController.text =
+        widget.motorcycle['address']['streetName'] ?? '';
+    districtController.text = widget.motorcycle['address']['district'] ?? '';
+    cityController.text = widget.motorcycle['address']['city'] ?? '';
+    countryController.text = widget.motorcycle['address']['country'] ?? '';
+
     // Fetch data for dropdowns
     fetchCompanyMotos();
     fetchCategories();
+  }
+
+  void _selectLocation(BuildContext context) async {
+    final selectedLocation = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const SearchLocation(),
+      ),
+    );
+
+    if (selectedLocation != null) {
+      setState(() {
+        locationController.text = selectedLocation;
+        final addressParts = selectedLocation.split(',');
+
+        if (addressParts.length >= 4) {
+          streetNameController.text = addressParts[0].trim();
+          districtController.text = addressParts[1].trim();
+          cityController.text = addressParts[2].trim();
+          countryController.text = addressParts[3].trim();
+        } else {
+          print('Error: Selected location does not contain expected parts.');
+        }
+      });
+    }
   }
 
   // Method to pick multiple images
@@ -114,7 +153,11 @@ class _UpdateMotorcycleScreenState extends State<UpdateMotorcycleScreen> {
     descriptionController.dispose();
     energyController.dispose();
     vehicleMassController.dispose();
-    // imagesController.dispose();
+    locationController.dispose();
+    streetNameController.dispose();
+    districtController.dispose();
+    cityController.dispose();
+    countryController.dispose();
     super.dispose();
   }
 
@@ -135,6 +178,14 @@ class _UpdateMotorcycleScreenState extends State<UpdateMotorcycleScreen> {
       selectedCategory: selectedCategory,
       isActive: isActive,
       isHide: isHide,
+      streetName: streetNameController.text,
+      district: districtController.text,
+      city: cityController.text,
+      country: countryController.text,
+      existingStreetName: widget.motorcycle['address']['streetName'] ?? '',
+      existingDistrict: widget.motorcycle['address']['district'] ?? '',
+      existingCity: widget.motorcycle['address']['city'] ?? '',
+      existingCountry: widget.motorcycle['address']['country'] ?? '',
     );
   }
 
@@ -152,6 +203,30 @@ class _UpdateMotorcycleScreenState extends State<UpdateMotorcycleScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Location input field
+              Card(
+                elevation: 5,
+                margin: EdgeInsets.only(bottom: 16),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 15),
+                  child: TextFormField(
+                    controller: locationController,
+                    decoration: const InputDecoration(
+                      labelText: 'Location',
+                      hintText:
+                          'Enter the location where you want to rent a motorbike',
+                    ),
+                    readOnly: true,
+                    onTap: () => _selectLocation(context),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please select a location.';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              ),
               // Number Plate Input with Icon
               Card(
                 elevation: 5,

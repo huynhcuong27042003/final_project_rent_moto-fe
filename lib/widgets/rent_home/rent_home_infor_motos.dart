@@ -1,4 +1,4 @@
-import 'package:final_project_rent_moto_fe/screens/HomePage/motorcycle_detail_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/fetch_motorcycle_isaccept_service.dart';
 import 'package:final_project_rent_moto_fe/app_icons_icons.dart';
@@ -59,7 +59,10 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MotorcycleDetailScreen(
+                              // builder: (context) => DetailMotoBodyCharacteristic(
+                              //   motorcycle: motorcycle,
+                              // ),
+                              builder: (context) => DetailMotoScreen(
                                 motorcycle: motorcycle,
                               ),
                             ),
@@ -80,29 +83,29 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  width: 350,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      width: 0.2,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  // child: ClipRRect(
-                                  //   borderRadius: BorderRadius.circular(8),
-                                  //   child: (info['images'] != null &&
-                                  //           info['images'].isNotEmpty)
-                                  //       ? Image.network(
-                                  //           info['images'][0],
-                                  //           fit: BoxFit.contain,
-                                  //         )
-                                  //       : Image.asset(
-                                  //           "assets/images/xe1.jpg",
-                                  //           fit: BoxFit.contain,
-                                  //         ),
-                                  // ),
-                                ),
+                                // Container(
+                                //   width: 350,
+                                //   decoration: BoxDecoration(
+                                //     borderRadius: BorderRadius.circular(8),
+                                //     border: Border.all(
+                                //       width: 0.2,
+                                //       color: Colors.black,
+                                //     ),
+                                //   ),
+                                //   child: ClipRRect(
+                                //     borderRadius: BorderRadius.circular(8),
+                                //     child: (info['images'] != null &&
+                                //             info['images'].isNotEmpty)
+                                //         ? Image.network(
+                                //             info['images'][0],
+                                //             fit: BoxFit.contain,
+                                //           )
+                                //         : Image.asset(
+                                //             "assets/images/xe1.jpg",
+                                //             fit: BoxFit.contain,
+                                //           ),
+                                //   ),
+                                // ),
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
