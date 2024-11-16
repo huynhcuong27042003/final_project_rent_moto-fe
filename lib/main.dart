@@ -3,6 +3,7 @@ import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_change_ava
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/history_rent/my_trip_nologin.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 

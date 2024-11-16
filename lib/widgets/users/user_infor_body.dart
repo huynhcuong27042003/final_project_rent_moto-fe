@@ -1,6 +1,7 @@
 import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
-import 'package:final_project_rent_moto_fe/widgets/auth/users/user_infor_myaccount_form.dart';
+import 'package:final_project_rent_moto_fe/widgets/auth/button_auth.dart';
+import 'package:final_project_rent_moto_fe/widgets/users/user_infor_myaccount_form.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -202,12 +203,23 @@ class _UserInforBodyState extends State<UserInforBody> {
       leading: Icon(icon, color: Colors.black),
       title: Text(title),
       trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
-      onTap: () {
+      onTap: () async {
         if (title == 'Tài khoản của tôi') {
-          Navigator.push(
+          final updatedUserData = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => UserInforMyaccount()),
+            MaterialPageRoute(builder: (context) => const UserInforMyaccount()),
           );
+
+          // Kiểm tra và chỉ cập nhật nếu có thay đổi
+          if (updatedUserData != null) {
+            setState(() {
+              userName = updatedUserData['name'];
+              // Chỉ cập nhật avatar nếu có URL avatar mới
+              if (updatedUserData['avatar'] != null) {
+                avatarUrl = updatedUserData['avatar'];
+              }
+            });
+          }
         }
       },
     );
