@@ -18,8 +18,8 @@ class MotorcycleDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            info['imagesMoto'] != null && info['imagesMoto'].isNotEmpty
-                ? Image.network(info['imagesMoto'][0], fit: BoxFit.cover):
+            info['images'] != null && info['images'].isNotEmpty
+                ? Image.network(info['images'][0], fit: BoxFit.cover):
             const SizedBox(height: 10),
             Text(
               info['nameMoto'] ?? "Motorcycle",

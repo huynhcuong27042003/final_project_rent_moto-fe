@@ -20,6 +20,14 @@ Future<void> updateMotorcycleLogic({
   required String? selectedCategory,
   required bool isActive,
   required bool isHide,
+  required String streetName,
+  required String district,
+  required String city,
+  required String country,
+  required String existingStreetName,
+  required String existingDistrict,
+  required String existingCity,
+  required String existingCountry,
 }) async {
   List<String> finalImageUrls = [];
 
@@ -38,6 +46,13 @@ Future<void> updateMotorcycleLogic({
     finalImageUrls = List.from(imageUrls);
   }
 
+  Map<String, dynamic> addressToUpdate = {};
+  if (streetName != existingStreetName)
+    addressToUpdate['streetName'] = streetName;
+  if (district != existingDistrict) addressToUpdate['district'] = district;
+  if (city != existingCity) addressToUpdate['city'] = city;
+  if (country != existingCountry) addressToUpdate['country'] = country;
+
   // Prepare updates
   final updates = {
     'numberPlate': numberPlateController.text,
@@ -53,6 +68,13 @@ Future<void> updateMotorcycleLogic({
     },
     'isActive': isActive,
     'isHide': isHide,
+    // 'addresss': {
+    //   'streetName': streetName,
+    //   'district': district,
+    //   'city': city,
+    //   'country': country,
+    // },
+    if (addressToUpdate.isNotEmpty) 'address': addressToUpdate,
   };
 
   try {
