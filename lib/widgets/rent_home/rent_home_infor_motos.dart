@@ -83,29 +83,29 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Container(
-                                //   width: 350,
-                                //   decoration: BoxDecoration(
-                                //     borderRadius: BorderRadius.circular(8),
-                                //     border: Border.all(
-                                //       width: 0.2,
-                                //       color: Colors.black,
-                                //     ),
-                                //   ),
-                                //   child: ClipRRect(
-                                //     borderRadius: BorderRadius.circular(8),
-                                //     child: (info['images'] != null &&
-                                //             info['images'].isNotEmpty)
-                                //         ? Image.network(
-                                //             info['images'][0],
-                                //             fit: BoxFit.contain,
-                                //           )
-                                //         : Image.asset(
-                                //             "assets/images/xe1.jpg",
-                                //             fit: BoxFit.contain,
-                                //           ),
-                                //   ),
-                                // ),
+                                Container(
+                                  width: 350,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      width: 0.2,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: (info['images'] != null &&
+                                            info['images'].isNotEmpty)
+                                        ? Image.network(
+                                            info['images'][0],
+                                            fit: BoxFit.contain,
+                                          )
+                                        : Image.asset(
+                                            "assets/images/xe1.jpg",
+                                            fit: BoxFit.contain,
+                                          ),
+                                  ),
+                                ),
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
