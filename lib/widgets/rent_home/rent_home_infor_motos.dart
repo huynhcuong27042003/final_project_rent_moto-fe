@@ -89,19 +89,19 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                       color: Colors.black,
                                     ),
                                   ),
-                                  // child: ClipRRect(
-                                  //   borderRadius: BorderRadius.circular(8),
-                                  //   child: (info['images'] != null &&
-                                  //           info['images'].isNotEmpty)
-                                  //       ? Image.network(
-                                  //           info['images'][0],
-                                  //           fit: BoxFit.contain,
-                                  //         )
-                                  //       : Image.asset(
-                                  //           "assets/images/xe1.jpg",
-                                  //           fit: BoxFit.contain,
-                                  //         ),
-                                  // ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: (info['images'] != null &&
+                                            info['images'].isNotEmpty)
+                                        ? Image.network(
+                                            info['images'][0],
+                                            fit: BoxFit.contain,
+                                          )
+                                        : Image.asset(
+                                            "assets/images/xe1.jpg",
+                                            fit: BoxFit.contain,
+                                          ),
+                                  ),
                                 ),
                                 Row(
                                   mainAxisAlignment:

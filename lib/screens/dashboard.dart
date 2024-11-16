@@ -31,9 +31,16 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
+      resizeToAvoidBottomInset:
+          true, // Cho phép giao diện thay đổi kích thước khi mở bàn phím
+      body: SingleChildScrollView(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: IndexedStack(
+            index: _selectedIndex,
+            children: _screens,
+          ),
+        ),
       ),
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: Colors.transparent,

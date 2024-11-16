@@ -124,7 +124,7 @@ class SignupService {
 
     try {
       // Gửi yêu cầu PATCH để cập nhật thông tin người dùng
-      final response = await http.put(url, headers: headers, body: body);
+      final response = await http.patch(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
         // Cập nhật thành công
@@ -156,7 +156,7 @@ class SignupService {
 
     try {
       // Gửi yêu cầu PUT để cập nhật ảnh đại diện người dùng
-      final response = await http.put(url, headers: headers, body: body);
+      final response = await http.patch(url, headers: headers, body: body);
 
       if (response.statusCode == 200) {
         // Cập nhật thành công
