@@ -2,7 +2,6 @@ import 'package:final_project_rent_moto_fe/screens/MotorCycle/add_motorcycle_scr
 import 'package:final_project_rent_moto_fe/screens/auth/forgot_password/forgot_password_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_enter_email_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
-import 'package:final_project_rent_moto_fe/screens/home/rent_home/rent_home_screen.dart';
 import 'package:final_project_rent_moto_fe/services/auth/login_service.dart';
 import 'package:final_project_rent_moto_fe/services/auth/validator_service.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/button_auth.dart';

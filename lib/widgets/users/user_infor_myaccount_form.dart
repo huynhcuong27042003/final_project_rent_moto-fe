@@ -281,6 +281,7 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
                     )
                   : TextField(
                       controller: controller,
+                      keyboardType: _getKeyboardType(label),
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: 'Nhập $label',
@@ -308,6 +309,16 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
     );
   }
 
+  TextInputType _getKeyboardType(String label) {
+    if (label == 'phoneNumber') {
+      return TextInputType.phone;
+    } else if (label == 'license') {
+      return TextInputType.number;
+    } else {
+      return TextInputType.text;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -330,98 +341,101 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
       ),
       body: userData == null
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Center(
-                    child: Stack(
-                      alignment: Alignment.bottomRight,
-                      children: [
-                        userData?['information']?['avatar'] != null
-                            ? CircleAvatar(
-                                radius: 50,
-                                backgroundImage: NetworkImage(
-                                    userData!['information']!['avatar']),
-                              )
-                            : const CircleAvatar(
-                                radius: 50,
-                                child: Icon(Icons.person, size: 50),
-                              ),
-                        if (isEditing)
-                          InkWell(
-                            onTap: isUploading ? null : _changeAvatar,
-                            child: Container(
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                              ),
-                              padding: const EdgeInsets.all(4.0),
-                              child: const Icon(
-                                Icons.edit,
-                                color: Colors.black,
-                                size: 20,
+          : SingleChildScrollView(
+              // Thêm phần này
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: Stack(
+                        alignment: Alignment.bottomRight,
+                        children: [
+                          userData?['information']?['avatar'] != null
+                              ? CircleAvatar(
+                                  radius: 50,
+                                  backgroundImage: NetworkImage(
+                                      userData!['information']!['avatar']),
+                                )
+                              : const CircleAvatar(
+                                  radius: 50,
+                                  child: Icon(Icons.person, size: 50),
+                                ),
+                          if (isEditing)
+                            InkWell(
+                              onTap: isUploading ? null : _changeAvatar,
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                ),
+                                padding: const EdgeInsets.all(4.0),
+                                child: const Icon(
+                                  Icons.edit,
+                                  color: Colors.black,
+                                  size: 20,
+                                ),
                               ),
                             ),
+                          if (isUploading)
+                            const Positioned.fill(
+                              child: CircularProgressIndicator(),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      userData?['email'] ?? 'No Email',
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: 16),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Column(
+                        children: [
+                          _buildInfoField(
+                              'Name',
+                              userData?['information']?['name'] ?? '',
+                              nameController),
+                          _buildInfoField(
+                              'DayOfBirth',
+                              userData?['information']?['dayOfBirth'] ?? '',
+                              dayOfBirthController,
+                              isDateField: true),
+                          _buildInfoField(
+                              'PhoneNumber',
+                              userData?['phoneNumber'] ?? '',
+                              phoneNumberController),
+                          _buildInfoField(
+                              ' Driver License',
+                              userData?['information']?['gplx'] ?? '',
+                              gplxController),
+                        ],
+                      ),
+                    ),
+                    if (isEditing)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                isEditing = false;
+                                _initializeControllers();
+                              });
+                            },
+                            child: const Text("Cancel"),
                           ),
-                        if (isUploading)
-                          const Positioned.fill(
-                            child: CircularProgressIndicator(),
+                          ElevatedButton(
+                            onPressed: saveUserData,
+                            child: const Text("Save"),
                           ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    userData?['email'] ?? 'No Email',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 16),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Column(
-                      children: [
-                        _buildInfoField(
-                            'Họ tên',
-                            userData?['information']?['name'] ?? '',
-                            nameController),
-                        _buildInfoField(
-                            'Ngày sinh',
-                            userData?['information']?['dayOfBirth'] ?? '',
-                            dayOfBirthController,
-                            isDateField: true),
-                        _buildInfoField(
-                            'Số điện thoại',
-                            userData?['phoneNumber'] ?? '',
-                            phoneNumberController),
-                        _buildInfoField(
-                            'Giấy phép lái xe',
-                            userData?['information']?['gplx'] ?? '',
-                            gplxController),
-                      ],
-                    ),
-                  ),
-                  if (isEditing)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          onPressed: () {
-                            setState(() {
-                              isEditing = false;
-                              _initializeControllers();
-                            });
-                          },
-                          child: const Text("Hủy"),
-                        ),
-                        ElevatedButton(
-                          onPressed: saveUserData,
-                          child: const Text("Lưu"),
-                        ),
-                      ],
-                    ),
-                ],
+                        ],
+                      ),
+                  ],
+                ),
               ),
             ),
     );

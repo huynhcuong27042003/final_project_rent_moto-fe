@@ -53,11 +53,11 @@ class _UserInforBodyState extends State<UserInforBody> {
             avatarUrl = userData['information']?['avatar'];
           });
         } else {
-          print("Không tìm thấy người dùng với email này.");
+          print("No user found with this email.");
         }
       }
     } catch (e) {
-      print("Lỗi khi lấy dữ liệu người dùng: $e");
+      print("Error fetching user data: $e");
     }
   }
 
@@ -95,7 +95,7 @@ class _UserInforBodyState extends State<UserInforBody> {
                       ),
                       SizedBox(height: 16),
                       Text(
-                        userName ?? 'Tên người dùng',
+                        userName ?? 'User Name',
                         style: TextStyle(
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
@@ -120,19 +120,19 @@ class _UserInforBodyState extends State<UserInforBody> {
                           child: Column(
                             children: [
                               _buildMenuItem(
-                                  Icons.person, 'Tài khoản của tôi', context),
+                                  Icons.person, 'MyAccount', context),
                               Divider(indent: 30.0, endIndent: 30.0),
                               _buildMenuItem(Icons.car_rental,
-                                  'Đăng ký cho thuê xe', context),
+                                  'Vehicle Registration for Rental', context),
                               Divider(indent: 30.0, endIndent: 30.0),
                               _buildMenuItem(
-                                  Icons.favorite, 'Xe yêu thích', context),
+                                  Icons.favorite, 'Favorite Vehicles', context),
                               Divider(indent: 30.0, endIndent: 30.0),
-                              _buildMenuItem(Icons.location_on,
-                                  'Địa chỉ của tôi', context),
+                              _buildMenuItem(
+                                  Icons.location_on, 'My Addresses', context),
                               Divider(indent: 30.0, endIndent: 30.0),
                               _buildMenuItem(Icons.card_membership,
-                                  'Giấy phép lái xe', context),
+                                  'Driver License', context),
                             ],
                           ),
                         ),
@@ -155,7 +155,7 @@ class _UserInforBodyState extends State<UserInforBody> {
                           child: Column(
                             children: [
                               _buildMenuItem(
-                                  Icons.lock, 'Đổi mật khẩu', context),
+                                  Icons.lock, 'Change Password', context),
                             ],
                           ),
                         ),
@@ -174,7 +174,7 @@ class _UserInforBodyState extends State<UserInforBody> {
                         },
                         icon: Icon(Icons.logout, color: Colors.red),
                         label: Text(
-                          'Đăng xuất',
+                          'Log Out',
                           style: TextStyle(color: Colors.red),
                         ),
                         style: ElevatedButton.styleFrom(
@@ -204,22 +204,15 @@ class _UserInforBodyState extends State<UserInforBody> {
       title: Text(title),
       trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
       onTap: () async {
-        if (title == 'Tài khoản của tôi') {
-          final updatedUserData = await Navigator.push(
+        if (title == 'MyAccount') {
+          // Điều hướng đến màn hình UserInforMyaccount và đợi kết quả
+          await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const UserInforMyaccount()),
           );
 
-          // Kiểm tra và chỉ cập nhật nếu có thay đổi
-          if (updatedUserData != null) {
-            setState(() {
-              userName = updatedUserData['name'];
-              // Chỉ cập nhật avatar nếu có URL avatar mới
-              if (updatedUserData['avatar'] != null) {
-                avatarUrl = updatedUserData['avatar'];
-              }
-            });
-          }
+          // Sau khi quay lại, lấy lại dữ liệu từ Firebase
+          await _fetchUserNameAndAvatar();
         }
       },
     );
