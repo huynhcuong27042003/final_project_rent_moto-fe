@@ -2,6 +2,10 @@ import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dar
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/fetch_motorcycle_isaccept_service.dart';
 import 'package:final_project_rent_moto_fe/app_icons_icons.dart';
+import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
+import 'package:final_project_rent_moto_fe/services/favorite_list/get_favoritelist_service.dart';
+import 'package:final_project_rent_moto_fe/services/favorite_list/add_favoritelist_service.dart';
+import 'package:final_project_rent_moto_fe/services/favorite_list/delete_favoritelist_service.dart';
 
 class RentHomeInforMotos extends StatefulWidget {
   const RentHomeInforMotos({super.key});
@@ -14,11 +18,76 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
   late Future<List<dynamic>> motorcycles;
   final FetchMotorcycleIsacceptService motorcycleService =
       FetchMotorcycleIsacceptService();
+  late String userEmail; // Store the user's email
+  Map<String, bool> motorcycleFavoriteState =
+      {}; // Track favorite state per motorcycle
 
   @override
   void initState() {
     super.initState();
     motorcycles = motorcycleService.fetchMotorcycle();
+    _loadUserFavoriteState(); // Load the user's favorite state when the widget is initialized
+  }
+
+  // Load the user's favorite state
+  Future<void> _loadUserFavoriteState() async {
+    final User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      userEmail = currentUser.email ?? 'No email available';
+
+      try {
+        // Get the user's favorite motorcycles
+        List<String> favoriteMotorcycles = await getFavoriteList(userEmail);
+
+        setState(() {
+          // Mark each motorcycle as favorite if it's in the favorite list
+          motorcycles.then((motorcycleList) {
+            for (var motorcycle in motorcycleList) {
+              String motorcycleId = motorcycle['id'] ?? '';
+              motorcycleFavoriteState[motorcycleId] =
+                  favoriteMotorcycles.contains(motorcycleId);
+            }
+          });
+        });
+      } catch (e) {
+        print("Failed to load favorite state: $e");
+      }
+    }
+  }
+
+  // Toggle the favorite state for a motorcycle
+  Future<void> toggleFavorite(String motorcycleId) async {
+    final User? currentUser = FirebaseAuth.instance.currentUser;
+    final String email = currentUser?.email ?? 'No email available';
+
+    try {
+      setState(() {
+        motorcycleFavoriteState[motorcycleId] =
+            !motorcycleFavoriteState[motorcycleId]!;
+      });
+
+      if (motorcycleFavoriteState[motorcycleId]!) {
+        // Add motorcycle to favorite list
+        await addFavoriteList(email, [motorcycleId]);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Motorcycle added to favorites!")),
+        );
+      } else {
+        // Remove motorcycle from favorite list
+        await deleteFavoriteListService(email, motorcycleId);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Motorcycle removed from favorites!")),
+        );
+      }
+    } catch (error) {
+      setState(() {
+        motorcycleFavoriteState[motorcycleId] =
+            !motorcycleFavoriteState[motorcycleId]!;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to update favorite list: $error")),
+      );
+    }
   }
 
   @override
@@ -54,19 +123,40 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                   child: Row(
                     children: data.map((motorcycle) {
                       var info = motorcycle['informationMoto'] ?? {};
+                      String motorcycleId = motorcycle['id'] ?? '';
+                      bool isFavorite =
+                          motorcycleFavoriteState[motorcycleId] ?? false;
+
                       return InkWell(
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(
+                          //     builder: (context) => DetailMotoScreen(
+                          //       motorcycle: motorcycle,
+                          //     ),
+                          //   ),
+                          // );
+
+                          // Wait for the result from DetailMotoScreen
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              // builder: (context) => DetailMotoBodyCharacteristic(
-                              //   motorcycle: motorcycle,
-                              // ),
                               builder: (context) => DetailMotoScreen(
                                 motorcycle: motorcycle,
                               ),
                             ),
                           );
+
+                          // Check if result is not null and the motorcycleId matches
+                          if (result != null &&
+                              result['motorcycleId'] == motorcycleId) {
+                            setState(() {
+                              // Update the favorite state based on the result
+                              motorcycleFavoriteState[motorcycleId] =
+                                  result['isFavorite'];
+                            });
+                          }
                         },
                         child: Container(
                           width: 350,
@@ -83,29 +173,29 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Container(
-                                //   width: 350,
-                                //   decoration: BoxDecoration(
-                                //     borderRadius: BorderRadius.circular(8),
-                                //     border: Border.all(
-                                //       width: 0.2,
-                                //       color: Colors.black,
-                                //     ),
-                                //   ),
-                                //   child: ClipRRect(
-                                //     borderRadius: BorderRadius.circular(8),
-                                //     child: (info['images'] != null &&
-                                //             info['images'].isNotEmpty)
-                                //         ? Image.network(
-                                //             info['images'][0],
-                                //             fit: BoxFit.contain,
-                                //           )
-                                //         : Image.asset(
-                                //             "assets/images/xe1.jpg",
-                                //             fit: BoxFit.contain,
-                                //           ),
-                                //   ),
-                                // ),
+                                Container(
+                                  width: 350,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      width: 0.2,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: (info['images'] != null &&
+                                            info['images'].isNotEmpty)
+                                        ? Image.network(
+                                            info['images'][0],
+                                            fit: BoxFit.contain,
+                                          )
+                                        : Image.asset(
+                                            "assets/images/xe1.jpg",
+                                            fit: BoxFit.contain,
+                                          ),
+                                  ),
+                                ),
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
@@ -123,17 +213,33 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                         style: TextStyle(fontSize: 12),
                                       ),
                                     ),
-                                    Container(
-                                      margin: const EdgeInsets.all(2),
-                                      padding: const EdgeInsets.all(5),
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey,
-                                        borderRadius: BorderRadius.circular(50),
-                                      ),
-                                      child: const Icon(
-                                        Icons.favorite_border_sharp,
+                                    // IconButton(
+                                    //   icon: Icon(
+                                    //     isFavorite
+                                    //         ? Icons.favorite
+                                    //         : Icons.favorite_border,
+                                    //     color: isFavorite
+                                    //         ? Colors.red
+                                    //         : Colors.black,
+                                    //     size: 18,
+                                    //   ),
+                                    //   onPressed: () {
+                                    //     toggleFavorite(motorcycleId);
+                                    //   },
+                                    // ),
+                                    IconButton(
+                                      icon: Icon(
+                                        isFavorite
+                                            ? Icons.favorite
+                                            : Icons.favorite_border,
+                                        color: isFavorite
+                                            ? Colors.red
+                                            : Colors.black,
                                         size: 18,
                                       ),
+                                      onPressed: () {
+                                        toggleFavorite(motorcycleId);
+                                      },
                                     ),
                                   ],
                                 ),
