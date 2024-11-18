@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class DetailMotoBodyCharacteristic extends StatelessWidget {
+class DetailMotoInformation extends StatelessWidget {
   final Map<String, dynamic> motorcycle;
 
-  const DetailMotoBodyCharacteristic({super.key, required this.motorcycle});
+  const DetailMotoInformation({super.key, required this.motorcycle});
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +50,7 @@ class DetailMotoBodyCharacteristic extends StatelessWidget {
                         const Icon(Icons.attach_money, color: Colors.green),
                         // Dynamic price
                         Text(
-                          '${info['price'] ?? "0"}\$ / day',
+                          '${info['price'] ?? "0"} / day',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -108,23 +108,8 @@ class DetailMotoBodyCharacteristic extends StatelessWidget {
                                 255, 255, 173, 21)), // Color icon
                         const SizedBox(width: 8),
                         Text(
-                          "Vehicle Mass: ${info['vehicleMass'] ?? "Unknown"} kg",
+                          "Vehicle Mass: ${info['vehicleMass'] ?? "Unknown"} cc",
                           style: const TextStyle(fontSize: 16),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-
-                    // Engine Capacity Feature
-                    const Row(
-                      children: [
-                        Icon(Icons.motorcycle,
-                            color: Color.fromARGB(
-                                255, 255, 173, 21)), // Engine icon
-                        SizedBox(width: 8),
-                        Text(
-                          'Phân khối: 120cc', // Engine size
-                          style: TextStyle(fontSize: 16),
                         ),
                       ],
                     ),

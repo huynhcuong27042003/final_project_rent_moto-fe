@@ -5,24 +5,32 @@ import 'package:final_project_rent_moto_fe/screens/users/user_infor_screen.dart'
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {
-  const Dashboard({super.key});
+  final int initialIndex;
+
+  const Dashboard({super.key, this.initialIndex = 0}); // Mặc định là Home
 
   @override
   State<Dashboard> createState() => _DashboardState();
 }
 
 class _DashboardState extends State<Dashboard> {
-  int _selectedIndex = 0; // Theo dõi mục được chọn
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex; // Lấy chỉ số từ tham số
+  }
 
   final List<Widget> _screens = [
-    const RentHomeScreen(), // Trang Home
+    const RentHomeScreen(),
     const MyTripScreen(),
     const UserInforScreen(),
   ];
 
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index; // Cập nhật trang hiện tại
+      _selectedIndex = index;
     });
   }
 
@@ -30,16 +38,10 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      resizeToAvoidBottomInset:
-          true, // Cho phép giao diện thay đổi kích thước khi mở bàn phím
-      body: SingleChildScrollView(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          child: IndexedStack(
-            index: _selectedIndex,
-            children: _screens,
-          ),
-        ),
+      resizeToAvoidBottomInset: true,
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens,
       ),
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: Colors.transparent,
@@ -51,6 +53,7 @@ class _DashboardState extends State<Dashboard> {
           Icon(Icons.motorcycle_outlined, size: 30, color: Colors.white),
           Icon(Icons.account_box_sharp, size: 30, color: Colors.white),
         ],
+        index: _selectedIndex,
         onTap: _onItemTapped,
       ),
     );

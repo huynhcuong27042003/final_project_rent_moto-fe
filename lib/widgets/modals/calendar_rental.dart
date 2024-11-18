@@ -44,8 +44,6 @@ class _BookingScreenState extends State<BookingScreen>
     tempReturnDate = selectedReturnDate!;
     selectedPickupTime = widget.pickupTime;
     selectedReturnTime = widget.returnTime;
-    print("Ngày nhận: $selectedPickupDate");
-    print("Ngày trả: $selectedReturnDate");
     // Nếu rentalPeriod chứa thông tin về thời gian, hãy phân tách để lấy pickupTime và returnTime
     // Giả sử rentalPeriod có dạng "pickupTime - returnTime"
   }

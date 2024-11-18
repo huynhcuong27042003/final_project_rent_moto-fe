@@ -1,4 +1,5 @@
 import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/signup/signup_change_avatar/signup_chang_avatar_infor.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/signup/signup_change_avatar/signup_change_avatar_main.dart';
@@ -42,7 +43,8 @@ class _SignupChangeAvatarBodyState extends State<SignupChangeAvatarBody> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const LoginScreen(),
+                    builder: (context) => const Dashboard(
+                        initialIndex: 2), // Chỉ số UserInforScreen
                   ),
                 );
               },

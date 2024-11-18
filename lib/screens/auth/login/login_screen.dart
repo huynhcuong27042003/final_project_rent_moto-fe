@@ -17,15 +17,17 @@ class _LoginScreenState extends State<LoginScreen> {
       // appBar: AppBar(
       //   backgroundColor: const Color(0xFFFFAD15),
       // ),
-      body: const Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: 200,
-            child: LoginHeader(),
-          ),
-          LoginBody()
-        ],
+      body: SingleChildScrollView(
+        child: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              height: 200,
+              child: LoginHeader(),
+            ),
+            LoginBody()
+          ],
+        ),
       ),
     );
   }

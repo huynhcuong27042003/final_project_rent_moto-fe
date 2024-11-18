@@ -15,10 +15,6 @@ class DetailMotoAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // IconButton(
-          //   icon: const Icon(Icons.arrow_back, color: Colors.white),
-          //   onPressed: () {},
-          // ),
           Expanded(
             child: Center(
               child: Text(

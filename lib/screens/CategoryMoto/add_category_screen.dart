@@ -4,7 +4,7 @@ import 'package:final_project_rent_moto_fe/widgets/notification/error_notificati
 import 'package:final_project_rent_moto_fe/widgets/notification/success_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/screens/categoryMoto/list_category_screen.dart';
-import 'package:final_project_rent_moto_fe/services/CategoryMoto/add_category_service.dart';
+import 'package:final_project_rent_moto_fe/services/categoryMoto/add_category_service.dart';
 
 class AddCategoryScreen extends StatefulWidget {
   const AddCategoryScreen({super.key});

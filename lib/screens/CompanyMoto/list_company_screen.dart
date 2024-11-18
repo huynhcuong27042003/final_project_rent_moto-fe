@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/screens/companyMoto/add_company_moto.dart';
 import 'package:final_project_rent_moto_fe/screens/companyMoto/update_company_screen.dart';
-import 'package:final_project_rent_moto_fe/services/CompanyMoto/fetch_company_service.dart';
-import 'package:final_project_rent_moto_fe/services/CompanyMoto/update_company_service.dart';
+import 'package:final_project_rent_moto_fe/services/companyMoto/fetch_company_service.dart';
+import 'package:final_project_rent_moto_fe/services/companyMoto/update_company_service.dart';
 
 class ListCompanyScreen extends StatefulWidget {
   const ListCompanyScreen({super.key});

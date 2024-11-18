@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/screens/categoryMoto/add_category_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/categoryMoto/update_category_screen.dart';
-import 'package:final_project_rent_moto_fe/services/CategoryMoto/fetch_category_service.dart';
-import 'package:final_project_rent_moto_fe/services/CategoryMoto/update_category_service.dart';
+import 'package:final_project_rent_moto_fe/services/categoryMoto/fetch_category_service.dart';
+import 'package:final_project_rent_moto_fe/services/categoryMoto/update_category_service.dart';
 
 class ListCategoryScreen extends StatefulWidget {
   const ListCategoryScreen({super.key});

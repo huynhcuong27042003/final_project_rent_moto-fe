@@ -1,3 +1,4 @@
+import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 
@@ -50,10 +51,12 @@ class _MyTripNologinState extends State<MyTripNologin>
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const LoginScreen()),
+                      builder: (context) => const Dashboard(
+                          initialIndex: 2), // Chỉ số UserInforScreen
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(

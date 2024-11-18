@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/screens/companyMoto/list_company_screen.dart';
-import 'package:final_project_rent_moto_fe/services/CompanyMoto/add_company_service.dart';
+import 'package:final_project_rent_moto_fe/services/companyMoto/add_company_service.dart';
 
 class AddCompanyMotoPage extends StatefulWidget {
   const AddCompanyMotoPage({super.key});
