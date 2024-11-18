@@ -1,4 +1,3 @@
-import 'package:final_project_rent_moto_fe/screens/MotorCycle/add_motorcycle_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/forgot_password/forgot_password_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_enter_email_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
@@ -8,7 +7,6 @@ import 'package:final_project_rent_moto_fe/widgets/auth/button_auth.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/button_link_auth.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/text_field_password_auth.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/text_field_username_auth.dart';
-import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_moto_rental.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
