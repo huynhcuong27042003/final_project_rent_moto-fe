@@ -70,13 +70,13 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
         // Add motorcycle to favorite list
         await addFavoriteList(email, [motorcycleId]);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Motorcycle added to favorites!")),
+          const SnackBar(content: Text("Đã thêm vào danh sách yêu thích!")),
         );
       } else {
         // Remove motorcycle from favorite list
         await deleteFavoriteListService(email, motorcycleId);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Motorcycle removed from favorites!")),
+          const SnackBar(content: Text("Đã xóa khỏi danh sách yêu thích!")),
         );
       }
     } catch (error) {
@@ -98,7 +98,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Promotional program",
+            "Xe máy danh cho bạn",
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 16,
@@ -123,6 +123,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                   child: Row(
                     children: data.map((motorcycle) {
                       var info = motorcycle['informationMoto'] ?? {};
+                      var address = motorcycle['address'] ?? {};
                       String motorcycleId = motorcycle['id'] ?? '';
                       bool isFavorite =
                           motorcycleFavoriteState[motorcycleId] ?? false;
@@ -209,7 +210,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                             129, 255, 173, 21),
                                       ),
                                       child: const Text(
-                                        "Automatic moto",
+                                        "Xe số",
                                         style: TextStyle(fontSize: 12),
                                       ),
                                     ),
@@ -254,11 +255,12 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                     ),
                                   ),
                                 ),
-                                const Row(
+                                Row(
                                   children: [
                                     Icon(Icons.location_on),
                                     SizedBox(width: 5),
-                                    Text("Quận 5, TP.HCM"),
+                                    Text(
+                                        "${address['district']}, ${address['city']}"),
                                   ],
                                 ),
                                 Container(
@@ -299,7 +301,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                                 width: 5,
                                               ),
                                               Text(
-                                                "10 trips",
+                                                "10 chuyến",
                                                 style: TextStyle(
                                                     fontWeight: FontWeight.w500,
                                                     fontSize: 18),
@@ -325,7 +327,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                             const Padding(
                                               padding: EdgeInsets.only(top: 10),
                                               child: Text(
-                                                "/day",
+                                                "/ngày",
                                                 style: TextStyle(
                                                   color: Color.fromARGB(
                                                       255, 83, 83, 83),
@@ -349,7 +351,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                 );
               } else {
                 return const Center(
-                  child: Text('No data available'),
+                  child: Text('Không có dữ liệu'),
                 );
               }
             },

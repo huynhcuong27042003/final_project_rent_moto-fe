@@ -47,7 +47,7 @@ class _UserInforBodyState extends State<UserInforBody> {
 
         if (querySnapshot.docs.isNotEmpty) {
           final userData =
-              querySnapshot.docs.first.data() as Map<String, dynamic>;
+              querySnapshot.docs.first.data();
           setState(() {
             userName = userData['information']?['name'];
             avatarUrl = userData['information']?['avatar'];

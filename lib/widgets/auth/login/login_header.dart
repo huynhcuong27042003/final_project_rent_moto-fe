@@ -25,10 +25,10 @@ class _LoginHeaderState extends State<LoginHeader> {
           ),
         ),
         const Positioned(
-          top: 20,
+          top: 15,
           left: 30,
           child: Text(
-            'Welcome',
+            'Chào Mừng',
             style: TextStyle(
               fontSize: 40,
               fontWeight: FontWeight.bold,
@@ -41,7 +41,7 @@ class _LoginHeaderState extends State<LoginHeader> {
           top: 50, // Điều chỉnh vị trí của văn bản
           right: 90, // Điều chỉnh vị trí của văn bản
           child: Text(
-            'Back!',
+            'Bạn!',
             style: TextStyle(
               fontSize: 48,
               fontWeight: FontWeight.bold,
@@ -54,7 +54,7 @@ class _LoginHeaderState extends State<LoginHeader> {
           top: 120, // Điều chỉnh vị trí của văn bản
           left: 20, // Điều chỉnh vị trí của văn bản
           child: Text(
-            'Please sign in to continue!',
+            'Hãy đăng nhập để tiếp tục!',
             style: TextStyle(
               fontSize: 20,
               color: Colors.white, // Màu sắc của văn bản

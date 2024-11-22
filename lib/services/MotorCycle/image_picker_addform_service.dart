@@ -7,7 +7,7 @@ class ImagePickerAddformService {
 
   Future<List<XFile>> pickImages() async {
     try {
-      final List<XFile>? selectedImages = await imagePicker.pickMultiImage();
+      final List<XFile> selectedImages = await imagePicker.pickMultiImage();
       return selectedImages ?? [];
     } catch (error) {
       print("Error picking images: $error");

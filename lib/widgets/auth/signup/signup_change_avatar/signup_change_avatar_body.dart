@@ -1,4 +1,3 @@
-import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/signup/signup_change_avatar/signup_chang_avatar_infor.dart';
@@ -49,7 +48,7 @@ class _SignupChangeAvatarBodyState extends State<SignupChangeAvatarBody> {
                 );
               },
               child: const Text(
-                "Next",
+                "Bỏ qua",
                 style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w600,

@@ -52,7 +52,7 @@ class _SignupEnterPasswordBodyState extends State<SignupEnterPasswordBody> {
                     const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 decoration: const InputDecoration(
                   label: Text(
-                    "Enter password for username",
+                    "Nhập mật khẩu cho email",
                     style: TextStyle(fontWeight: FontWeight.w700, fontSize: 20),
                   ),
                   border: OutlineInputBorder(
@@ -64,16 +64,16 @@ class _SignupEnterPasswordBodyState extends State<SignupEnterPasswordBody> {
           ),
           TextFieldPasswordAuth(
             controller: _controllerPassword,
-            label: 'Password',
+            label: 'Mật khẩu',
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter password!';
+                return 'Mật khẩu không được trống!';
               } else if (!_validatorService.isValidPassword(value)) {
-                return 'Password must be at least 8 characters, with uppercase, lowercase, and digits.';
+                return 'Mật khẩu phải trên 8 ký tự. Gồm 1 chữ hoa, chữ thường và số.';
               }
               return null;
             },
-            hintText: 'Enter password',
+            hintText: 'Nhập mật khẩu',
             obscureText: _obscureText,
             readOnly: false,
             toggleObscureText: () {
@@ -87,16 +87,16 @@ class _SignupEnterPasswordBodyState extends State<SignupEnterPasswordBody> {
           ),
           TextFieldPasswordAuth(
             controller: _controllerPasswordCF,
-            label: 'Password confirm',
+            label: 'Nhập lại mật khẩu',
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter password confirm!';
+                return 'Mật khẩu xác thực không được trống!';
               } else if (!_validatorService.isValidPassword(value)) {
-                return 'Password must be at least 8 characters, with uppercase, lowercase, and digits.';
+                return 'Mật khẩu phải trên 8 ký tự. Gồm 1 chữ hoa, chữ thường và số.';
               }
               return null;
             },
-            hintText: 'Enter password confirm',
+            hintText: 'Nhập lại mật khẩu',
             obscureText: _obscureTextCF,
             readOnly: false,
             toggleObscureText: () {
@@ -109,7 +109,7 @@ class _SignupEnterPasswordBodyState extends State<SignupEnterPasswordBody> {
             height: 20,
           ),
           ButtonAuth(
-            text: "CONTINUE",
+            text: "TIẾP TỤC",
             onPressed: () {
               if (_formKey.currentState!.validate()) {
                 if (_controllerPassword.text.trim() ==
@@ -120,7 +120,7 @@ class _SignupEnterPasswordBodyState extends State<SignupEnterPasswordBody> {
                       _controllerPassword.text.trim());
                   ScaffoldMessenger.of(context).showSnackBar(
                       const SuccessNotification(
-                              text: "Update password successfully.")
+                              text: "Cập nhật mật khẩu thành công.")
                           .buildSnackBar());
                   Navigator.push(
                     context,
@@ -132,7 +132,7 @@ class _SignupEnterPasswordBodyState extends State<SignupEnterPasswordBody> {
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                       const ErrorNotification(
-                              text: "Confirmation password is incorrect.")
+                              text: "Mật khẩu nhập lại không đúng.")
                           .buildSnackBar());
                 }
               }

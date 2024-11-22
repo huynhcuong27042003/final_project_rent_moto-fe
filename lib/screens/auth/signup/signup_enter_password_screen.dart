@@ -18,7 +18,7 @@ class _SignupEnterPasswordScreenState extends State<SignupEnterPasswordScreen> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text(
-          'Step 3',
+          'Bước 3',
           style: TextStyle(
               fontWeight: FontWeight.w700, color: Colors.white, fontSize: 30),
         ),

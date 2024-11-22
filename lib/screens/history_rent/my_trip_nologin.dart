@@ -1,6 +1,5 @@
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:flutter/material.dart';
-import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 
 class MyTripNologin extends StatefulWidget {
   const MyTripNologin({super.key});

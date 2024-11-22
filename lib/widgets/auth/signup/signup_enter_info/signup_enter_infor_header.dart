@@ -28,7 +28,7 @@ class _SignupEnterInforHeaderState extends State<SignupEnterInforHeader> {
           top: 0,
           left: 30,
           child: Text(
-            'Create',
+            'Tạo',
             style: TextStyle(
               fontSize: 40,
               fontWeight: FontWeight.bold,
@@ -41,7 +41,7 @@ class _SignupEnterInforHeaderState extends State<SignupEnterInforHeader> {
           top: 30, // Điều chỉnh vị trí của văn bản
           right: 90, // Điều chỉnh vị trí của văn bản
           child: Text(
-            'Account!',
+            'Tài Khoản!',
             style: TextStyle(
               fontSize: 48,
               fontWeight: FontWeight.bold,
@@ -54,7 +54,7 @@ class _SignupEnterInforHeaderState extends State<SignupEnterInforHeader> {
           top: 100, // Điều chỉnh vị trí của văn bản
           right: 20, // Điều chỉnh vị trí của văn bản
           child: Text(
-            'Field information to continue!',
+            'Câp nhật thông tin tài khoản!',
             style: TextStyle(
               fontSize: 20,
               color: Colors.white, // Màu sắc của văn bản

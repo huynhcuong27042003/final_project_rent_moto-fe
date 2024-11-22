@@ -27,7 +27,7 @@ class _SignupChangeAvatarMainState extends State<SignupChangeAvatarMain> {
       // Tạo tên file duy nhất bằng timestamp
       String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
       Reference ref =
-          FirebaseStorage.instance.ref().child('avatars/${fileName}');
+          FirebaseStorage.instance.ref().child('avatars/$fileName');
 
       // Tải lên ảnh
       await ref.putFile(file);
@@ -102,7 +102,7 @@ class _SignupChangeAvatarMainState extends State<SignupChangeAvatarMain> {
               ),
             ),
           ),
-        )
+        ),
       ],
     );
   }

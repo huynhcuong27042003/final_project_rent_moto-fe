@@ -2,7 +2,6 @@ import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/history_rent/my_trip_nologin.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/screens/history_rent/history_trip_screen.dart'; // Import trang MyTripNologin
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyTripScreen extends StatefulWidget {

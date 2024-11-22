@@ -62,14 +62,14 @@ class _SignupEnterCodeBodyState extends State<SignupEnterCodeBody> {
           ),
           TextFieldUsernameAuth(
             controller: _controllerCode,
-            label: "Verify Code",
-            hintText: "Enter Code",
+            label: "Mã xác thực",
+            hintText: "Nhập mã xác thực",
             icon: const Icon(Icons.verified),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter code!';
+                return 'Mã xác thực không được trống!';
               } else if (!_validatorService.isValidCode(value)) {
-                return 'Please enter a valid code';
+                return 'Mã xác thực phải là những ký tự in hoa';
               }
               return null; // Nếu không có lỗi
             },
@@ -83,7 +83,7 @@ class _SignupEnterCodeBodyState extends State<SignupEnterCodeBody> {
                   width: 30,
                 ),
                 const Text(
-                  'Resend code: ',
+                  'Gửi lại mã: ',
                   style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w700,
@@ -118,7 +118,7 @@ class _SignupEnterCodeBodyState extends State<SignupEnterCodeBody> {
                               context, widget.email);
                         },
                         child: const Text(
-                          "Send",
+                          "Gửi",
                           style: TextStyle(
                               color: Colors.black,
                               decoration: TextDecoration.underline,
@@ -129,7 +129,7 @@ class _SignupEnterCodeBodyState extends State<SignupEnterCodeBody> {
             ),
           ),
           ButtonAuth(
-            text: "CONTINUE",
+            text: "TIẾP TỤC",
             onPressed: () {
               if (_formKey.currentState!.validate()) {
                 _signupService.verifyCode(

@@ -31,13 +31,13 @@ class _SignupEnterEmailBodyState extends State<SignupEnterEmailBody> {
           TextFieldUsernameAuth(
             controller: _controllerUserName,
             label: "Email",
-            hintText: "Enter email",
+            hintText: "Nhập email",
             icon: const Icon(Icons.email_outlined),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter email!';
+                return 'Email không được trống!';
               } else if (!_validatorService.isValidEmail(value)) {
-                return 'Please enter a valid email';
+                return 'Định dạng email không đúng';
               }
               return null;
             },
@@ -45,7 +45,7 @@ class _SignupEnterEmailBodyState extends State<SignupEnterEmailBody> {
           ),
           const SizedBox(height: 20),
           ButtonAuth(
-            text: "CONTINUE",
+            text: "TIẾP TỤC",
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 // Kiểm tra nếu người dùng đã tồn tại
@@ -71,7 +71,7 @@ class _SignupEnterEmailBodyState extends State<SignupEnterEmailBody> {
                 } else {
                   // Hiển thị thông báo lỗi nếu người dùng đã tồn tại
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const ErrorNotification(text: "Email is exist")
+                    const ErrorNotification(text: "Email đã tồn tại")
                         .buildSnackBar(),
                   );
                 }

@@ -48,7 +48,7 @@ class _LoginFormState extends State<LoginForm> {
                 Icon(Icons.check_circle, color: Colors.white),
                 SizedBox(width: 10),
                 Text(
-                  'Login successfully.',
+                  'Đăng nhập thành công.',
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ],
@@ -62,10 +62,10 @@ class _LoginFormState extends State<LoginForm> {
           ),
         );
       } else {
-        _showErrorMessage('Invalid email or password');
+        _showErrorMessage('Email hoặc mật khẩu không đúng');
       }
     } catch (e) {
-      _showErrorMessage('Login failed.');
+      _showErrorMessage('Đăng nhập thất bại.');
     }
   }
 
@@ -100,14 +100,14 @@ class _LoginFormState extends State<LoginForm> {
         children: [
           TextFieldUsernameAuth(
             controller: _controllerUserEmail,
-            label: 'Username',
-            hintText: 'Enter email',
+            label: 'Email',
+            hintText: ' Nhập email',
             icon: const Icon(Icons.person_4_outlined),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter email!';
+                return 'Email không được trống!';
               } else if (!_validatorService.isValidEmail(value)) {
-                return 'Please enter a valid email';
+                return 'Định dạng email không đúng';
               }
               return null;
             },
@@ -116,16 +116,16 @@ class _LoginFormState extends State<LoginForm> {
           const SizedBox(height: 15),
           TextFieldPasswordAuth(
             controller: _passwordController,
-            label: 'Password',
+            label: 'Mật khẩu',
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter password!';
+                return 'Mật khẩu không được trống!';
               } else if (!_validatorService.isValidPassword(value)) {
-                return 'Password must be at least 8 characters, with uppercase, lowercase, and digits.';
+                return 'Mật khẩu phải trên 8 ký tự. Gồm 1 chữ hoa, chữ thường, và số.';
               }
               return null;
             },
-            hintText: 'Enter password',
+            hintText: 'Nhập mật khẩu',
             obscureText: _obscureText,
             readOnly: false,
             toggleObscureText: () {
@@ -147,7 +147,7 @@ class _LoginFormState extends State<LoginForm> {
                   );
                 },
                 child: const Text(
-                  "Forgot password?",
+                  "Quên mật khẩu?",
                   style: TextStyle(
                     color: Colors.black,
                     fontStyle: FontStyle.italic,
@@ -164,7 +164,7 @@ class _LoginFormState extends State<LoginForm> {
                 _login();
               }
             },
-            text: 'SIGN IN',
+            text: 'ĐĂNG NHẬP',
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -172,7 +172,7 @@ class _LoginFormState extends State<LoginForm> {
               TextButton(
                 onPressed: () {},
                 child: const Text(
-                  "Don't have an account?",
+                  "Chưa có tài khoản?",
                   style: TextStyle(
                     color: Colors.black,
                     fontStyle: FontStyle.italic,
@@ -193,7 +193,7 @@ class _LoginFormState extends State<LoginForm> {
                       ),
                     )
                   },
-              text: "Signup")
+              text: "Đăng ký")
         ],
       ),
     );

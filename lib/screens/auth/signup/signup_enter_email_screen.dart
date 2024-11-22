@@ -16,7 +16,7 @@ class _SignupEnterEmailScreenState extends State<SignupEnterEmailScreen> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text(
-          'Step 1',
+          'Bước 1',
           style: TextStyle(
               fontWeight: FontWeight.w700, color: Colors.white, fontSize: 30),
         ),

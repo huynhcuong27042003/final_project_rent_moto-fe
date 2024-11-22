@@ -20,7 +20,7 @@ class _SignupChangeAvatarScreenState extends State<SignupChangeAvatarScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'Uptdate Avatar',
+          'Thêm ảnh đại điện',
           style: TextStyle(
               fontWeight: FontWeight.w700, color: Colors.white, fontSize: 30),
         ),

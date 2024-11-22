@@ -68,7 +68,7 @@ class _SignupEnterInforDateTextState extends State<SignupEnterInforDateText> {
       child: TextFormField(
         controller: widget.controllerDate,
         decoration: InputDecoration(
-          labelText: "Birthday",
+          labelText: "Ngày sinh",
           labelStyle: TextStyle(
               color: Colors.black.withOpacity(0.8),
               fontWeight: FontWeight.w500),

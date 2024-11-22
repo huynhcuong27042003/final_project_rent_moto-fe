@@ -17,7 +17,7 @@ class _SignupEnterInfoScreenState extends State<SignupEnterInfoScreen> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text(
-          'Step 4',
+          'Bước 4',
           style: TextStyle(
               fontWeight: FontWeight.w700, color: Colors.white, fontSize: 30),
         ),

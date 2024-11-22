@@ -1,13 +1,14 @@
+import 'package:final_project_rent_moto_fe/screens/map/location_of-moto.dart';
 import 'package:final_project_rent_moto_fe/services/bookingMoto/addbookingService.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_appbar.dart';
-import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_body_location.dart';
-import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_bottomnav.dart';
-import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_information.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/calendar_rental.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:latlong2/latlong.dart';
 
 class DetailMotoScreen extends StatefulWidget {
   final Map<String, dynamic> motorcycle; // Thêm một tham số để nhận dữ liệu
@@ -29,12 +30,15 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
   DateTime? pickupDateTime;
   DateTime? returnDateTime;
   final _addBookingService = AddBookingservice();
+  LatLng? _mapCoordinates;
+  @override
   void initState() {
     super.initState();
     pickupDate = DateTime.now();
     returnDate = pickupDate.add(const Duration(days: 1));
     _updateDateTimes(); // Cập nhật giá trị pickupDateTime và returnDateTime ngay khi khởi tạo
     _calculateTotalAmount();
+    _fetchCoordinates();
   }
 
   // Phương thức cập nhật pickupDateTime và returnDateTime
@@ -104,7 +108,6 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
           returnDate: returnDate,
           numberOfRentalDay: numberOfRentalDay,
         );
-
         print(
             'Booking thành công: $email, $numberPlate, $bookingDate, $returnDate, $numberOfRentalDay ngày');
       } else {
@@ -115,9 +118,53 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
     }
   }
 
+  Future<LatLng> getCoordinates(
+      String streetName, String district, String city, String country) async {
+    final address = '$district, $city, $country';
+    final response = await http.get(Uri.parse(
+        'https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(address)}&format=json'));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data.isNotEmpty) {
+        final latitude = double.tryParse(data[0]['lat']);
+        final longitude = double.tryParse(data[0]['lon']);
+
+        if (latitude != null && longitude != null) {
+          print("Vị độ $longitude, Kinh độ $latitude");
+          return LatLng(latitude, longitude);
+        }
+      }
+    }
+    throw Exception('Không thể tải tọa độ');
+  }
+
+  Future<void> _fetchCoordinates() async {
+    var address = widget.motorcycle['address'] ?? {};
+    String streetName = address['streetName'] ?? '';
+    String district = address['district'] ?? '';
+    String city = address['city'] ?? '';
+    String country = address['country'] ?? '';
+
+    try {
+      LatLng coordinates =
+          await getCoordinates(streetName, district, city, country);
+      setState(() {
+        _mapCoordinates = coordinates; // Đảm bảo tọa độ được cập nhật
+      });
+    } catch (e) {
+      print('Lỗi khi lấy tọa độ: $e');
+      // Xử lý lỗi nếu không lấy được tọa độ
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var info = widget.motorcycle['informationMoto'] ?? {};
+    var address = widget.motorcycle['address'] ?? {};
+    String district = address['district'];
+    String city = address['city'];
+
     return Scaffold(
       appBar: DetailMotoAppBar(motorcycle: widget.motorcycle),
       body: SingleChildScrollView(
@@ -125,7 +172,6 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Truyền dữ liệu vào DetailMotoBodyCharacteristic
             Column(
               children: [
                 // Image section with dynamic image loading
@@ -165,11 +211,8 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                             ),
                             Row(
                               children: [
-                                const Icon(Icons.attach_money,
-                                    color: Colors.green),
-                                // Dynamic price
                                 Text(
-                                  '${info['price'] ?? "0"} / day',
+                                  '${info['price'] ?? "0"} đ / day',
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -225,12 +268,12 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                             // Color Feature
                             Row(
                               children: [
-                                const Icon(Icons.color_lens,
+                                const Icon(Icons.energy_savings_leaf_outlined,
                                     color: Color.fromARGB(
                                         255, 255, 173, 21)), // Color icon
                                 const SizedBox(width: 8),
                                 Text(
-                                  "Vehicle Mass: ${info['vehicleMass'] ?? "Unknown"} cc",
+                                  "Phân khối: ${info['vehicleMass'] ?? "Unknown"} cc",
                                   style: const TextStyle(fontSize: 16),
                                 ),
                               ],
@@ -245,7 +288,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                                         255, 255, 173, 21)), // Fuel icon
                                 SizedBox(width: 8),
                                 Text(
-                                  "Energy: ${info['energy'] ?? "Unknown"}",
+                                  "Nhiên liệu: ${info['energy'] ?? "Unknown"}",
                                   style: TextStyle(fontSize: 16),
                                 ),
                               ],
@@ -255,7 +298,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                       ),
                       const SizedBox(height: 16),
                       const Text(
-                        'Description',
+                        'Mô tả',
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
@@ -273,7 +316,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Rental Duration',
+                  'Thời gian thuê xe',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
@@ -329,32 +372,23 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                 ),
                 const SizedBox(height: 16),
                 const Text(
-                  'Pickup or Delivery Location',
+                  'Vị trí xe',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                RadioListTile(
-                  value: 'self_pickup',
-                  groupValue: _selectedPickupOption,
-                  activeColor: Colors.green,
-                  title: const Text('I will pick up the vehicle myself'),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedPickupOption = value!;
-                    });
-                  },
+                Text(
+                  '${district}, ${city}',
+                  style: TextStyle(
+                    color: Colors.black54,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-                RadioListTile(
-                  value: 'delivery',
-                  groupValue: _selectedPickupOption,
-                  activeColor: Colors.green,
-                  title: const Text('I want the vehicle delivered to me'),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedPickupOption = value!;
-                    });
-                  },
-                ),
+                _mapCoordinates != null
+                    ? LocationOfMotoScreen(
+                        latitude: _mapCoordinates!.latitude,
+                        longitude: _mapCoordinates!.longitude,
+                      )
+                    : const CircularProgressIndicator()
               ],
             ),
             const SizedBox(height: 16),
@@ -374,7 +408,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                 children: [
                   const SizedBox(height: 2),
                   Text(
-                    'Tổng tiền: ${totalAmount}',
+                    'Tổng tiền: $totalAmount',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,

@@ -18,7 +18,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Forgot password",
+          "Quên mật khẩu",
           style: TextStyle(
               color: Colors.white, fontWeight: FontWeight.w700, fontSize: 25),
         ),
@@ -36,13 +36,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             TextFieldUsernameAuth(
               controller: controllerEmail,
               label: "Email",
-              hintText: "Enter email",
+              hintText: "Nhập email",
               icon: Icon(Icons.email_outlined),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter email!';
+                  return 'Email không được trống!';
                 } else if (!_validatorService.isValidEmail(value)) {
-                  return 'Please enter a valid email';
+                  return 'Định dạng email không đúng';
                 }
                 return null;
               },
@@ -51,7 +51,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             SizedBox(
               height: 20,
             ),
-            ButtonAuth(text: "Continue", onPressed: () {})
+            ButtonAuth(text: "TIẾP TỤC", onPressed: () {})
           ],
         ),
       ),

@@ -1,11 +1,5 @@
-import 'package:final_project_rent_moto_fe/screens/admin/admin_screen.dart';
-import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
-import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_change_avatar_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
-import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
-import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
-import 'package:final_project_rent_moto_fe/screens/history_rent/my_trip_nologin.dart';
-import 'package:final_project_rent_moto_fe/screens/users/user_list_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/map/location_of-moto.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -26,8 +20,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: LoginScreen(),
+    return MaterialApp(
+      home: Dashboard(),
       debugShowCheckedModeBanner: false,
     );
   }

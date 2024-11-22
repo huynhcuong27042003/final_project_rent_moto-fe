@@ -35,14 +35,14 @@ class _SignupEnterInforBodyState extends State<SignupEnterInforBody> {
           ),
           TextFieldUsernameAuth(
             controller: _controllerLICNumber,
-            label: "License number",
-            hintText: "Enter License number",
+            label: "Giấy phép lái xe",
+            hintText: "Nhập giấy phép lái xe",
             icon: const Icon(Icons.inventory_rounded),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter License number!';
+                return 'Giấp phép lái xe không được trống!';
               } else if (!_validatorService.isValidLICNumber(value)) {
-                return 'License number must be 12 characters';
+                return 'Giấp phép lái xe';
               }
               return null;
             },
@@ -53,14 +53,14 @@ class _SignupEnterInforBodyState extends State<SignupEnterInforBody> {
           ),
           TextFieldUsernameAuth(
             controller: _controllerPhoneNumber,
-            label: "Phone number",
-            hintText: "Enter phone number",
+            label: "Số điện thoại",
+            hintText: "Nhập số điện thoại",
             icon: const Icon(Icons.account_circle),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter phone number!';
+                return 'Số điện thoại không được trống!';
               } else if (!_validatorService.isValidPhoneNumber(value)) {
-                return 'Phone number must be 10 characters';
+                return 'Số điện thoại phải đủ 10 ký tự';
               }
               return null;
             },
@@ -71,12 +71,12 @@ class _SignupEnterInforBodyState extends State<SignupEnterInforBody> {
           ),
           TextFieldUsernameAuth(
             controller: _controllerFullName,
-            label: "Full name",
-            hintText: "Enter full name",
+            label: "Họ và tên",
+            hintText: "Nhập họ và tên",
             icon: const Icon(Icons.account_circle),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter full name!';
+                return 'Họ và tên không được trống!';
               }
               return null;
             },
@@ -95,7 +95,7 @@ class _SignupEnterInforBodyState extends State<SignupEnterInforBody> {
             height: 20,
           ),
           ButtonAuth(
-            text: "DONE",
+            text: "HOÀN THÀNH",
             onPressed: () async {
               if (_formKey.currentState!.validate()) {
                 // Thực hiện cập nhật dữ liệu trước khi chuyển trang
@@ -110,7 +110,7 @@ class _SignupEnterInforBodyState extends State<SignupEnterInforBody> {
                 // Hiển thị thông báo thành công
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SuccessNotification(
-                          text: "Update information successfully.")
+                          text: "Cập nhật thông tin thành công.")
                       .buildSnackBar(),
                 );
 

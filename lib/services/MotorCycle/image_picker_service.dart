@@ -10,7 +10,7 @@ class ImagePickerService {
   Future<List<File>> pickImages() async {
     List<File> selectedImages = [];
     try {
-      final List<XFile>? pickedImages = await imagePicker.pickMultiImage();
+      final List<XFile> pickedImages = await imagePicker.pickMultiImage();
 
       if (pickedImages != null && pickedImages.isNotEmpty) {
         selectedImages = pickedImages.map((e) => File(e.path)).toList();
@@ -25,7 +25,7 @@ class ImagePickerService {
     try {
       // Create a unique file name for each image
       String fileName =
-          DateTime.now().millisecondsSinceEpoch.toString() + ".jpg";
+          "${DateTime.now().millisecondsSinceEpoch}.jpg";
 
       // Create a reference to Firebase Storage
       Reference storageRef =

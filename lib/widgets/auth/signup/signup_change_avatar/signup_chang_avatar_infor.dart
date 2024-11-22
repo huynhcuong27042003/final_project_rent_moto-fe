@@ -26,11 +26,11 @@ class _SignupChangAvatarInforState extends State<SignupChangAvatarInfor> {
         var userData = querySnapshot.docs.first.data() as Map<String, dynamic>;
         setState(() {
           this.userData = {
-            'gplx': userData['information']['gplx'] ?? 'No information',
-            'name': userData['information']['name'] ?? 'No information',
-            'phoneNumber': userData['phoneNumber'] ?? 'No information',
+            'gplx': userData['information']['gplx'] ?? 'Không có thông tin',
+            'name': userData['information']['name'] ?? 'Không có thông tin',
+            'phoneNumber': userData['phoneNumber'] ?? 'Không có thông tin',
             'dayOfBirth':
-                userData['information']['dayOfBirth'] ?? 'No information',
+                userData['information']['dayOfBirth'] ?? 'Không có thông tin',
           };
         });
       }
@@ -124,7 +124,7 @@ class _SignupChangAvatarInforState extends State<SignupChangAvatarInfor> {
                     const Align(
                       alignment: Alignment.topCenter,
                       child: Text(
-                        "YOUR INFORMATION",
+                        "THÔNG TIN CỦA BẠN",
                         style: TextStyle(
                           color: Colors.red,
                           fontSize: 18,
@@ -135,21 +135,21 @@ class _SignupChangAvatarInforState extends State<SignupChangAvatarInfor> {
                     const SizedBox(
                       height: 20,
                     ),
-                    fieldInfoRow("Full name", fullName),
+                    fieldInfoRow("Họ và tên", fullName),
                     const SizedBox(
                       height: 5,
                     ),
-                    fieldInfoRow("License number", licenseNumber),
+                    fieldInfoRow("Giấp phép lái xe", licenseNumber),
                     const SizedBox(
                       height: 5,
                     ),
                     Row(
                       children: [
-                        fieldInfoRow("Phone number", phoneNumber),
+                        fieldInfoRow("Số điện thoại", phoneNumber),
                         const SizedBox(
                           width: 30,
                         ),
-                        fieldInfoRow("Date of birth", dateOfBirth),
+                        fieldInfoRow("Ngày sinh", dateOfBirth),
                       ],
                     )
                   ],

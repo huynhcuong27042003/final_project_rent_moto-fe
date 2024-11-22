@@ -37,7 +37,7 @@ class _RentHomeMotoRentalState extends State<RentHomeMotoRental> {
             child: Padding(
               padding: EdgeInsets.only(top: 10, left: 20),
               child: Text(
-                "Want to rent your motos?",
+                "Bạn có muốn đăng xe lên cho thuê?",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -62,7 +62,7 @@ class _RentHomeMotoRentalState extends State<RentHomeMotoRental> {
                 // Add your onPressed functionality here
               },
               child: const Text(
-                "Post your car for rent",
+                "Đăng xe lên cho thuê",
                 style: TextStyle(color: Colors.white),
               ),
             ),
