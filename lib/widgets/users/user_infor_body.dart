@@ -1,3 +1,4 @@
+import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycle_list_by_user.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/button_auth.dart';
@@ -46,8 +47,7 @@ class _UserInforBodyState extends State<UserInforBody> {
             .get();
 
         if (querySnapshot.docs.isNotEmpty) {
-          final userData =
-              querySnapshot.docs.first.data();
+          final userData = querySnapshot.docs.first.data();
           setState(() {
             userName = userData['information']?['name'];
             avatarUrl = userData['information']?['avatar'];
@@ -210,9 +210,11 @@ class _UserInforBodyState extends State<UserInforBody> {
             context,
             MaterialPageRoute(builder: (context) => const UserInforMyaccount()),
           );
-
-          // Sau khi quay lại, lấy lại dữ liệu từ Firebase
-          await _fetchUserNameAndAvatar();
+        } else if (title == 'Đăng ký cho thuê xe') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MotorcycleListByUser()),
+          );
         }
       },
     );

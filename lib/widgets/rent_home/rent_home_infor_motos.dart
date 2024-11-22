@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/fetch_motorcycle_isaccept_service.dart';
@@ -130,15 +132,6 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
 
                       return InkWell(
                         onTap: () async {
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => DetailMotoScreen(
-                          //       motorcycle: motorcycle,
-                          //     ),
-                          //   ),
-                          // );
-
                           // Wait for the result from DetailMotoScreen
                           final result = await Navigator.push(
                             context,
@@ -209,25 +202,11 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                         color: const Color.fromARGB(
                                             129, 255, 173, 21),
                                       ),
-                                      child: const Text(
-                                        "Xe số",
-                                        style: TextStyle(fontSize: 12),
+                                      child: Text(
+                                        "Category: ${motorcycle['category']?['name'] ?? 'Unknown'}",
+                                        style: const TextStyle(fontSize: 12),
                                       ),
                                     ),
-                                    // IconButton(
-                                    //   icon: Icon(
-                                    //     isFavorite
-                                    //         ? Icons.favorite
-                                    //         : Icons.favorite_border,
-                                    //     color: isFavorite
-                                    //         ? Colors.red
-                                    //         : Colors.black,
-                                    //     size: 18,
-                                    //   ),
-                                    //   onPressed: () {
-                                    //     toggleFavorite(motorcycleId);
-                                    //   },
-                                    // ),
                                     IconButton(
                                       icon: Icon(
                                         isFavorite
