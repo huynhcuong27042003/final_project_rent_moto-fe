@@ -1,4 +1,7 @@
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:final_project_rent_moto_fe/screens/favorite_list/list_favorite_by_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -117,7 +120,14 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
               Row(
                 children: [
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ListFavoriteByUser(),
+                        ),
+                      );
+                    },
                     icon: const Icon(
                       Icons.favorite,
                       size: 18,

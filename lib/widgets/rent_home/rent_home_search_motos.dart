@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:final_project_rent_moto_fe/widgets/modals/search_location.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/calendar_rental.dart';

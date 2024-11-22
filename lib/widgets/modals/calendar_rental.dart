@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/select_rent_return_day_form.dart';
 

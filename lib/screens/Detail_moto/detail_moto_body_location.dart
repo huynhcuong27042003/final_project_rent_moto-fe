@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DetailMotoBodyLocation extends StatefulWidget {
-  const DetailMotoBodyLocation({Key? key}) : super(key: key);
+  const DetailMotoBodyLocation({super.key});
 
   @override
   _DetailMotoBodyLocationState createState() => _DetailMotoBodyLocationState();

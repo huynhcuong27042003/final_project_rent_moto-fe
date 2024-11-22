@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DetailMotoBottomNav extends StatelessWidget {
-  const DetailMotoBottomNav({Key? key}) : super(key: key);
+  const DetailMotoBottomNav({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,6 @@
 // update_motorcycle_logic.dart
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/image_picker_service.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/update_motorcycle_service.dart';

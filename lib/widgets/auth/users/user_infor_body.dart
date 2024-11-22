@@ -1,3 +1,4 @@
+import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycle_list_by_user.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/users/user_infor_myaccount_form.dart';
@@ -207,6 +208,11 @@ class _UserInforBodyState extends State<UserInforBody> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => UserInforMyaccount()),
+          );
+        } else if (title == 'Đăng ký cho thuê xe') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => MotorcycleListByUser()),
           );
         }
       },

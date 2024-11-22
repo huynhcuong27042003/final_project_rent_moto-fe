@@ -1,3 +1,4 @@
+import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycle_list_by_user.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/forgot_password/forgot_password_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_enter_email_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
@@ -38,7 +39,7 @@ class _LoginFormState extends State<LoginForm> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => Dashboard(),
+            builder: (context) => MotorcycleListByUser(),
           ),
         );
         ScaffoldMessenger.of(context).showSnackBar(

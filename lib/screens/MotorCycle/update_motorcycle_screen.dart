@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api
+// ignore_for_file: library_private_types_in_public_api, avoid_print
 import 'dart:io';
 import 'package:final_project_rent_moto_fe/screens/motorCycle/update_motorcycle_logic.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/image_picker_service.dart';
