@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
 import 'package:final_project_rent_moto_fe/services/favorite_list/get_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/add_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/delete_favoritelist_service.dart';
+import 'package:intl/intl.dart';
 
 class RentHomeInforMotos extends StatefulWidget {
   const RentHomeInforMotos({super.key});
@@ -153,7 +154,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                           }
                         },
                         child: Container(
-                          width: 350,
+                          width: MediaQuery.of(context).size.width * 0.9,
                           margin: const EdgeInsets.only(right: 8),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
@@ -168,7 +169,9 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  width: 350,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.9,
+                                  height: 200,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
@@ -196,14 +199,14 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                   children: [
                                     Container(
                                       margin: const EdgeInsets.only(top: 5),
-                                      padding: const EdgeInsets.all(3),
+                                      padding: const EdgeInsets.all(5),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(12),
                                         color: const Color.fromARGB(
                                             129, 255, 173, 21),
                                       ),
                                       child: Text(
-                                        "Category: ${motorcycle['category']?['name'] ?? 'Unknown'}",
+                                        "${motorcycle['category']?['name'] ?? 'Unknown'}",
                                         style: const TextStyle(fontSize: 12),
                                       ),
                                     ),
@@ -295,12 +298,20 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                         child: Row(
                                           children: [
                                             Text(
-                                              "${info['price'] ?? "111.000"}",
+                                              NumberFormat("#,###", "vi_VN")
+                                                  .format(info['price'] ?? 0),
                                               style: const TextStyle(
                                                 color: Color.fromARGB(
                                                     255, 253, 101, 20),
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 25,
+                                              ),
+                                            ),
+                                            Text(
+                                              "đ",
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 18,
                                               ),
                                             ),
                                             const Padding(

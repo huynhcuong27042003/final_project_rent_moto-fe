@@ -46,8 +46,6 @@ class _BookingScreenState extends State<BookingScreen>
     tempReturnDate = selectedReturnDate!;
     selectedPickupTime = widget.pickupTime;
     selectedReturnTime = widget.returnTime;
-    // Nếu rentalPeriod chứa thông tin về thời gian, hãy phân tách để lấy pickupTime và returnTime
-    // Giả sử rentalPeriod có dạng "pickupTime - returnTime"
   }
 
   @override
@@ -281,7 +279,7 @@ class _BookingScreenState extends State<BookingScreen>
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Container(
                   padding: const EdgeInsets.all(5),
@@ -320,7 +318,6 @@ class _BookingScreenState extends State<BookingScreen>
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
                 Container(
                   padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(

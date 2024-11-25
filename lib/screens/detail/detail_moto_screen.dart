@@ -29,7 +29,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
   int totalAmount = 0;
   DateTime? pickupDateTime;
   DateTime? returnDateTime;
-  final _addBookingService = AddBookingservice();
+  final _addBookingService = AddBookingService();
   LatLng? _mapCoordinates;
   @override
   void initState() {
@@ -74,7 +74,6 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
       String priceXe = info['price'].toString();
       String priceXeTemp = priceXe;
       int numberPirceXe = int.parse(priceXeTemp);
-      print(numberPirceXe);
 
       // Tính tổng tiền
       setState(() {
@@ -93,9 +92,6 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
 
     if (user != null && pickupDateTime != null && returnDateTime != null) {
       String email = user.email!;
-      String bookingDate =
-          DateFormat('yyyy-MM-dd HH:mm').format(pickupDateTime);
-      String returnDate = DateFormat('yyyy-MM-dd HH:mm').format(returnDateTime);
 
       int numberOfRentalDay = returnDateTime.difference(pickupDateTime).inDays;
 
@@ -104,12 +100,10 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
         await _addBookingService.addBooking(
           email: email,
           numberPlate: numberPlate,
-          bookingDate: bookingDate,
-          returnDate: returnDate,
+          bookingDate: pickupDateTime,
+          returnDate: returnDateTime,
           numberOfRentalDay: numberOfRentalDay,
         );
-        print(
-            'Booking thành công: $email, $numberPlate, $bookingDate, $returnDate, $numberOfRentalDay ngày');
       } else {
         print('Ngày trả xe phải sau ngày thuê!');
       }
@@ -212,7 +206,15 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                             Row(
                               children: [
                                 Text(
-                                  '${info['price'] ?? "0"} đ / day',
+                                  NumberFormat("#,###", "vi_VN")
+                                      .format(info['price']),
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  ' đ/day',
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -375,7 +377,6 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                   'Vị trí xe',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 8),
                 Text(
                   '${district}, ${city}',
                   style: TextStyle(
@@ -383,6 +384,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
+                const SizedBox(height: 8),
                 _mapCoordinates != null
                     ? LocationOfMotoScreen(
                         latitude: _mapCoordinates!.latitude,
@@ -407,12 +409,31 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const SizedBox(height: 2),
-                  Text(
-                    'Tổng tiền: $totalAmount',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        'Tổng tiền: ',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        NumberFormat("#,###", "vi_VN").format(totalAmount),
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        ),
+                      ),
+                      Text(
+                        ' VNĐ',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                   TextButton(
                     onPressed: () {

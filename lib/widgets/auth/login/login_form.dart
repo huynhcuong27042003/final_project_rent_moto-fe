@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycle_list_by_user.dart';
+import 'package:final_project_rent_moto_fe/screens/admin/admin_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/forgot_password/forgot_password_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_enter_email_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
@@ -32,38 +34,70 @@ class _LoginFormState extends State<LoginForm> {
 
     try {
       final response = await _loginService.login(email, password);
-      // Kiểm tra nếu đăng nhập thành công
+
       if (response != null) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setBool('isLogin', true);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MotorcycleListByUser(),
-          ),
-        );
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.check_circle, color: Colors.white),
-                SizedBox(width: 10),
-                Text(
-                  'Đăng nhập thành công.',
-                  style: TextStyle(color: Colors.white, fontSize: 16),
-                ),
-              ],
+        // Lấy thông tin người dùng từ Firestore bằng email
+        QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .where('email', isEqualTo: email)
+            .limit(1)
+            .get();
+
+        // Kiểm tra nếu có dữ liệu trong snapshot
+        if (userSnapshot.docs.isNotEmpty) {
+          final userData =
+              userSnapshot.docs.first.data() as Map<String, dynamic>;
+          final role = userData['role']; // Lấy role từ document
+
+          // Lưu trạng thái đăng nhập
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setBool('isLogin', true);
+
+          // Điều hướng dựa trên role
+          if (role == 'user') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Dashboard(),
+              ),
+            );
+          } else if (role == 'admin') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AdminScreen(),
+              ),
+            );
+          } else {
+            _showErrorMessage('Không xác định được quyền truy cập.');
+          }
+
+          // Hiển thị thông báo đăng nhập thành công
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white),
+                  SizedBox(width: 10),
+                  Text(
+                    'Đăng nhập thành công.',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              duration: const Duration(seconds: 3),
             ),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            duration: const Duration(seconds: 3),
-          ),
-        );
+          );
+        } else {
+          _showErrorMessage('Người dùng không tồn tại trong hệ thống.');
+        }
       } else {
-        _showErrorMessage('Email hoặc mật khẩu không đúng');
+        _showErrorMessage('Email hoặc mật khẩu không đúng.');
       }
     } catch (e) {
       _showErrorMessage('Đăng nhập thất bại.');
