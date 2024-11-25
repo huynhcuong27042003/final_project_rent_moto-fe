@@ -2,6 +2,7 @@ import 'package:final_project_rent_moto_fe/screens/CategoryMoto/list_category_sc
 import 'package:final_project_rent_moto_fe/screens/CompanyMoto/list_company_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycles_list_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
+import 'package:final_project_rent_moto_fe/screens/promo/promo_list_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/users/user_list_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -90,6 +91,7 @@ class DashboardAdmin extends StatelessWidget {
     'Category',
     'Moto',
     'User',
+    'Promo',
     // 'Profile',
     // 'Revenue',
   ];
@@ -99,6 +101,7 @@ class DashboardAdmin extends StatelessWidget {
     const ListCategoryScreen(),
     const MotorcyclesListScreen(),
     const UserListScreen(),
+    const PromoListScreen(),
     // const ProductList(),
   ];
 

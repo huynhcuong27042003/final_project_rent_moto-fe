@@ -1,5 +1,7 @@
 import 'package:final_project_rent_moto_fe/screens/map/location_of-moto.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project_rent_moto_fe/services/bookingMoto/addbookingService.dart';
+import 'package:final_project_rent_moto_fe/services/promo/apply_promo_service.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_appbar.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/calendar_rental.dart';
@@ -27,11 +29,12 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
   String pickupTime = "21:00";
   String returnTime = "22:00";
   int totalAmount = 0;
+  int originalTotalAmount = 0;
   DateTime? pickupDateTime;
   DateTime? returnDateTime;
   final _addBookingService = AddBookingService();
   LatLng? _mapCoordinates;
-  @override
+  String? appliedPromoCode;
   void initState() {
     super.initState();
     pickupDate = DateTime.now();
@@ -78,6 +81,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
       // Tính tổng tiền
       setState(() {
         totalAmount = (rentalDays * numberPirceXe);
+        originalTotalAmount = totalAmount;
       });
     }
   }
@@ -442,6 +446,8 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                         builder: (context) {
                           TextEditingController discountController =
                               TextEditingController();
+                          ApplyPromoService promoService = ApplyPromoService();
+
                           return AlertDialog(
                             title: const Text('Nhập Mã Giảm Giá'),
                             content: TextField(
@@ -452,9 +458,57 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                             ),
                             actions: [
                               TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  // Handle discount code here if needed
+                                onPressed: () async {
+                                  String promoCode =
+                                      discountController.text.trim();
+
+                                  try {
+                                    // Kiểm tra xem mã giảm giá đã được áp dụng chưa
+                                    if (promoCode == appliedPromoCode) {
+                                      promoService.showSnackbar(
+                                        context,
+                                        'Mã giảm giá này đã được áp dụng!',
+                                        isError: true,
+                                      );
+                                      Navigator.of(context).pop();
+                                      return;
+                                    }
+                                    // Gọi service để xử lý áp dụng mã khuyến mãi
+                                    await promoService.applyPromoHandler(
+                                      context,
+                                      promoCode,
+                                      originalTotalAmount,
+                                    );
+
+                                    // Lấy lại tổng tiền sau khi áp dụng khuyến mãi
+                                    Map<String, dynamic>? promoDetails =
+                                        await promoService
+                                            .fetchPromoDetails(promoCode);
+
+                                    if (promoDetails != null) {
+                                      int newTotal =
+                                          await promoService.applyPromo(
+                                        promoCode: promoCode,
+                                        totalAmount: originalTotalAmount,
+                                        promoDetails: promoDetails,
+                                      );
+
+                                      setState(() {
+                                        totalAmount =
+                                            newTotal; // Cập nhật tổng tiền
+                                        appliedPromoCode =
+                                            promoCode; // Lưu mã đã áp dụng
+                                      });
+                                    }
+
+                                    Navigator.of(context).pop();
+                                  } catch (e) {
+                                    promoService.showSnackbar(
+                                      context,
+                                      e.toString(),
+                                      isError: true,
+                                    );
+                                  }
                                 },
                                 child: const Text('Áp Dụng'),
                               ),
@@ -481,9 +535,10 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
               ElevatedButton(
                 onPressed: () {
                   _addBooking(
-                      numberPlate: widget.motorcycle['numberPlate'],
-                      pickupDateTime: pickupDateTime,
-                      returnDateTime: returnDateTime);
+                    numberPlate: widget.motorcycle['numberPlate'],
+                    pickupDateTime: pickupDateTime,
+                    returnDateTime: returnDateTime,
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 255, 173, 21),
