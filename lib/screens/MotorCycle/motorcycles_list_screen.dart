@@ -24,6 +24,9 @@ class _MotorcyclesListScreenState extends State<MotorcyclesListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Danh sách xe cần duyệt"),
+      ),
       body: FutureBuilder<List<dynamic>>(
         future: motorcycles, // The future that will be used to build the list
         builder: (context, snapshot) {
@@ -86,15 +89,6 @@ class _MotorcyclesListScreenState extends State<MotorcyclesListScreen> {
                       ),
                       leading:
                           Icon(Icons.motorcycle, color: Colors.teal, size: 30),
-                      trailing: GestureDetector(
-                        onTap: () {
-                          // Do nothing when the red "X" icon is tapped
-                        },
-                        child: const Icon(
-                          Icons.close, // Red "X" icon
-                          color: Colors.red, // Set color to red
-                        ),
-                      ),
                       onTap: () {
                         // Navigate to the UpdateMotorcycleScreen when tapping anywhere else
                         Navigator.push(

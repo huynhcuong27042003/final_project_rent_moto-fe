@@ -1,5 +1,6 @@
 import 'package:final_project_rent_moto_fe/screens/CategoryMoto/list_category_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/CompanyMoto/list_company_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycles_list_by_admin_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycles_list_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/promo/promo_list_screen.dart';
@@ -87,11 +88,11 @@ class DashboardAdmin extends StatelessWidget {
 
   // List of actions for grid items
   final List<String> itemNames = [
-    'Company',
-    'Category',
-    'Moto',
-    'User',
-    'Promo',
+    'Hảng xe',
+    'Loại xe',
+    'Xe',
+    'Tài khoản',
+    'Khuyến mãi',
     // 'Profile',
     // 'Revenue',
   ];
@@ -99,7 +100,7 @@ class DashboardAdmin extends StatelessWidget {
   final List<Widget> itemsPages = [
     const ListCompanyScreen(),
     const ListCategoryScreen(),
-    const MotorcyclesListScreen(),
+    const MotorcyclesListByAdminScreen(),
     const UserListScreen(),
     const PromoListScreen(),
     // const ProductList(),
