@@ -416,7 +416,6 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                                       Navigator.of(context).pop();
                                       return;
                                     }
-
                                     // Gọi service để xử lý áp dụng mã khuyến mãi
                                     await promoService.applyPromoHandler(
                                       context,
