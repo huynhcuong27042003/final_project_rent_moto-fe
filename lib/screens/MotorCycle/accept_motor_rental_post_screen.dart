@@ -1,4 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api
+import 'package:final_project_rent_moto_fe/models/motos.dart';
+import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycles_list_by_admin_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/image_picker_service.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/update_motorcycle_service.dart';
 import 'package:flutter/material.dart';
@@ -141,6 +144,17 @@ class _AcceptMotorRentalPostScreenState
         title: Text('Accept Posting'),
         backgroundColor: Colors.teal,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const MotorcyclesListByAdminScreen(),
+              ),
+            );
+          },
+        ),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -315,17 +329,59 @@ class _AcceptMotorRentalPostScreenState
               ),
 
               // Update Button
-              Center(
-                child: ElevatedButton(
-                  onPressed: updateMotorcycle,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                  ),
-                  child: Text(
-                    'Accept Posting',
-                    style: TextStyle(fontSize: 16),
-                  ),
+              // Center(
+              //   child: ElevatedButton(
+              //     onPressed: updateMotorcycle,
+              //     style: ElevatedButton.styleFrom(
+              //       backgroundColor: Colors.teal,
+              //       padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              //     ),
+              //     child: Text(
+              //       'Accept Posting',
+              //       style: TextStyle(fontSize: 16),
+              //     ),
+              //   ),
+              // ),
+
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center, // Căn giữa hai nút
+                  children: [
+                    // Accept Posting button
+                    ElevatedButton(
+                      onPressed: updateMotorcycle,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                      ),
+                      child: Text(
+                        'Chấp nhận',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+
+                    SizedBox(width: 20), // Khoảng cách giữa hai nút
+
+                    // Reject button
+                    ElevatedButton(
+                      onPressed: () {
+                        // Handle the reject action here
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Colors.red, // Đổi màu nút từ chối thành đỏ
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                      ),
+                      child: Text(
+                        'Từ chối',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],

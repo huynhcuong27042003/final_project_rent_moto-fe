@@ -1,7 +1,6 @@
 // ignore_for_file: library_private_types_in_public_api
 
-import 'package:final_project_rent_moto_fe/screens/MotorCycle/update_motorcycle_screen.dart';
-
+import 'package:final_project_rent_moto_fe/screens/MotorCycle/accept_motor_rental_post_screen.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/fetch_motorcycle_service.dart';
 import 'package:flutter/material.dart';
 
@@ -25,11 +24,6 @@ class _MotorcyclesListScreenState extends State<MotorcyclesListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Motorcycles List',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.teal,
-      ),
       body: FutureBuilder<List<dynamic>>(
         future: motorcycles, // The future that will be used to build the list
         builder: (context, snapshot) {
@@ -106,7 +100,7 @@ class _MotorcyclesListScreenState extends State<MotorcyclesListScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => UpdateMotorcycleScreen(
+                            builder: (context) => AcceptMotorRentalPostScreen(
                               motorcycle:
                                   motorcycle, // Pass the motorcycle data
                             ),
