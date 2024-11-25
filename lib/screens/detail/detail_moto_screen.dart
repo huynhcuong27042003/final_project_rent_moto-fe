@@ -1,9 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project_rent_moto_fe/services/bookingMoto/addbookingService.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_appbar.dart';
-import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_body_location.dart';
-import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_bottomnav.dart';
-import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_information.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/calendar_rental.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -112,6 +110,101 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
       }
     } else {
       print('Thông tin không đầy đủ: Vui lòng kiểm tra email hoặc ngày thuê!');
+    }
+  }
+
+  Future<int> applyPromo({
+    required String promoCode,
+    required int totalAmount,
+    required Map<String, dynamic> promoDetails,
+  }) async {
+    // Kiểm tra mã khuyến mãi có hợp lệ không
+    if (promoCode != promoDetails['code']) {
+      throw Exception('Mã khuyến mãi không hợp lệ');
+    }
+
+    // Kiểm tra ngày khuyến mãi
+    DateTime startDate = DateTime.parse(promoDetails['startDate']);
+    DateTime endDate = DateTime.parse(promoDetails['endDate']);
+    DateTime today = DateTime.now();
+
+    if (today.isBefore(startDate) || today.isAfter(endDate)) {
+      throw Exception('Khuyến mãi này đã hết hạn hoặc chưa được kích hoạt');
+    }
+
+    // Kiểm tra trạng thái ẩn/hiển của khuyến mãi
+    if (promoDetails['isHide'] == true) {
+      throw Exception('Khuyến mãi này hiện không khả dụng');
+    }
+
+    // Tính tổng tiền sau giảm giá
+    int discount = promoDetails['discount']; // Lấy tỷ lệ giảm giá
+    int discountedAmount = (totalAmount * (100 - discount) ~/ 100);
+
+    return discountedAmount;
+  }
+
+  Future<Map<String, dynamic>?> fetchPromoDetails(String promoCode) async {
+    try {
+      // Truy cập collection "promotions" trên Firestore
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('promotions')
+          .where('code', isEqualTo: promoCode)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        // Lấy document đầu tiên
+        return snapshot.docs.first.data() as Map<String, dynamic>;
+      } else {
+        // Không tìm thấy mã khuyến mãi
+        return null;
+      }
+    } catch (e) {
+      print('Lỗi khi lấy mã khuyến mãi: $e');
+      return null;
+    }
+  }
+
+  void showSnackbar(BuildContext context, String message,
+      {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
+  Future<void> applyPromoHandler(
+      BuildContext context, String promoCode, int totalAmount) async {
+    try {
+      // Gọi hàm `fetchPromoDetails`
+      Map<String, dynamic>? promoDetails = await fetchPromoDetails(promoCode);
+
+      if (promoDetails == null) {
+        showSnackbar(context, 'Mã khuyến mãi không tồn tại', isError: true);
+        return;
+      }
+
+      // Gọi hàm `applyPromo`
+      int discountedAmount = await applyPromo(
+        promoCode: promoCode,
+        totalAmount: totalAmount,
+        promoDetails: promoDetails,
+      );
+
+      showSnackbar(
+        context,
+        'Áp dụng thành công! Tổng tiền sau khi giảm: $discountedAmount',
+        isError: false,
+      );
+    } catch (e) {
+      // Hiển thị thông báo lỗi
+      showSnackbar(context, e.toString(), isError: true);
     }
   }
 
@@ -397,9 +490,58 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                             ),
                             actions: [
                               TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  // Handle discount code here if needed
+                                onPressed: () async {
+                                  try {
+                                    String promoCode =
+                                        discountController.text.trim();
+
+                                    // Lấy thông tin khuyến mãi từ Firebase
+                                    Map<String, dynamic>? promoDetails =
+                                        await fetchPromoDetails(promoCode);
+
+                                    if (promoDetails == null) {
+                                      throw Exception(
+                                          'Mã khuyến mãi không tồn tại');
+                                    }
+
+                                    // Kiểm tra và áp dụng khuyến mãi
+                                    int newTotal = await applyPromo(
+                                      promoCode: promoCode,
+                                      totalAmount: totalAmount,
+                                      promoDetails: promoDetails,
+                                    );
+
+                                    setState(() {
+                                      totalAmount = newTotal;
+                                    });
+
+                                    // Hiển thị thông báo thành công
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Giảm giá thành công! Tổng tiền: $newTotal',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        backgroundColor: Colors.green,
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+
+                                    // Đóng hộp thoại (nếu cần)
+                                    Navigator.of(context).pop();
+                                  } catch (e) {
+                                    // Hiển thị thông báo lỗi
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          e.toString(),
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                        backgroundColor: Colors.red,
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
                                 },
                                 child: const Text('Áp Dụng'),
                               ),

@@ -279,7 +279,7 @@ class _BookingScreenState extends State<BookingScreen>
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Container(
                   padding: const EdgeInsets.all(5),
@@ -318,7 +318,6 @@ class _BookingScreenState extends State<BookingScreen>
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
                 Container(
                   padding: const EdgeInsets.all(5),
                   decoration: BoxDecoration(
