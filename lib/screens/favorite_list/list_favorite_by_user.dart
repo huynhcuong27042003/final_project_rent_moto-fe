@@ -42,13 +42,11 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
           DocumentSnapshot userDoc = querySnapshot.docs.first;
           String firestoreUserId = userDoc.id;
 
-          // Fetch favorite list based on the Firestore userId
           List<Map<String, dynamic>> data =
               await getFavoriteListByUserService(firestoreUserId);
           setState(() {
             favoriteList = Future.value(data);
 
-            // Initialize the favorite state based on the fetched data
             motorcycleFavoriteState = {
               for (var motorcycle in data) motorcycle['id']: true
             };
@@ -69,15 +67,12 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
     final String email = currentUser?.email ?? 'No email available';
 
     try {
-      // Cập nhật trạng thái yêu thích cho xe
       setState(() {
         motorcycleFavoriteState[motorcycleId] =
             !(motorcycleFavoriteState[motorcycleId] ?? false);
       });
 
-      // Kiểm tra nếu icon chuyển sang màu trắng (không yêu thích), ta sẽ xóa xe khỏi danh sách yêu thích
       if (motorcycleFavoriteState[motorcycleId]!) {
-        // Nếu là yêu thích, thêm vào danh sách yêu thích
         await addFavoriteList(email, [motorcycleId]);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -85,7 +80,6 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
           );
         }
       } else {
-        // Nếu không yêu thích, xóa khỏi danh sách yêu thích
         await deleteFavoriteListService(email, motorcycleId);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -93,13 +87,11 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
           );
         }
 
-        // Sau khi xóa, cập nhật lại danh sách yêu thích
         setState(() {
           favoriteList = favoriteList == null
               ? Future.value(
                   []) // Nếu favoriteList là null, trả về danh sách trống
               : favoriteList!.then((list) {
-                  // Loại bỏ chiếc xe vừa bị xóa khỏi danh sách
                   return list
                       .where((motorcycle) => motorcycle['id'] != motorcycleId)
                       .toList();
@@ -400,7 +392,35 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
                         }).toList(),
                       );
                     } else {
-                      return const Center(child: Text('No data available'));
+                      return const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment
+                              .center, // Căn giữa theo chiều dọc
+                          children: [
+                            // Biểu tượng tải hình tròn chuyển động
+                            SizedBox(
+                              height: 50,
+                              width: 50,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 4, // Độ dày của vòng tải
+                                color: Colors.blueAccent, // Màu của biểu tượng
+                              ),
+                            ),
+                            SizedBox(
+                                height:
+                                    10), // Khoảng cách giữa biểu tượng và văn bản
+                            // Văn bản hiển thị
+                            Text(
+                              "Đang tải...",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
                     }
                   },
                 ),

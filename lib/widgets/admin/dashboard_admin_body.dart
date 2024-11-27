@@ -1,7 +1,6 @@
 import 'package:final_project_rent_moto_fe/screens/CategoryMoto/list_category_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/CompanyMoto/list_company_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycles_list_by_admin_screen.dart';
-import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycles_list_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/promo/promo_list_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/users/user_list_screen.dart';
