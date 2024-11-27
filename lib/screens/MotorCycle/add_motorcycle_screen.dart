@@ -186,9 +186,12 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
     // Corrected access to email here
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Motorcycle'),
+        title: const Text(
+          'Đăng xe',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
-        backgroundColor: Colors.teal,
+        backgroundColor: Color.fromARGB(255, 239, 125, 63),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -201,12 +204,13 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                 TextFormField(
                   initialValue: email,
                   decoration: InputDecoration(
-                    labelText: 'Owner Email',
+                    labelText: 'Email',
                     labelStyle: TextStyle(
-                      color: Colors.teal, // Change the label text color
+                      color: Color.fromARGB(
+                          255, 255, 178, 71), // Change the label text color
                       fontWeight: FontWeight.bold, // Make the label bold
                     ),
-                    hintText: 'Email will be displayed here',
+                    hintText: 'Email sẽ được hiển thị ở đây',
                     hintStyle: TextStyle(
                         color:
                             Colors.grey), // Hint style for better readability
@@ -214,13 +218,13 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                     fillColor: Colors.grey[200], // Light grey background
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                          color: Colors.teal,
+                          color: Color.fromARGB(255, 255, 217, 196),
                           width: 1.5), // Border color when not focused
                       borderRadius: BorderRadius.circular(8), // Rounded corners
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderSide: BorderSide(
-                          color: Colors.teal,
+                          color: Color.fromARGB(255, 165, 246, 252),
                           width: 2), // Border color when focused
                       borderRadius: BorderRadius.circular(8), // Rounded corners
                     ),
@@ -236,16 +240,16 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                 TextFormField(
                   controller: locationController,
                   decoration: const InputDecoration(
-                    labelText: 'Location',
-                    hintText:
-                        'Enter the location where you want to rent a motorbike',
+                    labelText: 'Địa điểm',
+                    hintText: 'Hãy nhập địa điểm của bạn',
+                    prefixIcon: Icon(Icons.location_on),
                   ),
                   readOnly: true,
                   onTap: () =>
                       _selectLocation(context), // Open the location picker
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please select a location.';
+                      return 'Vui lòng nhập địa điểm.';
                     }
                     return null;
                   },
@@ -256,6 +260,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+                  color: Colors.grey[200],
                   elevation: 3,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -263,31 +268,51 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "Information vehicle",
+                          "Thông tin xe",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.teal,
+                            color: Color.fromARGB(255, 255, 181, 69),
                           ),
                         ),
-                        const Divider(),
-                        // Number Plate
+                        const Divider(
+                          color: Color.fromARGB(
+                              255, 106, 79, 40), // Chỉnh màu sắc của Divider
+                          thickness: 2, // Điều chỉnh độ dày của Divider
+                        ),
+                        // Biển số xe with icon
+                        TextFormField(
+                          controller: nameMotoController,
+                          decoration: const InputDecoration(
+                            labelText: 'Tên xe',
+                            prefixIcon:
+                                Icon(Icons.assignment), // Add motorcycle icon
+                          ),
+                          validator: (value) =>
+                              value!.isEmpty ? 'Vui lòng nhập tên xe' : null,
+                        ),
                         TextFormField(
                           controller: numberPlateController,
-                          decoration:
-                              const InputDecoration(labelText: 'Number Plate'),
+                          decoration: const InputDecoration(
+                            labelText: 'Biển số xe',
+                            prefixIcon: Icon(Icons.assignment), // Add car icon
+                          ),
                           validator: (value) => value!.isEmpty
-                              ? 'Please enter a number plate'
+                              ? 'Vui lòng nhập biển số xe'
                               : null,
                         ),
+                        // Hãng xe with icon
                         DropdownButtonFormField<String>(
                           value: selectedCompanyMoto,
-                          decoration:
-                              const InputDecoration(labelText: 'Company Name'),
+                          decoration: const InputDecoration(
+                            labelText: 'Tên Hãng Xe',
+                            prefixIcon:
+                                Icon(Icons.business), // Add business icon
+                          ),
                           items: companyMotoList.isEmpty
                               ? [
                                   const DropdownMenuItem(
-                                      child: Text("No companies available"))
+                                      child: Text("Hãng xe không khả dụng"))
                                 ]
                               : companyMotoList
                                   .map((String company) =>
@@ -299,18 +324,21 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                               selectedCompanyMoto = value;
                             });
                           },
-                          validator: (value) => value == null
-                              ? 'Please select a company name'
-                              : null,
+                          validator: (value) =>
+                              value == null ? 'Vui lòng chọn hãng xe' : null,
                         ),
+                        // Loại xe with icon
                         DropdownButtonFormField<String>(
                           value: selectedCategory,
-                          decoration:
-                              const InputDecoration(labelText: 'Category Name'),
+                          decoration: const InputDecoration(
+                            labelText: 'Loại xe',
+                            prefixIcon:
+                                Icon(Icons.motorcycle), // Add category icon
+                          ),
                           items: categoryList.isEmpty
                               ? [
                                   const DropdownMenuItem(
-                                      child: Text("No categories available"))
+                                      child: Text("Loại xe không khả dụng"))
                                 ]
                               : categoryList
                                   .map((String category) =>
@@ -324,26 +352,20 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                             });
                           },
                           validator: (value) =>
-                              value == null ? 'Please select a category' : null,
+                              value == null ? 'Vui lòng chọn loại xe' : null,
                         ),
-                        // Motorcycle Name
-                        TextFormField(
-                          controller: nameMotoController,
-                          decoration: const InputDecoration(
-                              labelText: 'Motorcycle Name'),
-                          validator: (value) => value!.isEmpty
-                              ? 'Please enter a motorcycle name'
-                              : null,
-                        ),
+                        // Tên xe with icon
                       ],
                     ),
                   ),
                 ),
+
                 const SizedBox(height: 20),
                 Card(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
+                  color: Colors.grey[200],
                   elevation: 3,
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -351,55 +373,72 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "Pricing & Specifications",
+                          "Thông tin bổ sung",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.teal,
+                            color: Color.fromARGB(255, 255, 181, 69),
                           ),
                         ),
-                        const Divider(),
+                        const Divider(
+                          color: Color.fromARGB(
+                              255, 106, 79, 40), // Chỉnh màu sắc của Divider
+                          thickness: 2, // Điều chỉnh độ dày của Divider
+                        ),
+
                         // Price
                         TextFormField(
                           controller: priceController,
-                          decoration: const InputDecoration(labelText: 'Price'),
+                          decoration: const InputDecoration(
+                            labelText: 'Giá',
+                            prefixIcon: Icon(
+                                Icons.monetization_on), // Icon cho trường Giá
+                          ),
                           keyboardType: TextInputType.number,
                           validator: (value) {
-                            if (value!.isEmpty) return 'Please enter a price';
+                            if (value!.isEmpty) return 'Vui lòng nhập giá';
                             if (double.tryParse(value) == null)
-                              return 'Please enter a valid number';
+                              return 'Vui lòng nhập giá hợp lệ';
                             return null;
                           },
                         ),
                         // Description
                         TextFormField(
                           controller: descriptionController,
-                          decoration:
-                              const InputDecoration(labelText: 'Description'),
-                          validator: (value) => value!.isEmpty
-                              ? 'Please enter a description'
-                              : null,
+                          decoration: const InputDecoration(
+                            labelText: 'Mô tả',
+                            prefixIcon: Icon(
+                                Icons.description), // Icon cho trường Mô tả
+                          ),
+                          validator: (value) =>
+                              value!.isEmpty ? 'Vui lòng nhập mô tả' : null,
                         ),
                         // Energy Type
                         TextFormField(
                           controller: energyController,
-                          decoration:
-                              const InputDecoration(labelText: 'Energy Type'),
+                          decoration: const InputDecoration(
+                            labelText: 'Nhiên liệu',
+                            prefixIcon: Icon(Icons
+                                .local_gas_station), // Icon cho trường Nhiên liệu
+                          ),
                           validator: (value) => value!.isEmpty
-                              ? 'Please enter energy type'
+                              ? 'Vui lòng nhập nhiên liệu'
                               : null,
                         ),
                         // Vehicle Mass
                         TextFormField(
                           controller: vehicleMassController,
-                          decoration:
-                              const InputDecoration(labelText: 'Vehicle Mass'),
+                          decoration: const InputDecoration(
+                            labelText: 'Phân khối',
+                            prefixIcon: Icon(
+                                Icons.motorcycle), // Icon cho trường Phân khối
+                          ),
                           keyboardType: TextInputType.number,
                           validator: (value) {
                             if (value!.isEmpty)
-                              return 'Please enter vehicle mass';
+                              return 'Vui lòng nhập phân khối';
                             if (double.tryParse(value) == null)
-                              return 'Please enter a valid number';
+                              return 'Vui lòng nhập phân khối hợp lệ';
                             return null;
                           },
                         ),
@@ -417,11 +456,11 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                         .center, // Center-aligns children horizontally
                     children: [
                       const Text(
-                        "Upload Images",
+                        "Tải hình xe",
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.teal,
+                          color: Color.fromARGB(255, 255, 181, 69),
                         ),
                       ),
                       const Divider(),
@@ -429,11 +468,11 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                         onPressed: pickImages,
                         icon: const Icon(Icons.photo_library),
                         label: const Text(
-                          'Pick Images',
+                          'Chọn ảnh',
                           style: TextStyle(color: Colors.white, fontSize: 18),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal,
+                          backgroundColor: Colors.orange[300],
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -441,7 +480,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                       ),
                       const SizedBox(height: 10),
                       imagesMoto!.isEmpty
-                          ? const Text('No images selected.')
+                          ? const Text('Chưa có ảnh nào được chọn')
                           : SizedBox(
                               height: 120,
                               child: ListView(
@@ -468,7 +507,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                       ElevatedButton(
                         onPressed: _submitForm,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal, // Button color
+                          backgroundColor: Colors.orange[300], // Button color
                           padding: const EdgeInsets.symmetric(
                               horizontal: 32,
                               vertical: 16), // Padding around the text
@@ -479,7 +518,7 @@ class _AddMotorcycleScreenState extends State<AddMotorcycleScreen> {
                           elevation: 4, // Shadow effect for depth
                         ),
                         child: const Text(
-                          'Submit',
+                          'Hoàn Tất',
                           style: TextStyle(
                             fontSize: 18, // Larger font size for visibility
                             fontWeight: FontWeight.bold,

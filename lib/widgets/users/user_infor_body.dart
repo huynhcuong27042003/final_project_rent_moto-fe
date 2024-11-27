@@ -1,6 +1,7 @@
 import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycle_list_by_user.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
+import 'package:final_project_rent_moto_fe/screens/favorite_list/list_favorite_by_user.dart';
 import 'package:final_project_rent_moto_fe/widgets/users/user_infor_myaccount_form.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -119,19 +120,19 @@ class _UserInforBodyState extends State<UserInforBody> {
                           child: Column(
                             children: [
                               _buildMenuItem(
-                                  Icons.person, 'MyAccount', context),
+                                  Icons.person, 'Tài khoản của tôi', context),
                               Divider(indent: 30.0, endIndent: 30.0),
                               _buildMenuItem(Icons.car_rental,
-                                  'Vehicle Registration for Rental', context),
+                                  'Danh sách xe của bạn', context),
                               Divider(indent: 30.0, endIndent: 30.0),
-                              _buildMenuItem(
-                                  Icons.favorite, 'Favorite Vehicles', context),
+                              _buildMenuItem(Icons.favorite,
+                                  'Danh sách xe yêu thích', context),
                               Divider(indent: 30.0, endIndent: 30.0),
-                              _buildMenuItem(
-                                  Icons.location_on, 'My Addresses', context),
+                              _buildMenuItem(Icons.location_on,
+                                  'Địa chỉ của tôi', context),
                               Divider(indent: 30.0, endIndent: 30.0),
                               _buildMenuItem(Icons.card_membership,
-                                  'Driver License', context),
+                                  'Giấy phép lái xe', context),
                             ],
                           ),
                         ),
@@ -154,7 +155,7 @@ class _UserInforBodyState extends State<UserInforBody> {
                           child: Column(
                             children: [
                               _buildMenuItem(
-                                  Icons.lock, 'Change Password', context),
+                                  Icons.lock, 'Đổi mật khẩu', context),
                             ],
                           ),
                         ),
@@ -173,7 +174,7 @@ class _UserInforBodyState extends State<UserInforBody> {
                         },
                         icon: Icon(Icons.logout, color: Colors.red),
                         label: Text(
-                          'Log Out',
+                          'Đăng xuất',
                           style: TextStyle(color: Colors.red),
                         ),
                         style: ElevatedButton.styleFrom(
@@ -203,16 +204,28 @@ class _UserInforBodyState extends State<UserInforBody> {
       title: Text(title),
       trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
       onTap: () async {
-        if (title == 'MyAccount') {
+        if (title == 'Tài khoản của tôi') {
           // Điều hướng đến màn hình UserInforMyaccount và đợi kết quả
-          await Navigator.push(
+          final updatedAvatar = await Navigator.push<String>(
             context,
             MaterialPageRoute(builder: (context) => const UserInforMyaccount()),
           );
-        } else if (title == 'Đăng ký cho thuê xe') {
+
+          // Cập nhật avatar sau khi quay lại
+          if (updatedAvatar != null) {
+            setState(() {
+              avatarUrl = updatedAvatar; // Cập nhật avatar mới
+            });
+          }
+        } else if (title == 'Danh sách xe của bạn') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => MotorcycleListByUser()),
+          );
+        } else if (title == 'Danh sách xe yêu thích') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ListFavoriteByUser()),
           );
         }
       },
