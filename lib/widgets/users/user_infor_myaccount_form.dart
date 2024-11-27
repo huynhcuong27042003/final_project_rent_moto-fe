@@ -90,32 +90,32 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
   }
 
   Future<void> saveUserData() async {
-    // Name validation
+    // Tên người dùng kiểm tra
     if (nameController.text.isEmpty || nameController.text.length < 2) {
-      _showErrorDialog('Name must have at least 2 characters.');
+      _showErrorDialog('Tên phải có ít nhất 2 ký tự.');
       return;
     }
 
-    // Phone number validation
+    // Số điện thoại kiểm tra
     if (phoneNumberController.text.isEmpty ||
         phoneNumberController.text.length != 10) {
-      _showErrorDialog('Phone number must have exactly 10 digits.');
+      _showErrorDialog('Số điện thoại phải có đúng 10 chữ số.');
       return;
     }
 
-    // GPLX (driver's license) validation
+    // GPLX kiểm tra
     if (gplxController.text.isEmpty) {
-      _showErrorDialog('Driver\'s license cannot be empty.');
+      _showErrorDialog('Giấy phép lái xe không được để trống.');
       return;
     }
     if (!RegExp(r'^\d{12}$').hasMatch(gplxController.text)) {
-      _showErrorDialog('Driver\'s license must have exactly 12 digits.');
+      _showErrorDialog('Giấy phép lái xe phải có đúng 12 chữ số.');
       return;
     }
 
-    // Date of birth validation
+    // Ngày sinh kiểm tra
     if (dayOfBirthController.text.isEmpty) {
-      _showErrorDialog('Date of birth cannot be empty.');
+      _showErrorDialog('Ngày sinh không thể để trống.');
       return;
     }
 
@@ -139,18 +139,25 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
       );
 
       if (response.statusCode == 200) {
-        print('User data updated successfully!');
+        print('Dữ liệu người dùng đã được cập nhật thành công!');
+
+        // Cập nhật lại dữ liệu người dùng mới sau khi thay đổi
+        setState(() {
+          userData?['information']?['name'] = nameController.text;
+          userData?['information']?['dayOfBirth'] = dayOfBirthController.text;
+          userData?['phoneNumber'] = phoneNumberController.text;
+          isEditing = false; // Tắt chế độ chỉnh sửa
+        });
+
+        // Trả về tên mới (cập nhật) nếu không có thay đổi avatar
         Navigator.pop(context, {
-          'name': nameController.text,
-          'dayOfBirth': dayOfBirthController.text,
-          'phoneNumber': phoneNumberController.text,
-          'gplx': gplxController.text,
+          'name': nameController.text, // Tên người dùng mới
         });
       } else {
-        print('Failed to update user data: ${response.body}');
+        print('Cập nhật dữ liệu người dùng không thành công: ${response.body}');
       }
     } catch (e) {
-      print('Error when sending request: $e');
+      print('Lỗi khi gửi yêu cầu: $e');
     }
   }
 
@@ -158,14 +165,14 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Error'),
+        title: const Text('Lỗi'),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.pop(context);
             },
-            child: const Text('OK'),
+            child: const Text('Hoàn Tất'),
           ),
         ],
       ),
@@ -182,18 +189,15 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
           isUploading = true;
         });
 
-        // Lấy email từ FirebaseAuth
         final email = user?.email;
-
         if (email == null) {
-          print("Email not found.");
+          print("Không tìm thấy email.");
           setState(() {
             isUploading = false;
           });
-          return; // Trả về nếu không có email
+          return;
         }
 
-        // Truy vấn tài liệu người dùng từ Firestore theo email
         QuerySnapshot querySnapshot = await _firestore
             .collection('users')
             .where('email', isEqualTo: email)
@@ -201,47 +205,44 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
             .get();
 
         if (querySnapshot.docs.isEmpty) {
-          // Nếu không tìm thấy người dùng với email này
           setState(() {
             isUploading = false;
           });
-          print("No user found with this email.");
-          return; // Dừng lại nếu không tìm thấy người dùng
+          print("Không tìm thấy người dùng với email này.");
+          return;
         }
 
-        // Lấy documentId của người dùng đầu tiên
         String userId = querySnapshot.docs.first.id;
-
-        // Upload file lên Firebase Storage
         final storageRef =
             FirebaseStorage.instance.ref().child('avatars/$userId');
         await storageRef.putFile(File(pickedFile.path));
 
-        // Lấy URL tải xuống của avatar mới
         final downloadUrl = await storageRef.getDownloadURL();
 
-        // Cập nhật URL của avatar vào Firestore
+        // Cập nhật avatar URL trong Firestore
         await _firestore
             .collection('users')
             .doc(userId)
             .update({'information.avatar': downloadUrl});
 
         setState(() {
-          // Cập nhật avatar mới cho người dùng trong UI
           userData?['information']?['avatar'] = downloadUrl;
           isUploading = false;
         });
 
-        // Làm mới lại dữ liệu người dùng
-        await _getUserData();
+        // Trả về avatar và tên mới
+        Navigator.pop(context, {
+          'avatar': downloadUrl, // avatar mới
+          'name': nameController.text, // tên người dùng mới
+        });
 
-        print('Avatar updated successfully!');
+        print('Cập nhật avatar thành công!');
       }
     } catch (e) {
       setState(() {
         isUploading = false;
       });
-      print('Error updating avatar: $e');
+      print('Lỗi khi cập nhật avatar: $e');
     }
   }
 
@@ -324,7 +325,7 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('MyAccount'),
+        title: const Text('Tài khoản của tôi'),
         backgroundColor: const Color(0xFFF49C21),
         actions: isEditing
             ? null
@@ -396,20 +397,20 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
                       child: Column(
                         children: [
                           _buildInfoField(
-                              'Name',
+                              'Tài khoản của tôi',
                               userData?['information']?['name'] ?? '',
                               nameController),
                           _buildInfoField(
-                              'DayOfBirth',
+                              'Ngày sinh',
                               userData?['information']?['dayOfBirth'] ?? '',
                               dayOfBirthController,
                               isDateField: true),
                           _buildInfoField(
-                              'PhoneNumber',
+                              'Số điện thoại',
                               userData?['phoneNumber'] ?? '',
                               phoneNumberController),
                           _buildInfoField(
-                              ' Driver License',
+                              'Giấy phép lái xe',
                               userData?['information']?['gplx'] ?? '',
                               gplxController),
                         ],
@@ -426,11 +427,11 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
                                 _initializeControllers();
                               });
                             },
-                            child: const Text("Cancel"),
+                            child: const Text("Thoát"),
                           ),
                           ElevatedButton(
                             onPressed: saveUserData,
-                            child: const Text("Save"),
+                            child: const Text("Lưu"),
                           ),
                         ],
                       ),

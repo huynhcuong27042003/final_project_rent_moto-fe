@@ -2,6 +2,7 @@ import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycle_list_by
 import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/widgets/users/user_infor_change_password.dart';
+import 'package:final_project_rent_moto_fe/screens/favorite_list/list_favorite_by_user.dart';
 import 'package:final_project_rent_moto_fe/widgets/users/user_infor_myaccount_form.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -122,19 +123,19 @@ class _UserInforBodyState extends State<UserInforBody> {
                           child: Column(
                             children: [
                               _buildMenuItem(
-                                  Icons.person, 'Thông tin tài khoản', context),
+                                  Icons.person, 'Tài khoản của tôi', context),
                               Divider(indent: 30.0, endIndent: 30.0),
                               _buildMenuItem(Icons.car_rental,
-                                  'Danh sách xe cho của bạn', context),
+                                  'Danh sách xe của bạn', context),
                               Divider(indent: 30.0, endIndent: 30.0),
-                              _buildMenuItem(
-                                  Icons.favorite, 'Favorite Vehicles', context),
+                              _buildMenuItem(Icons.favorite,
+                                  'Danh sách xe yêu thích', context),
                               Divider(indent: 30.0, endIndent: 30.0),
-                              _buildMenuItem(
-                                  Icons.location_on, 'My Addresses', context),
+                              _buildMenuItem(Icons.location_on,
+                                  'Địa chỉ của tôi', context),
                               Divider(indent: 30.0, endIndent: 30.0),
                               _buildMenuItem(Icons.card_membership,
-                                  'Driver License', context),
+                                  'Giấy phép lái xe', context),
                             ],
                           ),
                         ),
@@ -206,13 +207,21 @@ class _UserInforBodyState extends State<UserInforBody> {
       title: Text(title),
       trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
       onTap: () async {
-        if (title == 'Thông tin tài khoản') {
-          // Điều hướng đến màn hình UserInforMyaccount và đợi kết quả
-          await Navigator.push(
+        if (title == 'Tài khoản của tôi') {
+          final updatedData = await Navigator.push<Map<String, String>>(
             context,
-            MaterialPageRoute(builder: (context) => const UserInforMyaccount()),
+            MaterialPageRoute(
+              builder: (context) => const UserInforMyaccount(),
+            ),
           );
-        } else if (title == 'Danh sách xe cho của bạn') {
+
+          if (updatedData != null) {
+            setState(() {
+              avatarUrl = updatedData['avatar'] ?? avatarUrl;
+              userName = updatedData['name'] ?? userName;
+            });
+          }
+        } else if (title == 'Danh sách xe của bạn') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => MotorcycleListByUser()),
@@ -225,6 +234,12 @@ class _UserInforBodyState extends State<UserInforBody> {
                 email: email!,
               ),
             ),
+          );
+        } else if (title == 'Danh sách xe yêu thích') {
+          // Navigate to the list of favorite motorcycles
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ListFavoriteByUser()),
           );
         }
       },
