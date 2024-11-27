@@ -205,16 +205,17 @@ class _UserInforBodyState extends State<UserInforBody> {
       trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
       onTap: () async {
         if (title == 'Tài khoản của tôi') {
-          // Điều hướng đến màn hình UserInforMyaccount và đợi kết quả
-          final updatedAvatar = await Navigator.push<String>(
+          final updatedData = await Navigator.push<Map<String, String>>(
             context,
-            MaterialPageRoute(builder: (context) => const UserInforMyaccount()),
+            MaterialPageRoute(
+              builder: (context) => const UserInforMyaccount(),
+            ),
           );
 
-          // Cập nhật avatar sau khi quay lại
-          if (updatedAvatar != null) {
+          if (updatedData != null) {
             setState(() {
-              avatarUrl = updatedAvatar; // Cập nhật avatar mới
+              avatarUrl = updatedData['avatar'] ?? avatarUrl;
+              userName = updatedData['name'] ?? userName;
             });
           }
         } else if (title == 'Danh sách xe của bạn') {
@@ -223,6 +224,7 @@ class _UserInforBodyState extends State<UserInforBody> {
             MaterialPageRoute(builder: (context) => MotorcycleListByUser()),
           );
         } else if (title == 'Danh sách xe yêu thích') {
+          // Navigate to the list of favorite motorcycles
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ListFavoriteByUser()),

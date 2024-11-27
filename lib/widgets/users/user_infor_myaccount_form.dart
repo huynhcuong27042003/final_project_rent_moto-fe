@@ -90,20 +90,20 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
   }
 
   Future<void> saveUserData() async {
-    // Name validation
+    // Tên người dùng kiểm tra
     if (nameController.text.isEmpty || nameController.text.length < 2) {
       _showErrorDialog('Tên phải có ít nhất 2 ký tự.');
       return;
     }
 
-    // Phone number validation
+    // Số điện thoại kiểm tra
     if (phoneNumberController.text.isEmpty ||
         phoneNumberController.text.length != 10) {
       _showErrorDialog('Số điện thoại phải có đúng 10 chữ số.');
       return;
     }
 
-    // GPLX (driver's license) validation
+    // GPLX kiểm tra
     if (gplxController.text.isEmpty) {
       _showErrorDialog('Giấy phép lái xe không được để trống.');
       return;
@@ -113,7 +113,7 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
       return;
     }
 
-    // Date of birth validation
+    // Ngày sinh kiểm tra
     if (dayOfBirthController.text.isEmpty) {
       _showErrorDialog('Ngày sinh không thể để trống.');
       return;
@@ -140,11 +140,18 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
 
       if (response.statusCode == 200) {
         print('Dữ liệu người dùng đã được cập nhật thành công!');
+
+        // Cập nhật lại dữ liệu người dùng mới sau khi thay đổi
+        setState(() {
+          userData?['information']?['name'] = nameController.text;
+          userData?['information']?['dayOfBirth'] = dayOfBirthController.text;
+          userData?['phoneNumber'] = phoneNumberController.text;
+          isEditing = false; // Tắt chế độ chỉnh sửa
+        });
+
+        // Trả về tên mới (cập nhật) nếu không có thay đổi avatar
         Navigator.pop(context, {
-          'name': nameController.text,
-          'dayOfBirth': dayOfBirthController.text,
-          'phoneNumber': phoneNumberController.text,
-          'gplx': gplxController.text,
+          'name': nameController.text, // Tên người dùng mới
         });
       } else {
         print('Cập nhật dữ liệu người dùng không thành công: ${response.body}');
@@ -212,6 +219,7 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
 
         final downloadUrl = await storageRef.getDownloadURL();
 
+        // Cập nhật avatar URL trong Firestore
         await _firestore
             .collection('users')
             .doc(userId)
@@ -222,8 +230,12 @@ class _UserInforMyaccountState extends State<UserInforMyaccount> {
           isUploading = false;
         });
 
-        // Trả về URL avatar mới
-        Navigator.pop(context, downloadUrl);
+        // Trả về avatar và tên mới
+        Navigator.pop(context, {
+          'avatar': downloadUrl, // avatar mới
+          'name': nameController.text, // tên người dùng mới
+        });
+
         print('Cập nhật avatar thành công!');
       }
     } catch (e) {
