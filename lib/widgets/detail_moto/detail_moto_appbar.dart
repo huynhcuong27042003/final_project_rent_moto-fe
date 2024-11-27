@@ -1,3 +1,5 @@
+import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/add_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/delete_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/get_favoritelist_service.dart';
@@ -53,15 +55,25 @@ class _DetailMotoAppBarState extends State<DetailMotoAppBar> {
     }
   }
 
-  // Function to toggle the favorite state
   Future<void> toggleFavorite() async {
-    final String motorcycleId =
-        widget.motorcycle['id'] ?? 'No motorcycle ID available';
-
     // Get the current user's email
     final User? currentUser = FirebaseAuth.instance.currentUser;
-    final String email = currentUser?.email ?? 'No email available';
 
+    if (currentUser == null) {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                const Dashboard(initialIndex: 2), // Chỉ số UserInforScreen
+          ),
+        );
+      }
+      return;
+    }
+    final String email = currentUser?.email ?? 'No email available';
+    final String motorcycleId =
+        widget.motorcycle['id'] ?? 'No motorcycle ID available';
     // Show loading indicator or any visual feedback
     setState(() {
       isFavorite = !isFavorite; // Toggle the favorite state locally
@@ -69,7 +81,6 @@ class _DetailMotoAppBarState extends State<DetailMotoAppBar> {
 
     try {
       if (isFavorite) {
-        // Add to favorite list if not already a favorite
         await addFavoriteList(email, [motorcycleId]);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -77,7 +88,6 @@ class _DetailMotoAppBarState extends State<DetailMotoAppBar> {
           );
         }
       } else {
-        // Remove from favorite list
         await deleteFavoriteListService(email, motorcycleId);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -86,7 +96,6 @@ class _DetailMotoAppBarState extends State<DetailMotoAppBar> {
         }
       }
     } catch (error) {
-      // If the widget is still mounted, revert the state in case of error
       if (mounted) {
         setState(() {
           isFavorite = !isFavorite; // Revert the local favorite state
@@ -99,7 +108,6 @@ class _DetailMotoAppBarState extends State<DetailMotoAppBar> {
     }
   }
 
-  // In DetailMotoAppBar
   void _onBackButtonPressed() {
     Navigator.pop(context, {
       'motorcycleId': motorcycleId,

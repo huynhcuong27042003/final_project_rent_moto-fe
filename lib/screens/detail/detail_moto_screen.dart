@@ -1,5 +1,4 @@
 import 'package:final_project_rent_moto_fe/screens/map/location_of-moto.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project_rent_moto_fe/services/bookingMoto/addbookingService.dart';
 import 'package:final_project_rent_moto_fe/services/promo/apply_promo_service.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto.dart';
