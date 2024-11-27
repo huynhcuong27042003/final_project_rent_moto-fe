@@ -70,12 +70,6 @@ Future<void> updateMotorcycleLogic({
     },
     'isActive': isActive,
     'isHide': isHide,
-    // 'addresss': {
-    //   'streetName': streetName,
-    //   'district': district,
-    //   'city': city,
-    //   'country': country,
-    // },
     if (addressToUpdate.isNotEmpty) 'address': addressToUpdate,
   };
 

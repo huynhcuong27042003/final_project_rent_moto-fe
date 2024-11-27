@@ -16,7 +16,7 @@ class _RentHomePromoState extends State<RentHomePromo> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Promotional program",
+            "Chương trình khuyến mãi",
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 16,

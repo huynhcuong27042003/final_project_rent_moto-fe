@@ -204,7 +204,7 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
                               }
                             },
                             child: Container(
-                              width: 350,
+                              width: MediaQuery.of(context).size.width * 0.9,
                               margin: const EdgeInsets.only(bottom: 20),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
@@ -220,7 +220,8 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
                                   children: [
                                     // Motorcycle Image
                                     Container(
-                                      width: 350,
+                                      width: MediaQuery.of(context).size.width *
+                                          0.9,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(

@@ -21,6 +21,54 @@ class SendMailService {
     );
   }
 
+  Future<void> sendReasonByMail(
+      BuildContext context, String email, String reason) async {
+    try {
+      // Cấu hình thông tin email
+      String username = 'caokyanh122@gmail.com'; // Thay thế bằng email của bạn
+      String appPassword =
+          'wypb fhgx synr nkty'; // Thay thế bằng mật khẩu ứng dụng
+      final smtpServer = gmail(username, appPassword);
+
+      final message = Message()
+        ..from = Address(username, 'RentMoto')
+        ..recipients.add(email)
+        ..subject = 'Thông báo từ chối duyệt xe'
+        ..html = """
+        <html>
+          <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+            <div style="max-width: 600px; margin: auto; padding: 20px; border-radius: 8px; background-color: #FF5733; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+              <h2 style="color: #ffffff;">Xin chào!</h2>
+              <p style="font-size: 16px; color: #ffffff;">Chúng tôi rất tiếc phải thông báo rằng bài đăng của bạn đã bị từ chối.</p>
+              <div style="font-size: 16px; color: #ffffff; margin-top: 10px;">
+                <strong>Lý do:</strong>
+                <p style="background-color: #333; color: #ffffff; padding: 10px; border-radius: 5px;">
+                  $reason
+                </p>
+              </div>
+              <p style="font-size: 16px; color: #ffffff; margin-top: 20px;">
+                Nếu bạn có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi.
+              </p>
+            </div>
+          </body>
+        </html>
+      """;
+
+      // Gửi email
+      await send(message, smtpServer);
+
+      // Thông báo gửi thành công
+      ScaffoldMessenger.of(context).showSnackBar(
+        SuccessNotification(text: "Đã gửi mail thành công").buildSnackBar(),
+      );
+    } catch (e) {
+      // Xử lý lỗi khi gửi email
+      ScaffoldMessenger.of(context).showSnackBar(
+        ErrorNotification(text: 'Error: $e').buildSnackBar(),
+      );
+    }
+  }
+
   Future<void> sendCodeByMail(BuildContext context, String email) async {
     try {
       // Kiểm tra xem email có tồn tại bằng cách tạo một tài khoản tạm thời

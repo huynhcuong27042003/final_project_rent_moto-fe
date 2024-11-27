@@ -112,7 +112,7 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
                   child: avatarUrl == null ? const Icon(Icons.person) : null,
                 ),
                 const SizedBox(width: 15),
-                avatarUrl != null
+                userName != null
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -135,7 +135,7 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
                         ],
                       )
                     : const Text(
-                        "Welcome!",
+                        "Chào mừng!",
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
@@ -144,7 +144,7 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
                       ),
               ],
             ),
-            if (avatarUrl != null)
+            if (userName != null)
               Row(
                 children: [
                   IconButton(

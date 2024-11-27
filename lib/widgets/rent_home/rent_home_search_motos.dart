@@ -93,7 +93,7 @@ class _RentHomeSearchMotosState extends State<RentHomeSearchMotos> {
                     width: 10,
                   ),
                   Text(
-                    "Self-driving motorbikes",
+                    "Tìm kiếm xe máy",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
@@ -129,7 +129,7 @@ class _RentHomeSearchMotosState extends State<RentHomeSearchMotos> {
                               width: 5,
                             ),
                             Text(
-                              'Location',
+                              'Địa điểm',
                               style: TextStyle(
                                   color: Colors.black87, fontSize: 12),
                             ),
@@ -147,7 +147,7 @@ class _RentHomeSearchMotosState extends State<RentHomeSearchMotos> {
                             child: Text(
                               locationController.text.isNotEmpty
                                   ? locationController.text
-                                  : 'Enter the location where you want to rent a motorbike',
+                                  : 'Nhập địa chỉ xe bạn muốn thuê',
                               overflow: TextOverflow
                                   .ellipsis, // Hiển thị dấu ba chấm khi chuỗi quá dài
                               style: const TextStyle(
@@ -176,7 +176,7 @@ class _RentHomeSearchMotosState extends State<RentHomeSearchMotos> {
                               width: 5,
                             ),
                             Text(
-                              'Rental period',
+                              'Thời gian thuê',
                               style: TextStyle(
                                   color: Colors.black87, fontSize: 12),
                             ),
@@ -242,7 +242,7 @@ class _RentHomeSearchMotosState extends State<RentHomeSearchMotos> {
                           child: TextButton(
                             onPressed: () {},
                             child: const Text(
-                              'Search',
+                              'TÌM',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,

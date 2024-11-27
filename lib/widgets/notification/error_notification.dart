@@ -10,9 +10,14 @@ class ErrorNotification extends StatelessWidget {
         children: [
           Icon(Icons.error, color: Colors.white),
           SizedBox(width: 10),
-          Text(
-            text,
-            style: TextStyle(color: Colors.white, fontSize: 16),
+          Expanded(
+            // Sử dụng Expanded để tự động co giãn
+            child: Text(
+              text,
+              style: TextStyle(color: Colors.white, fontSize: 16),
+              softWrap: true, // Cho phép xuống dòng
+              overflow: TextOverflow.visible, // Xử lý văn bản tràn
+            ),
           ),
         ],
       ),
@@ -27,6 +32,6 @@ class ErrorNotification extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox.shrink(); // Không cần hiển thị gì cả
+    return SizedBox.shrink();
   }
 }

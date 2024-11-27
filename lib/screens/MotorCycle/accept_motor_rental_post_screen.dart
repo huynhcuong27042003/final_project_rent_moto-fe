@@ -1,7 +1,7 @@
 // ignore_for_file: library_private_types_in_public_api
-import 'package:final_project_rent_moto_fe/models/motos.dart';
 import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycles_list_by_admin_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
+import 'package:final_project_rent_moto_fe/screens/motorCycle/deny_motor_rental_post_screen.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/image_picker_service.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/update_motorcycle_service.dart';
 import 'package:flutter/material.dart';
@@ -36,6 +36,7 @@ class _AcceptMotorRentalPostScreenState
   late TextEditingController descriptionController;
   late TextEditingController energyController;
   late TextEditingController vehicleMassController;
+  late TextEditingController emailController;
 
   // List<File> selectedImages = [];
   List<String> imageUrls = []; // To store image URLs from Firebase
@@ -60,6 +61,8 @@ class _AcceptMotorRentalPostScreenState
         text: widget.motorcycle['informationMoto']['energy']);
     vehicleMassController = TextEditingController(
         text: widget.motorcycle['informationMoto']['vehicleMass'].toString());
+    emailController = TextEditingController(text: widget.motorcycle['email']);
+    print(emailController.text);
     // Fetch image URLs from Firestore
     if (widget.motorcycle['informationMoto']['images'] != null) {
       imageUrls =
@@ -141,7 +144,7 @@ class _AcceptMotorRentalPostScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Accept Posting'),
+        title: Text('Chi tiết xe'),
         backgroundColor: Colors.teal,
         centerTitle: true,
         leading: IconButton(
@@ -327,22 +330,6 @@ class _AcceptMotorRentalPostScreenState
                   ],
                 ),
               ),
-
-              // Update Button
-              // Center(
-              //   child: ElevatedButton(
-              //     onPressed: updateMotorcycle,
-              //     style: ElevatedButton.styleFrom(
-              //       backgroundColor: Colors.teal,
-              //       padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-              //     ),
-              //     child: Text(
-              //       'Accept Posting',
-              //       style: TextStyle(fontSize: 16),
-              //     ),
-              //   ),
-              // ),
-
               Padding(
                 padding: const EdgeInsets.only(top: 20.0),
                 child: Row(
@@ -369,6 +356,12 @@ class _AcceptMotorRentalPostScreenState
                     ElevatedButton(
                       onPressed: () {
                         // Handle the reject action here
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => DenyMotorRentalPostScreen(
+                                      email: emailController.text,
+                                    )));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor:

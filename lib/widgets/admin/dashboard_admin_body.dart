@@ -5,7 +5,9 @@ import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycles_list_s
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/promo/promo_list_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/users/user_list_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DashboardAdmin extends StatelessWidget {
   DashboardAdmin({super.key});
@@ -60,22 +62,20 @@ class DashboardAdmin extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
       child: ListTile(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
+          icon: const Icon(Icons.login_outlined, color: Colors.black),
+          onPressed: () async {
             // Navigator.pushAndRemoveUntil with proper context usage
-            Navigator.pushAndRemoveUntil(
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('isLogin', false);
+            await FirebaseAuth.instance.signOut();
+            Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    const Dashboard(), // Navigate to Dashboard
-              ),
-              (Route<dynamic> route) =>
-                  false, // Clear the entire stack of routes
+              MaterialPageRoute(builder: (context) => Dashboard()),
             );
           },
         ),
         title: const Text(
-          'Admin Dashboard',
+          'Trang chủ Admin',
           style: TextStyle(
             color: Colors.white,
             fontSize: 28,
@@ -141,7 +141,7 @@ class DashboardAdmin extends StatelessWidget {
                         ),
                         const SizedBox(height: 10),
                         Text(
-                          itemNames[index], // Display the name of the item
+                          itemNames[index],
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,

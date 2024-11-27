@@ -10,9 +10,14 @@ class SuccessNotification extends StatelessWidget {
         children: [
           Icon(Icons.check_circle, color: Colors.white),
           SizedBox(width: 10),
-          Text(
-            text,
-            style: TextStyle(color: Colors.white, fontSize: 16),
+          Expanded(
+            // Sử dụng Expanded để tự động co giãn
+            child: Text(
+              text,
+              style: TextStyle(color: Colors.white, fontSize: 16),
+              softWrap: true, // Cho phép xuống dòng
+              overflow: TextOverflow.visible, // Xử lý văn bản tràn
+            ),
           ),
         ],
       ),

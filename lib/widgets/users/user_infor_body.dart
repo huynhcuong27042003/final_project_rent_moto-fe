@@ -1,6 +1,7 @@
 import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycle_list_by_user.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
+import 'package:final_project_rent_moto_fe/widgets/users/user_infor_change_password.dart';
 import 'package:final_project_rent_moto_fe/widgets/users/user_infor_myaccount_form.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,6 +20,7 @@ class _UserInforBodyState extends State<UserInforBody> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String? userName;
   String? avatarUrl;
+  String? email;
   bool isLoggedIn = false;
 
   @override
@@ -50,6 +52,7 @@ class _UserInforBodyState extends State<UserInforBody> {
           setState(() {
             userName = userData['information']?['name'];
             avatarUrl = userData['information']?['avatar'];
+            email = user.email;
           });
         } else {
           print("No user found with this email.");
@@ -119,10 +122,10 @@ class _UserInforBodyState extends State<UserInforBody> {
                           child: Column(
                             children: [
                               _buildMenuItem(
-                                  Icons.person, 'MyAccount', context),
+                                  Icons.person, 'Thông tin tài khoản', context),
                               Divider(indent: 30.0, endIndent: 30.0),
                               _buildMenuItem(Icons.car_rental,
-                                  'Vehicle Registration for Rental', context),
+                                  'Danh sách xe cho của bạn', context),
                               Divider(indent: 30.0, endIndent: 30.0),
                               _buildMenuItem(
                                   Icons.favorite, 'Favorite Vehicles', context),
@@ -154,7 +157,7 @@ class _UserInforBodyState extends State<UserInforBody> {
                           child: Column(
                             children: [
                               _buildMenuItem(
-                                  Icons.lock, 'Change Password', context),
+                                  Icons.lock, 'Đổi mật khẩu', context),
                             ],
                           ),
                         ),
@@ -173,7 +176,7 @@ class _UserInforBodyState extends State<UserInforBody> {
                         },
                         icon: Icon(Icons.logout, color: Colors.red),
                         label: Text(
-                          'Log Out',
+                          'Đăng xuất',
                           style: TextStyle(color: Colors.red),
                         ),
                         style: ElevatedButton.styleFrom(
@@ -203,16 +206,25 @@ class _UserInforBodyState extends State<UserInforBody> {
       title: Text(title),
       trailing: Icon(Icons.arrow_forward_ios, size: 16.0),
       onTap: () async {
-        if (title == 'MyAccount') {
+        if (title == 'Thông tin tài khoản') {
           // Điều hướng đến màn hình UserInforMyaccount và đợi kết quả
           await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const UserInforMyaccount()),
           );
-        } else if (title == 'Đăng ký cho thuê xe') {
+        } else if (title == 'Danh sách xe cho của bạn') {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => MotorcycleListByUser()),
+          );
+        } else if (title == 'Đổi mật khẩu') {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => UserInforChangePassword(
+                email: email!,
+              ),
+            ),
           );
         }
       },
