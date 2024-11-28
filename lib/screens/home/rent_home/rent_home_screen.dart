@@ -1,3 +1,4 @@
+import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_featured_location.dart';
 import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_infor_user.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_background.dart';
@@ -26,11 +27,12 @@ class _RentHomeScreenState extends State<RentHomeScreen> {
             const RentHomeSearchMotos(),
             Container(
               margin: const EdgeInsets.only(top: 400, left: 20),
-              child: const Column(
+              child: Column(
                 children: [
-                  RentHomePromo(),
-                  RentHomeInforMotos(),
-                  RentHomeMotoRental(),
+                  const RentHomePromo(),
+                  const RentHomeInforMotos(),
+                  RentHomeFeaturedLocation(),
+                  const RentHomeMotoRental(),
                 ],
               ),
             ),
