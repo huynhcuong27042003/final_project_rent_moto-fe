@@ -117,7 +117,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
 
   Future<LatLng> getCoordinates(
       String streetName, String district, String city, String country) async {
-    final address = '$district, $city, $country';
+    final address = '$streetName,$district, $city, $country';
     final response = await http.get(Uri.parse(
         'https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(address)}&format=json'));
 
