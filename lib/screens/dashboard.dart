@@ -2,6 +2,7 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:final_project_rent_moto_fe/screens/history_rent/my_trip_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/home/rent_home/rent_home_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/users/user_infor_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Dashboard extends StatefulWidget {
@@ -15,6 +16,7 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   late int _selectedIndex;
+  User? currentUser; // Lưu thông tin người dùng hiện tại
 
   @override
   void initState() {

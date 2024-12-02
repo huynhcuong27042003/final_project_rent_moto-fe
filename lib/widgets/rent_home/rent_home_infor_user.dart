@@ -1,8 +1,8 @@
 // ignore_for_file: avoid_print
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycles_list_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/favorite_list/list_favorite_by_user.dart';
+import 'package:final_project_rent_moto_fe/screens/notification/notification_list_by_user.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -59,33 +59,47 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
     }
   }
 
-  Future<String?> _fetchUserRole() async {
-    try {
-      final currentUser = FirebaseAuth.instance.currentUser;
-      if (currentUser != null) {
-        final userEmail = currentUser.email;
-        final userSnapshot = await FirebaseFirestore.instance
-            .collection('users')
-            .where('email', isEqualTo: userEmail)
+  Stream<int> fetchBookingCount() {
+    final String currentUserEmail =
+        FirebaseAuth.instance.currentUser?.email ?? '';
+
+    // First, get the email from the motorcycles collection using the number plate
+    return FirebaseFirestore.instance
+        .collection('bookings')
+        .where('isAccept',
+            isEqualTo: false) // Filter for bookings where 'isAccept' is false
+        .snapshots()
+        .asyncMap((bookingSnapshot) async {
+      // Create a list to hold the count of accepted bookings for the user
+      int count = 0;
+
+      // For each booking, we need to query the motorcycles collection
+      for (var doc in bookingSnapshot.docs) {
+        final numberPlate =
+            doc['numberPlate']; // Get the number plate from the booking
+
+        // Query the motorcycles collection for the matching number plate
+        final motorcycleSnapshot = await FirebaseFirestore.instance
+            .collection('motorcycles')
+            .where('numberPlate',
+                isEqualTo: numberPlate) // Filter by number plate
+            .limit(1) // Only get one motorcycle document
             .get();
 
-        if (userSnapshot.docs.isNotEmpty) {
-          final userData = userSnapshot.docs.first.data();
-          return userData['role']; // Return the user's role from Firestore
+        if (motorcycleSnapshot.docs.isNotEmpty) {
+          // If a motorcycle is found, retrieve its email
+          final motorcycleEmail = motorcycleSnapshot.docs.first['email'];
+
+          // Now check if the email matches the current user's email
+          if (motorcycleEmail == currentUserEmail) {
+            // If the email matches, increment the count
+            count++;
+          }
         }
       }
-    } catch (e) {
-      print('Error fetching user role: $e');
-    }
-    return null; // Return null if there was an error or no role found
-  }
 
-  Stream<int> fetchMotorcycleCount() {
-    return FirebaseFirestore.instance
-        .collection('motorcycles')
-        .where('isHide', isEqualTo: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.length);
+      return count; // Return the final count after processing all bookings
+    });
   }
 
   @override
@@ -168,93 +182,25 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
                     color: Colors.red,
                   ),
                   StreamBuilder<int>(
-                    stream: fetchMotorcycleCount(),
+                    stream: fetchBookingCount(),
                     builder: (context, snapshot) {
-                      int count = snapshot.data ?? 0;
+                      // Check the state of the stream
+                      final int bookingCount = snapshot.data ??
+                          0; // Get the number of unaccepted bookings
 
                       return IconButton(
                         onPressed: () async {
-                          try {
-                            final currentUser =
-                                FirebaseAuth.instance.currentUser;
-                            if (currentUser != null) {
-                              final userEmail = currentUser.email;
-                              final userSnapshot = await FirebaseFirestore
-                                  .instance
-                                  .collection('users')
-                                  .where('email', isEqualTo: userEmail)
-                                  .get();
-
-                              if (userSnapshot.docs.isNotEmpty) {
-                                final userData = userSnapshot.docs.first.data();
-                                final role = userData[
-                                    'role']; // Fetch user role directly here
-
-                                // Only proceed if the role is 'employee' and the count is greater than 0
-                                if (role == 'employee' && count > 0) {
-                                  final RenderBox renderBox =
-                                      context.findRenderObject() as RenderBox;
-                                  final position =
-                                      renderBox.localToGlobal(Offset.zero);
-                                  final size = renderBox.size;
-
-                                  showMenu(
-                                    context: context,
-                                    position: RelativeRect.fromLTRB(
-                                      position.dx + size.width - 50,
-                                      position.dy + size.height,
-                                      0,
-                                      0,
-                                    ),
-                                    items: [
-                                      PopupMenuItem(
-                                        child: SizedBox(
-                                          width: 200,
-                                          height: 400,
-                                          child: MotorcyclesListScreen(),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                } else if (role != 'employee') {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          'Access restricted to employees only.'),
-                                    ),
-                                  );
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('No new notifications.'),
-                                    ),
-                                  );
-                                }
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content:
-                                        Text('No user found with this email.'),
-                                  ),
-                                );
-                              }
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content:
-                                      Text('No current user is logged in.'),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            print('Error fetching user data: $e');
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    'Error fetching user data. Please try again later.'),
+                          // When the icon is clicked, navigate to NotificationListByUser
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => NotificationListByUser(
+                                email:
+                                    FirebaseAuth.instance.currentUser?.email ??
+                                        '',
                               ),
-                            );
-                          }
+                            ),
+                          );
                         },
                         icon: Stack(
                           children: [
@@ -262,39 +208,30 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
                               Icons.notifications,
                               color: Colors.blueGrey,
                             ),
-                            // Only show the count badge for 'employee' role and if count > 0
-                            if (count >
-                                0) // Ensure that count is greater than 0
+                            // Show a badge if there are any unaccepted bookings
+                            if (bookingCount > 0)
                               Positioned(
-                                top: 0,
                                 right: 0,
-                                child: FutureBuilder<String?>(
-                                  future:
-                                      _fetchUserRole(), // Fetch the user's role asynchronously
-                                  builder: (context, roleSnapshot) {
-                                    if (roleSnapshot.connectionState ==
-                                        ConnectionState.waiting) {
-                                      return Container(); // Show nothing while loading
-                                    }
-
-                                    // Only show the count badge for 'employee' role
-                                    if (roleSnapshot.hasData &&
-                                        roleSnapshot.data == 'employee') {
-                                      return CircleAvatar(
-                                        radius: 8,
-                                        backgroundColor: Colors.red,
-                                        child: Text(
-                                          count.toString(),
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      );
-                                    } else {
-                                      return Container(); // Don't show anything if the user is not an 'employee'
-                                    }
-                                  },
+                                top: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 10,
+                                    minHeight: 10,
+                                  ),
+                                  child: Text(
+                                    '$bookingCount',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 7,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ),
                               ),
                           ],

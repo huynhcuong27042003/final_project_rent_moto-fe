@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_print
 
-import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
 import 'package:flutter/material.dart';
@@ -34,14 +33,12 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
     _loadUserFavoriteState(); // Load the user's favorite state when the widget is initialized
   }
 
-  // Load the user's favorite state
   Future<void> _loadUserFavoriteState() async {
     final User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
       userEmail = currentUser.email ?? 'No email available';
 
       try {
-        // Get the user's favorite motorcycles
         List<String> favoriteMotorcycles = await getFavoriteList(userEmail);
 
         setState(() {
@@ -60,7 +57,6 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
     }
   }
 
-  // Toggle the favorite state for a motorcycle
   Future<void> toggleFavorite(String motorcycleId) async {
     final User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
