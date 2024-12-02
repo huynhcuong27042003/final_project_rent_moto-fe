@@ -129,9 +129,10 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Khung chứa hình ảnh
                           Container(
-                            width: MediaQuery.of(context).size.width,
-                            height: 200,
+                            width: double.infinity, // Chiều rộng toàn màn hình
+                            height: 200, // Chiều cao cố định
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
@@ -145,14 +146,18 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                                       info['images'].isNotEmpty)
                                   ? Image.network(
                                       info['images'][0],
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit
+                                          .contain, // Khống chế ảnh để ảnh không bị cắt
                                     )
                                   : Image.asset(
-                                      "assets/images/xe1.jpg",
-                                      fit: BoxFit.cover,
+                                      "assets/images/logo.png",
+                                      fit: BoxFit
+                                          .contain, // Khống chế ảnh mặc định
                                     ),
                             ),
                           ),
+
+                          // Hiển thị loại xe (ví dụ: "Xe số")
                           Container(
                             margin: const EdgeInsets.only(top: 5),
                             padding: const EdgeInsets.all(5),
@@ -165,6 +170,7 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                               style: const TextStyle(fontSize: 12),
                             ),
                           ),
+                          // Hiển thị tên xe
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 5),
                             child: Text(
@@ -175,6 +181,7 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                               ),
                             ),
                           ),
+                          // Hiển thị địa chỉ
                           Row(
                             children: [
                               const Icon(Icons.location_on),
@@ -183,6 +190,7 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                                   "${address['district']}, ${address['city']}"),
                             ],
                           ),
+                          // Thông tin bổ sung và giá
                           Container(
                             margin: const EdgeInsets.symmetric(vertical: 10),
                             decoration: const BoxDecoration(
@@ -194,6 +202,7 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                               children: [
                                 Row(
                                   children: const [
+                                    // Hiển thị đánh giá sao
                                     Row(
                                       children: [
                                         Icon(
@@ -211,6 +220,7 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                                       ],
                                     ),
                                     SizedBox(width: 100),
+                                    // Hiển thị số chuyến
                                     Row(
                                       children: [
                                         Icon(Icons.motorcycle),

@@ -43,25 +43,27 @@ class _RentHomePromoState extends State<RentHomePromo> {
                   if (promoData['imageUrl'] != null)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: AspectRatio(
-                        aspectRatio: 16 / 9,
-                        child: Image.network(
-                          promoData['imageUrl'],
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              color: Colors.grey[300],
-                              child: const Center(
-                                child: Text(
-                                  'Không có hình ảnh',
-                                  style: TextStyle(color: Colors.black54),
-                                ),
+                      child: Image.network(
+                        promoData['imageUrl'],
+                        fit: BoxFit
+                            .contain, // Hiển thị toàn bộ hình ảnh mà không bị cắt
+                        width: double.infinity, // Đặt chiều rộng đầy đủ
+                        height:
+                            200, // Chiều cao cố định (hoặc để trống nếu cần tự động)
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[300],
+                            child: const Center(
+                              child: Text(
+                                'Không có hình ảnh',
+                                style: TextStyle(color: Colors.black54),
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
                     ),
+
                   const SizedBox(height: 16),
 
                   // Tên khuyến mãi
@@ -155,117 +157,133 @@ class _RentHomePromoState extends State<RentHomePromo> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start, // Đảm bảo căn lề trái
+      children: [
+        const Padding(
+          padding: EdgeInsets.zero, // Không có khoảng cách bên ngoài
+          child: Text(
             "Chương trình khuyến mãi",
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 16,
             ),
           ),
-          const SizedBox(
-            height: 5,
-          ),
-          StreamBuilder<QuerySnapshot>(
-            stream:
-                FirebaseFirestore.instance.collection('promotions').snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              final promotions = snapshot.data!.docs;
+        ),
+        const SizedBox(height: 5),
+        StreamBuilder<QuerySnapshot>(
+          stream:
+              FirebaseFirestore.instance.collection('promotions').snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            final promotions = snapshot.data!.docs;
+            final now = DateTime.now();
 
-              final now = DateTime.now();
+            // Lọc các khuyến mãi có ngày hợp lệ và không bị ẩn
+            final validPromotions = promotions.where((promo) {
+              final data = promo.data() as Map<String, dynamic>;
 
-              // Lọc các khuyến mãi có ngày hợp lệ
-              final validPromotions = promotions.where((promo) {
-                final data = promo.data() as Map<String, dynamic>;
-                final startDate = data['startDate'] != null
-                    ? DateTime.tryParse(data['startDate'])
-                    : null;
-                final endDate = data['endDate'] != null
-                    ? DateTime.tryParse(data['endDate'])
-                    : null;
+              // Kiểm tra ishide
+              if (data['isHide'] == true) return false;
 
-                if (startDate == null || endDate == null) return false;
-                return now.isAfter(startDate) && now.isBefore(endDate);
-              }).toList();
+              final startDate = data['startDate'] != null
+                  ? DateTime.tryParse(data['startDate'])
+                  : null;
+              final endDate = data['endDate'] != null
+                  ? DateTime.tryParse(data['endDate'])
+                  : null;
 
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: validPromotions.map((promo) {
-                    final data = promo.data() as Map<String, dynamic>;
-                    return GestureDetector(
-                      onTap: () => _showPromotionDetails(data),
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 4),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.transparent,
-                        ),
-                        width: 270,
-                        height: 150,
-                        child: Stack(
-                          children: [
-                            // Hình ảnh toàn khung
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.network(
-                                data['imageUrl'] ?? '',
-                                fit: BoxFit.cover,
-                                width: double.infinity,
-                                height: double.infinity,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: Colors.grey,
-                                    child: const Center(
-                                      child: Text(
-                                        'Không có hình ảnh',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                            // Mã khuyến mãi ở góc phải dưới
-                            Positioned(
-                              bottom: 8,
-                              right: 8,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  data['code'] ?? 'Không có mã',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+              // Chỉ hiển thị các khuyến mãi trong khoảng thời gian hợp lệ
+              if (startDate == null || endDate == null) return false;
+              return now.isAfter(startDate) && now.isBefore(endDate);
+            }).toList();
+
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: validPromotions.isEmpty
+                  ? Center(
+                      child: Text(
+                        "Hiện tại chưa có khuyến mãi",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+                    )
+                  : Row(
+                      children: validPromotions.map((promo) {
+                        final data = promo.data() as Map<String, dynamic>;
+                        return GestureDetector(
+                          onTap: () => _showPromotionDetails(data),
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 4),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: Colors.transparent,
+                            ),
+                            width: 270,
+                            height: 150,
+                            child: Stack(
+                              children: [
+                                // Hình ảnh toàn khung
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    data['imageUrl'] ?? '',
+                                    fit: BoxFit
+                                        .contain, // Sử dụng BoxFit.contain
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        color: Colors.grey,
+                                        child: const Center(
+                                          child: Text(
+                                            'Không có hình ảnh',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+
+                                // Mã khuyến mãi ở góc phải dưới
+                                Positioned(
+                                  bottom: 8,
+                                  right: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black54,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      data['code'] ?? 'Không có mã',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
