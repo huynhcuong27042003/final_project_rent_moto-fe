@@ -178,14 +178,35 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8.0),
-                    child: Image.network(
-                      info['images'] != null && info['images'].isNotEmpty
-                          ? info['images']
-                              [0] // Use the first image if available
-                          : '', // If no image, use an empty string
-                      height: 200,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
+                    child: Builder(
+                      builder: (context) {
+                        // Kiểm tra URL của ảnh trước khi load
+                        String imageUrl = (info['images'] != null &&
+                                info['images'].isNotEmpty)
+                            ? info['images']
+                                [0] // Nếu có ảnh thì dùng ảnh đầu tiên
+                            : 'assets/images/xe1.jpg'; // Nếu không có ảnh thì dùng ảnh mặc định từ assets
+
+                        // Kiểm tra URL hợp lệ cho Image.network
+                        Uri? uri = Uri.tryParse(imageUrl);
+                        if (uri != null && uri.isAbsolute) {
+                          // Nếu URL hợp lệ (URL mạng), sử dụng NetworkImage
+                          return Image.network(
+                            imageUrl,
+                            height: 200,
+                            width: double.infinity,
+                            fit: BoxFit.contain,
+                          );
+                        } else {
+                          // Nếu không phải URL hợp lệ, sử dụng AssetImage từ thư mục assets
+                          return Image.asset(
+                            imageUrl, // Dùng ảnh từ thư mục assets
+                            height: 200,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          );
+                        }
+                      },
                     ),
                   ),
                 ),
