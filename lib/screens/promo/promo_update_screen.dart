@@ -8,7 +8,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 class PromoUpdateScreen extends StatefulWidget {
   final String documentId;
 
-  PromoUpdateScreen({required this.documentId});
+  PromoUpdateScreen({super.key, required this.documentId});
 
   @override
   _PromoUpdateScreenState createState() => _PromoUpdateScreenState();
