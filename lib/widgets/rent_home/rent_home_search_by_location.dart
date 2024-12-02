@@ -149,7 +149,7 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                                     )
                                   : Image.asset(
                                       "assets/images/xe1.jpg",
-                                      fit: BoxFit.cover,
+                                      fit: BoxFit.contain,
                                     ),
                             ),
                           ),

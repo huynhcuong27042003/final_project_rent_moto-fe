@@ -185,7 +185,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                           : '', // If no image, use an empty string
                       height: 200,
                       width: double.infinity,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.contain,
                     ),
                   ),
                 ),

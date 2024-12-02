@@ -28,10 +28,10 @@ class _SearchMotoScreenState extends State<SearchMotoScreen> {
   late Future<List<dynamic>> motorcycles;
   final FetchMotorcycleIsacceptService motorcycleService =
       FetchMotorcycleIsacceptService();
-  late String userEmail; // Store the user's email
+  late String userEmail;
   Map<String, bool> motorcycleFavoriteState = {};
   late LatLng userLocation;
-  bool isLoading = true; // Dùng để kiểm tra trạng thái tải dữ liệu
+  bool isLoading = true;
   Map<String, double> distances = {};
   List<dynamic> sortedMotorcycles = [];
   @override
