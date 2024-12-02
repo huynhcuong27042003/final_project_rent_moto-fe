@@ -53,4 +53,6 @@ class AppIcons {
       IconData(0xf0f2, fontFamily: _kFontFam, fontPackage: _kFontPkg);
   static const IconData motorcycle =
       IconData(0xf21c, fontFamily: _kFontFam, fontPackage: _kFontPkg);
+
+  static var heart_filled;
 }

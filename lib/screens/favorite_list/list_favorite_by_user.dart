@@ -76,14 +76,16 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
         await addFavoriteList(email, [motorcycleId]);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Motorcycle added to favorites!")),
+            const SnackBar(
+                content: Text("Xe đã được thêm vào danh sách yêu thích!")),
           );
         }
       } else {
         await deleteFavoriteListService(email, motorcycleId);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Motorcycle removed from favorites!")),
+            const SnackBar(
+                content: Text("Xe bị xóa trong danh sách yêu thích!")),
           );
         }
 
@@ -137,7 +139,7 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Color(0xFFF49C21),
         elevation: 5,
       ),
       body: SingleChildScrollView(
@@ -158,7 +160,9 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
                     } else if (snapshot.hasData) {
                       var data = snapshot.data!;
                       if (data.isEmpty) {
-                        return const Center(child: Text('No favorites found'));
+                        return const Center(
+                          child: Text('Dách sách xe yêu thích trông'),
+                        );
                       }
 
                       return Column(

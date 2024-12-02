@@ -19,8 +19,7 @@ class FetchMotorcycleIsacceptService {
         if (data is List) {
           return data;
         } else if (data is Map<String, dynamic> && data['data'] != null) {
-          return List.from(
-              data['data']);
+          return List.from(data['data']);
         } else {
           throw Exception('Data format error: List of motorcycles not found');
         }

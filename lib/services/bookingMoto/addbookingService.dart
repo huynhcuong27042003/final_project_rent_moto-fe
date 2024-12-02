@@ -14,7 +14,6 @@ class AddBookingService {
     bool isHide = false,
   }) async {
     final url = Uri.parse(baseUrl);
-    print("Ngayn nhan: $bookingDate");
     final adjustedBookingDate = bookingDate.toUtc().add(Duration(hours: 7));
     final adjustedReturnDate = returnDate.toUtc().add(Duration(hours: 7));
     try {
