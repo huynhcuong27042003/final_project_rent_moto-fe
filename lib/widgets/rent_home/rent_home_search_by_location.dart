@@ -26,10 +26,12 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
     try {
-      // Tìm kiếm theo quận
+      // Tìm kiếm theo quận, loại trừ các xe có isHide = true
       final districtSnapshot = await firestore
           .collection('motorcycles')
           .where('address.district', isEqualTo: district)
+          .where('isHide',
+              isEqualTo: false) // Exclude motorcycles with isHide = true
           .get();
 
       var motorcycles = districtSnapshot.docs
@@ -39,11 +41,13 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
               })
           .toList();
 
-      // Nếu không có kết quả, tìm kiếm theo thành phố
+      // Nếu không có kết quả, tìm kiếm theo thành phố và loại trừ các xe có isHide = true
       if (motorcycles.isEmpty) {
         final citySnapshot = await firestore
             .collection('motorcycles')
             .where('address.city', isEqualTo: district)
+            .where('isHide',
+                isEqualTo: false) // Exclude motorcycles with isHide = true
             .get();
 
         motorcycles = citySnapshot.docs

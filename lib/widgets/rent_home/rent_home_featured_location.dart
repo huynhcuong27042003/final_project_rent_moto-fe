@@ -1,5 +1,6 @@
 import 'package:final_project_rent_moto_fe/widgets/rent_home/rent_home_search_by_location.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Firebase data
 
 class RentHomeFeaturedLocation extends StatelessWidget {
   RentHomeFeaturedLocation({super.key});
@@ -9,7 +10,7 @@ class RentHomeFeaturedLocation extends StatelessWidget {
     'assets/images/q2.png',
     'assets/images/q3.png',
     'assets/images/q4.png',
-    'assets/images/q5.png',
+    'assets/images/quan5.png',
     'assets/images/q6.png',
     'assets/images/q7.png',
     'assets/images/q8.png',
@@ -76,7 +77,7 @@ class RentHomeFeaturedLocation extends StatelessWidget {
                     );
                   },
                   child: Container(
-                    width: MediaQuery.of(context).size.width * 0.4,
+                    width: MediaQuery.of(context).size.width * 0.45,
                     margin: const EdgeInsets.only(
                         right: 10), // Khoảng cách giữa các ảnh
                     height: 230, // Chiều cao của ảnh
@@ -123,40 +124,113 @@ class RentHomeFeaturedLocation extends StatelessWidget {
               }),
             ),
           ),
+          // Fetch data from Firebase and display vehicles based on isHide
+          FutureBuilder<QuerySnapshot>(
+            future: FirebaseFirestore.instance.collection('vehicles').get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              }
+
+              var vehicleData = snapshot.data!.docs;
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: vehicleData.map((doc) {
+                    var isHide =
+                        doc['isHide']; // Assuming the field name is isHide
+                    if (isHide) {
+                      return Container(); // Skip rendering if isHide is true
+                    }
+
+                    // Render vehicle item
+                    String image = doc['image'] ??
+                        'assets/images/default.png'; // Example image path
+                    String location = doc['location'] ??
+                        'Unknown Location'; // Example location
+                    return GestureDetector(
+                      onTap: () {
+                        // Handle vehicle detail navigation
+                      },
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.45,
+                        margin: const EdgeInsets.only(right: 10),
+                        height: 230,
+                        child: ClipPath(
+                          clipper: DiagonalClipper(),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(13),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.network(
+                                  image,
+                                  fit: BoxFit.cover,
+                                ),
+                                Positioned(
+                                  bottom: 10,
+                                  left: 10,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    color: Colors.grey.withOpacity(0.6),
+                                    child: Text(
+                                      location,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 }
 
-// Custom Clipper để cắt ảnh theo đường chéo
 class DiagonalClipper extends CustomClipper<Path> {
-  final double cutPercentageX; // Tỷ lệ cắt theo chiều ngang
-  final double cutPercentageY; // Tỷ lệ cắt theo chiều dọc
+  final double cutPercentageX;
+  final double cutPercentageY;
 
   DiagonalClipper({
-    this.cutPercentageX = 1 / 3, // Tỷ lệ cắt theo chiều ngang mặc định là 1/3
-    this.cutPercentageY = 1 / 3, // Tỷ lệ cắt theo chiều dọc mặc định là 1/3
+    this.cutPercentageX = 1 / 3,
+    this.cutPercentageY = 1 / 3,
   });
 
   @override
   Path getClip(Size size) {
     Path path = Path();
-    double cutPointX = size.width * cutPercentageX; // Điểm cắt theo chiều ngang
-    double cutPointY = size.height * cutPercentageY; // Điểm cắt theo chiều dọc
+    double cutPointX = size.width * cutPercentageX;
+    double cutPointY = size.height * cutPercentageY;
 
-    path.moveTo(0, 0); // Bắt đầu từ góc trên bên trái
-    path.lineTo(size.width - cutPointX, 0); // Cắt ngang từ góc trên bên phải
-    path.lineTo(size.width, cutPointY); // Cắt dọc xuống góc trên bên phải
-    path.lineTo(size.width, size.height); // Kéo xuống góc dưới bên phải
-    path.lineTo(0, size.height); // Kéo sang góc dưới bên trái
-    path.close(); // Đóng lại đường path
+    path.moveTo(0, 0);
+    path.lineTo(size.width - cutPointX, 0);
+    path.lineTo(size.width, cutPointY);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
 
     return path;
   }
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) {
-    return false; // Không cần tái cắt khi thay đổi
+    return false;
   }
 }
