@@ -73,7 +73,7 @@ class _MotorcycleListByUserState extends State<MotorcycleListByUser> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Color(0xFFF49C21),
         elevation: 5,
       ),
       body: SingleChildScrollView(
@@ -95,7 +95,7 @@ class _MotorcycleListByUserState extends State<MotorcycleListByUser> {
                       var data = snapshot.data!;
                       if (data.isEmpty) {
                         return const Center(
-                            child: Text('No motorcycles found'));
+                            child: Text('Chưa có xe được đăng lên'));
                       }
 
                       return Column(
@@ -177,7 +177,7 @@ class _MotorcycleListByUserState extends State<MotorcycleListByUser> {
                                         const SizedBox(width: 5),
                                         Expanded(
                                           child: Text(
-                                            "Address: ${motorcycle['address']?['streetName'] ?? 'Unknown'}, "
+                                            "${motorcycle['address']?['streetName'] ?? 'Unknown'}, "
                                             "${motorcycle['address']?['district'] ?? 'Unknown'}, "
                                             "${motorcycle['address']?['city'] ?? 'Unknown'}, "
                                             "${motorcycle['address']?['country'] ?? 'Unknown'}",
@@ -274,7 +274,35 @@ class _MotorcycleListByUserState extends State<MotorcycleListByUser> {
                         }).toList(),
                       );
                     } else {
-                      return const Center(child: Text('No data available'));
+                      return const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment
+                              .center, // Căn giữa theo chiều dọc
+                          children: [
+                            // Biểu tượng tải hình tròn chuyển động
+                            SizedBox(
+                              height: 50,
+                              width: 50,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 4, // Độ dày của vòng tải
+                                color: Colors.blueAccent, // Màu của biểu tượng
+                              ),
+                            ),
+                            SizedBox(
+                                height:
+                                    10), // Khoảng cách giữa biểu tượng và văn bản
+                            // Văn bản hiển thị
+                            Text(
+                              "Đang tải...",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
                     }
                   },
                 ),

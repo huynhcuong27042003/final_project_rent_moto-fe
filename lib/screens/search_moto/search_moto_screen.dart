@@ -1,48 +1,104 @@
-import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
+import 'package:final_project_rent_moto_fe/app_icons_icons.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/fetch_motorcycle_isaccept_service.dart';
-import 'package:final_project_rent_moto_fe/app_icons_icons.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
-import 'package:final_project_rent_moto_fe/services/favorite_list/get_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/add_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/delete_favoritelist_service.dart';
+import 'package:final_project_rent_moto_fe/services/favorite_list/get_favoritelist_service.dart';
+import 'package:final_project_rent_moto_fe/services/map/map_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:latlong2/latlong.dart';
 
-class RentHomeInforMotos extends StatefulWidget {
-  const RentHomeInforMotos({super.key});
+class SearchMotoScreen extends StatefulWidget {
+  final String location;
+  final String time;
+  const SearchMotoScreen({
+    super.key,
+    required this.location,
+    required this.time,
+  });
 
   @override
-  State<RentHomeInforMotos> createState() => _RentHomeInforMotosState();
+  State<SearchMotoScreen> createState() => _SearchMotoScreenState();
 }
 
-class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
+class _SearchMotoScreenState extends State<SearchMotoScreen> {
   late Future<List<dynamic>> motorcycles;
   final FetchMotorcycleIsacceptService motorcycleService =
       FetchMotorcycleIsacceptService();
   late String userEmail; // Store the user's email
   Map<String, bool> motorcycleFavoriteState = {};
-
+  late LatLng userLocation;
+  bool isLoading = true; // Dùng để kiểm tra trạng thái tải dữ liệu
+  Map<String, double> distances = {};
+  List<dynamic> sortedMotorcycles = [];
   @override
   void initState() {
     super.initState();
     motorcycles = motorcycleService.fetchMotorcycle();
-    _loadUserFavoriteState(); // Load the user's favorite state when the widget is initialized
+    _loadUserFavoriteState();
+    _getUserLocation();
   }
 
-  // Load the user's favorite state
+  Future<void> _getUserLocation() async {
+    try {
+      MapService mapService = MapService();
+      userLocation = await mapService.getCoordinates(widget.location);
+      await _calculateDistances(); // Tính toán khoảng cách sau khi lấy tọa độ
+    } catch (e) {
+      print("Failed to get user location: $e");
+    }
+  }
+
+  Future<void> _calculateDistances() async {
+    final distanceCalculator = Distance();
+    motorcycles.then((motorcycleList) async {
+      List<dynamic> updatedMotorcycles = motorcycleList;
+      for (var motorcycle in motorcycleList) {
+        var address = motorcycle['address'] ?? {};
+        String fullAddress =
+            "${address['streetName'] ?? ''} ${address['district'] ?? ''}, ${address['city'] ?? ''}";
+
+        try {
+          MapService mapService = MapService();
+          LatLng motoLocation = await mapService.getCoordinates(fullAddress);
+
+          double distanceInMeters = distanceCalculator.as(
+              LengthUnit.Meter, userLocation, motoLocation);
+
+          setState(() {
+            distances[motorcycle['id'] ?? ''] = distanceInMeters / 1000; // km
+          });
+        } catch (e) {
+          print("Error calculating distance for motorcycle: $e");
+        }
+      }
+
+      // Sau khi tính toán khoảng cách, sắp xếp danh sách xe máy theo khoảng cách từ nhỏ đến lớn
+      updatedMotorcycles.sort((a, b) {
+        double distanceA = distances[a['id']] ?? double.infinity;
+        double distanceB = distances[b['id']] ?? double.infinity;
+        return distanceA.compareTo(distanceB);
+      });
+
+      setState(() {
+        sortedMotorcycles = updatedMotorcycles; // Lưu lại danh sách đã sắp xếp
+        isLoading = false; // Đặt trạng thái tải xong
+      });
+    });
+  }
+
   Future<void> _loadUserFavoriteState() async {
     final User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
       userEmail = currentUser.email ?? 'No email available';
 
       try {
-        // Get the user's favorite motorcycles
         List<String> favoriteMotorcycles = await getFavoriteList(userEmail);
 
         setState(() {
-          // Mark each motorcycle as favorite if it's in the favorite list
           motorcycles.then((motorcycleList) {
             for (var motorcycle in motorcycleList) {
               String motorcycleId = motorcycle['id'] ?? '';
@@ -57,7 +113,6 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
     }
   }
 
-  // Toggle the favorite state for a motorcycle
   Future<void> toggleFavorite(String motorcycleId) async {
     final User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
@@ -65,8 +120,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                const Dashboard(initialIndex: 2), // Chỉ số UserInforScreen
+            builder: (context) => const Dashboard(initialIndex: 2),
           ),
         );
       }
@@ -81,13 +135,11 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
       });
 
       if (motorcycleFavoriteState[motorcycleId]!) {
-        // Add motorcycle to favorite list
         await addFavoriteList(email, [motorcycleId]);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Đã thêm vào danh sách yêu thích!")),
         );
       } else {
-        // Remove motorcycle from favorite list
         await deleteFavoriteListService(email, motorcycleId);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Đã xóa khỏi danh sách yêu thích!")),
@@ -106,36 +158,31 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Xe máy danh cho bạn",
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 5),
-          FutureBuilder<List<dynamic>>(
-            future: motorcycles,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (snapshot.hasData) {
-                var data = snapshot.data!;
-                if (data.isEmpty) {
-                  return const Center(child: Text('No motorcycles found'));
-                }
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Danh sách xe"),
+        centerTitle: true,
+      ),
+      body: FutureBuilder<List<dynamic>>(
+        future: motorcycles,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (snapshot.hasData) {
+            var data = snapshot.data!;
+            if (data.isEmpty) {
+              return const Center(child: Text('Không có xe nào được tìm thấy'));
+            }
 
-                return SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: data.map((motorcycle) {
+            return isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: data.length,
+                    itemBuilder: (context, index) {
+                      var motorcycle = data[index];
                       var info = motorcycle['informationMoto'] ?? {};
                       var address = motorcycle['address'] ?? {};
                       String motorcycleId = motorcycle['id'] ?? '';
@@ -144,7 +191,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
 
                       return InkWell(
                         onTap: () async {
-                          // Wait for the result from DetailMotoScreen
+                          // Chờ kết quả từ DetailMotoScreen
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -154,19 +201,18 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                             ),
                           );
 
-                          // Check if result is not null and the motorcycleId matches
+                          // Kiểm tra nếu có kết quả trả về và khớp với motorcycleId
                           if (result != null &&
                               result['motorcycleId'] == motorcycleId) {
                             setState(() {
-                              // Update the favorite state based on the result
+                              // Cập nhật trạng thái yêu thích
                               motorcycleFavoriteState[motorcycleId] =
                                   result['isFavorite'];
                             });
                           }
                         },
                         child: Container(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          margin: const EdgeInsets.only(right: 8),
+                          margin: const EdgeInsets.only(bottom: 14),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
@@ -180,8 +226,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.9,
+                                  width: MediaQuery.of(context).size.width,
                                   height: 200,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
@@ -250,10 +295,31 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                 ),
                                 Row(
                                   children: [
-                                    Icon(Icons.location_on),
-                                    SizedBox(width: 5),
+                                    const Icon(Icons.location_on),
+                                    const SizedBox(width: 5),
                                     Text(
-                                        "${address['district']}, ${address['city']}"),
+                                        "${address['district'] ?? ''}, ${address['city'] ?? ''}"),
+                                  ],
+                                ),
+                                const SizedBox(height: 5),
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.route,
+                                      color: Colors.blue,
+                                    ),
+                                    distances.containsKey(motorcycleId)
+                                        ? Text(
+                                            "~${distances[motorcycleId]?.toStringAsFixed(1)} km",
+                                            style:
+                                                const TextStyle(fontSize: 14),
+                                          )
+                                        : const SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                                strokeWidth: 2),
+                                          ),
                                   ],
                                 ),
                                 Container(
@@ -275,32 +341,28 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                                 color: Colors.yellow,
                                                 size: 30,
                                               ),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
+                                              SizedBox(width: 5),
                                               Text(
                                                 "5.0",
                                                 style: TextStyle(
                                                     fontWeight: FontWeight.w500,
                                                     fontSize: 18),
-                                              )
+                                              ),
                                             ],
                                           ),
                                           SizedBox(width: 100),
                                           Row(
                                             children: [
                                               Icon(AppIcons.suitcase),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
+                                              SizedBox(width: 5),
                                               Text(
                                                 "10 chuyến",
                                                 style: TextStyle(
                                                     fontWeight: FontWeight.w500,
                                                     fontSize: 18),
-                                              )
+                                              ),
                                             ],
-                                          )
+                                          ),
                                         ],
                                       ),
                                       Padding(
@@ -318,9 +380,9 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                                 fontSize: 25,
                                               ),
                                             ),
-                                            Text(
+                                            const Text(
                                               "đ",
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontWeight: FontWeight.w600,
                                                 fontSize: 18,
                                               ),
@@ -341,23 +403,20 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                       ),
                                     ],
                                   ),
-                                )
+                                ),
                               ],
                             ),
                           ),
                         ),
                       );
-                    }).toList(),
-                  ),
-                );
-              } else {
-                return const Center(
-                  child: Text('Không có dữ liệu'),
-                );
-              }
-            },
-          ),
-        ],
+                    },
+                  );
+          } else {
+            return const Center(
+              child: Text('Không có dữ liệu'),
+            );
+          }
+        },
       ),
     );
   }

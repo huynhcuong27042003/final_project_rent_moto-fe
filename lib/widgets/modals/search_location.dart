@@ -103,7 +103,10 @@ class _SearchLocationState extends State<SearchLocation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Location")),
+      appBar: AppBar(
+        title: Text("Địa điểm"),
+        centerTitle: true,
+      ),
       body: Column(
         children: [
           Padding(
@@ -119,7 +122,7 @@ class _SearchLocationState extends State<SearchLocation> {
               child: TextField(
                 controller: searchController,
                 decoration: InputDecoration(
-                  hintText: "Enter address",
+                  hintText: "Nhập địa chỉ",
                   border: OutlineInputBorder(borderSide: BorderSide.none),
                   prefixIcon: Icon(
                     Icons.location_on_outlined,

@@ -1,6 +1,9 @@
 // ignore_for_file: avoid_print
 
+import 'package:final_project_rent_moto_fe/screens/search_moto/search_moto_screen.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/search_location.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/error_notification.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/success_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/calendar_rental.dart';
 import 'package:intl/intl.dart';
@@ -240,9 +243,27 @@ class _RentHomeSearchMotosState extends State<RentHomeSearchMotos> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: TextButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              if (!locationController.text.trim().isEmpty) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => SearchMotoScreen(
+                                      location: locationController.text.trim(),
+                                      time: rentalPeriodController.text.trim(),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  ErrorNotification(
+                                    text: 'Hãy nhập địa chỉ để tìm kiếm',
+                                  ).buildSnackBar(),
+                                );
+                              }
+                            },
                             child: const Text(
-                              'TÌM',
+                              'TÌM XE',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w700,
