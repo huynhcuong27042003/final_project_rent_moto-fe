@@ -1,12 +1,11 @@
-// ignore_for_file: avoid_print
-
-import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firebase
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
+import 'package:final_project_rent_moto_fe/services/promoByCompany/applyPromoByCompany.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/fetch_motorcycle_isaccept_service.dart';
 import 'package:final_project_rent_moto_fe/app_icons_icons.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/get_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/add_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/delete_favoritelist_service.dart';
@@ -23,15 +22,19 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
   late Future<List<dynamic>> motorcycles;
   final FetchMotorcycleIsacceptService motorcycleService =
       FetchMotorcycleIsacceptService();
-  late String userEmail; // Store the user's email
-  Map<String, bool> motorcycleFavoriteState =
-      {}; // Track favorite state per motorcycle
+  late String userEmail;
+  Map<String, bool> motorcycleFavoriteState = {};
+  late Future<List<Map<String, dynamic>>> promotedMotorcyclesFuture;
+  final ApplyPromoByCompanyService applyPromoService =
+      ApplyPromoByCompanyService(); // Sử dụng service mới
 
   @override
   void initState() {
     super.initState();
     motorcycles = motorcycleService.fetchMotorcycle();
-    _loadUserFavoriteState(); // Load the user's favorite state when the widget is initialized
+    promotedMotorcyclesFuture = applyPromoService
+        .getPromotedMotorcycles(); // Sử dụng service mới để lấy khuyến mãi
+    _loadUserFavoriteState();
   }
 
   // Load the user's favorite state
@@ -86,12 +89,14 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
       if (motorcycleFavoriteState[motorcycleId]!) {
         // Add motorcycle to favorite list
         await addFavoriteList(email, [motorcycleId]);
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Đã thêm vào danh sách yêu thích!")),
         );
       } else {
         // Remove motorcycle from favorite list
         await deleteFavoriteListService(email, motorcycleId);
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Đã xóa khỏi danh sách yêu thích!")),
         );
@@ -123,31 +128,57 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
           ),
           const SizedBox(height: 5),
           FutureBuilder<List<dynamic>>(
-            future: motorcycles,
+            future: Future.wait([motorcycles, promotedMotorcyclesFuture]),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (snapshot.hasData) {
-                var data = snapshot.data!;
-                if (data.isEmpty) {
-                  return const Center(child: Text('No motorcycles found'));
-                }
+                var motorcyclesData = snapshot.data![0] as List<dynamic>;
+                var promotedMotorcyclesData =
+                    snapshot.data![1] as List<dynamic>;
+
+                Set<String> promotedNumberPlates = promotedMotorcyclesData
+                    .map((moto) => moto['numberPlate'] as String?)
+                    .where((plate) => plate != null)
+                    .cast<String>()
+                    .toSet();
+
+                List<dynamic> motorcyclesWithoutPromotion =
+                    motorcyclesData.where((motorcycle) {
+                  return !promotedNumberPlates
+                      .contains(motorcycle['numberPlate']);
+                }).toList();
+
+                List<dynamic> allMotorcycles = [
+                  ...promotedMotorcyclesData,
+                  ...motorcyclesWithoutPromotion,
+                ];
 
                 return SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
-                    children: data.map((motorcycle) {
+                    children: allMotorcycles.map((motorcycle) {
                       var info = motorcycle['informationMoto'] ?? {};
                       var address = motorcycle['address'] ?? {};
                       String motorcycleId = motorcycle['id'] ?? '';
                       bool isFavorite =
                           motorcycleFavoriteState[motorcycleId] ?? false;
 
+                      double originalPrice = (info['price'] ?? 0.0).toDouble();
+                      double discountedPrice = originalPrice;
+
+                      if (motorcycle['promotion'] != null) {
+                        double discountPercentage =
+                            (motorcycle['promotion']['percentage'] ?? 0.0)
+                                .toDouble();
+                        discountedPrice = originalPrice -
+                            (originalPrice * discountPercentage / 100);
+                      }
+
                       return InkWell(
                         onTap: () async {
-                          // Wait for the result from DetailMotoScreen
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -157,11 +188,9 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                             ),
                           );
 
-                          // Check if result is not null and the motorcycleId matches
                           if (result != null &&
                               result['motorcycleId'] == motorcycleId) {
                             setState(() {
-                              // Update the favorite state based on the result
                               motorcycleFavoriteState[motorcycleId] =
                                   result['isFavorite'];
                             });
@@ -172,10 +201,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                           margin: const EdgeInsets.only(right: 8),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              width: 0.2,
-                              color: Colors.black,
-                            ),
+                            border: Border.all(width: 0.2, color: Colors.black),
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(10),
@@ -189,22 +215,44 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
-                                      width: 0.2,
-                                      color: Colors.black,
-                                    ),
+                                        width: 0.2, color: Colors.black),
                                   ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: (info['images'] != null &&
-                                            info['images'].isNotEmpty)
-                                        ? Image.network(
-                                            info['images'][0],
-                                            fit: BoxFit.contain,
-                                          )
-                                        : Image.asset(
-                                            "assets/images/xe1.jpg",
-                                            fit: BoxFit.contain,
+                                  child: Stack(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: (info['images'] != null &&
+                                                info['images'].isNotEmpty)
+                                            ? Image.network(info['images'][0],
+                                                fit: BoxFit.cover)
+                                            : Image.asset(
+                                                "assets/images/xe1.jpg",
+                                                fit: BoxFit.cover,
+                                              ),
+                                      ),
+                                      if (motorcycle['promotion'] != null)
+                                        Positioned(
+                                          bottom: 8,
+                                          right: 8,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  Colors.red.withOpacity(0.8),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              'Giảm ${motorcycle['promotion']['percentage']}%',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
                                           ),
+                                        ),
+                                    ],
                                   ),
                                 ),
                                 Row(
@@ -253,8 +301,8 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                 ),
                                 Row(
                                   children: [
-                                    Icon(Icons.location_on),
-                                    SizedBox(width: 5),
+                                    const Icon(Icons.location_on),
+                                    const SizedBox(width: 5),
                                     Text(
                                         "${address['district']}, ${address['city']}"),
                                   ],
@@ -269,78 +317,55 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                   ),
                                   child: Column(
                                     children: [
-                                      Row(
-                                        children: const [
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.star,
-                                                color: Colors.yellow,
-                                                size: 30,
-                                              ),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                "5.0",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 18),
-                                              )
-                                            ],
+                                      const Row(
+                                        children: [
+                                          Icon(
+                                            Icons.star,
+                                            color: Colors.yellow,
+                                            size: 30,
                                           ),
-                                          SizedBox(width: 100),
-                                          Row(
-                                            children: [
-                                              Icon(AppIcons.suitcase),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                "10 chuyến",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 18),
-                                              )
-                                            ],
-                                          )
+                                          SizedBox(width: 5),
+                                          Text(
+                                            "5.0",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 18),
+                                          ),
                                         ],
                                       ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(left: 10),
-                                        child: Row(
-                                          children: [
+                                      Row(
+                                        children: [
+                                          // Hiển thị giá gốc với gạch ngang
+                                          if (motorcycle['promotion'] != null)
                                             Text(
                                               NumberFormat("#,###", "vi_VN")
-                                                  .format(info['price'] ?? 0),
+                                                  .format(originalPrice),
                                               style: const TextStyle(
-                                                color: Color.fromARGB(
-                                                    255, 253, 101, 20),
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 25,
+                                                decoration:
+                                                    TextDecoration.lineThrough,
+                                                fontSize: 20,
+                                                color: Colors.grey,
                                               ),
                                             ),
-                                            Text(
-                                              "đ",
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 18,
-                                              ),
+
+                                          // Hiển thị giá đã giảm hoặc giá gốc
+                                          Text(
+                                            NumberFormat("#,###", "vi_VN")
+                                                .format(discountedPrice),
+                                            style: const TextStyle(
+                                              color: Color.fromARGB(
+                                                  255, 253, 101, 20),
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 25,
                                             ),
-                                            const Padding(
-                                              padding: EdgeInsets.only(top: 10),
-                                              child: Text(
-                                                "/ngày",
-                                                style: TextStyle(
-                                                  color: Color.fromARGB(
-                                                      255, 83, 83, 83),
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                          ),
+                                          const Text(
+                                            " đ/ngày",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 16),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -354,12 +379,10 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                   ),
                 );
               } else {
-                return const Center(
-                  child: Text('Không có dữ liệu'),
-                );
+                return const Center(child: Text('No data available'));
               }
             },
-          ),
+          )
         ],
       ),
     );

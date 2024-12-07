@@ -1,3 +1,4 @@
+import 'package:final_project_rent_moto_fe/services/promoByCompany/applyPromoByCompany.dart'; // Import service applyPromoByCompanyService
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -15,6 +16,8 @@ class RentHomeSearchByLocation extends StatefulWidget {
 
 class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
   late Future<List<dynamic>> motorcyclesByLocation;
+  final ApplyPromoByCompanyService applyPromoService =
+      ApplyPromoByCompanyService(); // Khai báo service applyPromoByCompanyService
 
   @override
   void initState() {
@@ -24,30 +27,29 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
 
   Future<List<dynamic>> fetchMotorcyclesByLocation(String district) async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
+    List<Map<String, dynamic>> motorcycles = [];
 
     try {
-      // Tìm kiếm theo quận, loại trừ các xe có isHide = true
+      // Tìm kiếm xe máy theo quận
       final districtSnapshot = await firestore
           .collection('motorcycles')
           .where('address.district', isEqualTo: district)
-          .where('isHide',
-              isEqualTo: false) // Exclude motorcycles with isHide = true
+          .where('isHide', isEqualTo: false)
           .get();
 
-      var motorcycles = districtSnapshot.docs
+      motorcycles = districtSnapshot.docs
           .map((doc) => {
                 'id': doc.id,
                 ...doc.data(),
               })
           .toList();
 
-      // Nếu không có kết quả, tìm kiếm theo thành phố và loại trừ các xe có isHide = true
+      // Nếu không có xe trong quận, tìm kiếm theo thành phố
       if (motorcycles.isEmpty) {
         final citySnapshot = await firestore
             .collection('motorcycles')
             .where('address.city', isEqualTo: district)
-            .where('isHide',
-                isEqualTo: false) // Exclude motorcycles with isHide = true
+            .where('isHide', isEqualTo: false)
             .get();
 
         motorcycles = citySnapshot.docs
@@ -56,6 +58,20 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                   ...doc.data(),
                 })
             .toList();
+      }
+
+      // Lấy khuyến mãi từ ApplyPromoByCompanyService
+      final promotedMotorcycles =
+          await applyPromoService.getPromotedMotorcycles();
+
+      // Ghép thông tin khuyến mãi với xe máy
+      for (var motorcycle in motorcycles) {
+        for (var promo in promotedMotorcycles) {
+          if (motorcycle['companyMoto']['name'] ==
+              promo['companyMoto']['name']) {
+            motorcycle['promotion'] = promo['promotion'];
+          }
+        }
       }
 
       return motorcycles;
@@ -92,6 +108,16 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                 var motorcycle = data[index];
                 var info = motorcycle['informationMoto'] ?? {};
                 var address = motorcycle['address'] ?? {};
+                double originalPrice = (info['price'] ?? 0.0).toDouble();
+                double discountedPrice = originalPrice;
+
+                // Kiểm tra và tính giá sau khuyến mãi
+                if (motorcycle['promotion'] != null) {
+                  double discountPercentage =
+                      (motorcycle['promotion']['percentage'] ?? 0.0).toDouble();
+                  discountedPrice = originalPrice -
+                      (originalPrice * discountPercentage / 100);
+                }
 
                 return InkWell(
                   onTap: () async {
@@ -105,12 +131,10 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                       ),
                     );
 
-                    // Nếu kết quả không null và chứa dữ liệu mong đợi
                     if (result != null &&
                         result['motorcycleId'] == motorcycle['id']) {
                       setState(() {
                         // Cập nhật trạng thái yêu thích dựa trên kết quả từ DetailMotoScreen
-                        // Ví dụ nếu bạn cần cập nhật trạng thái yêu thích
                         motorcycle['isFavorite'] = result['isFavorite'];
                       });
                     }
@@ -129,10 +153,10 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Khung chứa hình ảnh
+                          // Hiển thị hình ảnh xe
                           Container(
-                            width: double.infinity, // Chiều rộng toàn màn hình
-                            height: 200, // Chiều cao cố định
+                            width: double.infinity,
+                            height: 200,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
@@ -146,18 +170,38 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                                       info['images'].isNotEmpty)
                                   ? Image.network(
                                       info['images'][0],
-                                      fit: BoxFit
-                                          .contain, // Khống chế ảnh để ảnh không bị cắt
+                                      fit: BoxFit.contain,
                                     )
                                   : Image.asset(
                                       "assets/images/logo.png",
-                                      fit: BoxFit
-                                          .contain, // Khống chế ảnh mặc định
+                                      fit: BoxFit.contain,
                                     ),
                             ),
                           ),
 
-                          // Hiển thị loại xe (ví dụ: "Xe số")
+                          // Hiển thị nhãn khuyến mãi
+                          if (motorcycle['promotion'] != null)
+                            Positioned(
+                              bottom: 8,
+                              right: 8,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.8),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'Giảm ${motorcycle['promotion']['percentage']}%',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                          // Hiển thị thông tin loại xe, tên xe, địa chỉ, và giá
                           Container(
                             margin: const EdgeInsets.only(top: 5),
                             padding: const EdgeInsets.all(5),
@@ -170,7 +214,6 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                               style: const TextStyle(fontSize: 12),
                             ),
                           ),
-                          // Hiển thị tên xe
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 5),
                             child: Text(
@@ -181,7 +224,6 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                               ),
                             ),
                           ),
-                          // Hiển thị địa chỉ
                           Row(
                             children: [
                               const Icon(Icons.location_on),
@@ -190,7 +232,6 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                                   "${address['district']}, ${address['city']}"),
                             ],
                           ),
-                          // Thông tin bổ sung và giá
                           Container(
                             margin: const EdgeInsets.symmetric(vertical: 10),
                             decoration: const BoxDecoration(
@@ -202,7 +243,7 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                               children: [
                                 Row(
                                   children: const [
-                                    // Hiển thị đánh giá sao
+                                    // Đánh giá sao
                                     Row(
                                       children: [
                                         Icon(
@@ -220,7 +261,6 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                                       ],
                                     ),
                                     SizedBox(width: 100),
-                                    // Hiển thị số chuyến
                                     Row(
                                       children: [
                                         Icon(Icons.motorcycle),
@@ -239,9 +279,20 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                                   padding: const EdgeInsets.only(left: 10),
                                   child: Row(
                                     children: [
+                                      if (motorcycle['promotion'] != null)
+                                        Text(
+                                          NumberFormat("#,###", "vi_VN")
+                                              .format(originalPrice),
+                                          style: const TextStyle(
+                                            decoration:
+                                                TextDecoration.lineThrough,
+                                            fontSize: 20,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
                                       Text(
                                         NumberFormat("#,###", "vi_VN")
-                                            .format(info['price'] ?? 0),
+                                            .format(discountedPrice),
                                         style: const TextStyle(
                                           color:
                                               Color.fromARGB(255, 253, 101, 20),
@@ -272,7 +323,7 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                                 ),
                               ],
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),

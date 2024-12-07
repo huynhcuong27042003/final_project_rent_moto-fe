@@ -37,7 +37,6 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
             .where('email', isEqualTo: email)
             .limit(1)
             .get();
-
         if (querySnapshot.docs.isNotEmpty) {
           DocumentSnapshot userDoc = querySnapshot.docs.first;
           String firestoreUserId = userDoc.id;
