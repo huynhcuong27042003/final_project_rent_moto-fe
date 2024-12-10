@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/admin/admin_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/review/review_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +52,9 @@ class _MyAppState extends State<MyApp> {
           // Điều hướng dựa trên role
           if (role == 'user') {
             setState(() {
-              _homeScreen = Dashboard();
+              _homeScreen = ReviewScreen(
+                numberPlate: "70D1-754.91",
+              );
             });
           } else if (role == 'admin') {
             setState(() {
