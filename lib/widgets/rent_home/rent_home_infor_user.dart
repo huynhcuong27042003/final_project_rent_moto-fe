@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project_rent_moto_fe/screens/favorite_list/list_favorite_by_user.dart';
 import 'package:final_project_rent_moto_fe/screens/notification/notification_list_by_user.dart';
+import 'package:final_project_rent_moto_fe/screens/notification/notification_list_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -194,11 +195,12 @@ class _RentHomeInforUserState extends State<RentHomeInforUser> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => NotificationListByUser(
-                                email:
-                                    FirebaseAuth.instance.currentUser?.email ??
-                                        '',
-                              ),
+                              // builder: (context) => NotificationListByUser(
+                              //   email:
+                              //       FirebaseAuth.instance.currentUser?.email ??
+                              //           '',
+                              // ),
+                              builder: (context) => NotificationListScreen(),
                             ),
                           );
                         },

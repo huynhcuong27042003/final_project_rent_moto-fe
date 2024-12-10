@@ -1,11 +1,11 @@
 // ignore_for_file: avoid_print, sort_child_properties_last
 
-import 'package:final_project_rent_moto_fe/screens/notification/notification_list_by_user.dart';
+import 'package:final_project_rent_moto_fe/screens/notification/notification_list_screen.dart';
 import 'package:final_project_rent_moto_fe/services/bookingMoto/accept_booking_service.dart';
 import 'package:final_project_rent_moto_fe/services/bookingMoto/get_booking_service.dart';
 import 'package:final_project_rent_moto_fe/services/notification/update_is_hide_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class BookingDetailsScreen extends StatefulWidget {
   final String bookingId;
@@ -28,6 +28,8 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
   bool isAccepting = false;
 
+  String? acceptTime;
+
   final AcceptBookingService acceptBookingService = AcceptBookingService();
 
   final GetBookingService service = GetBookingService();
@@ -47,8 +49,25 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     try {
       final response = await service.fetchBookingById(widget.bookingId);
       if (response != null && response['success'] == true) {
+        final booking = response['data'];
+
+        // Xử lý ngày thành DateTime hoặc chuỗi hiển thị
+        final String bookingDate = booking['bookingDate'] != null
+            ? DateFormat('yyyy-MM-dd HH:mm:ss')
+                .format(DateTime.parse(booking['bookingDate']).toLocal())
+            : 'N/A';
+
+        final String returnDate = booking['returnDate'] != null
+            ? DateFormat('yyyy-MM-dd HH:mm:ss')
+                .format(DateTime.parse(booking['returnDate']).toLocal())
+            : 'N/A';
+
         setState(() {
-          bookingData = response['data'];
+          bookingData = {
+            ...booking,
+            'bookingDate': bookingDate,
+            'returnDate': returnDate,
+          };
           isLoading = false;
         });
       } else {
@@ -85,7 +104,11 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     if (result['error'] != null) {
       _showErrorMessage(result['error']);
     } else {
-      _showErrorMessage('Booking accepted successfully!');
+      setState(() {
+        acceptTime =
+            DateFormat('yyyy-MM-dd HH:mm:ss').format(result['acceptTime']);
+      });
+      _showErrorMessage(result['message']);
     }
   }
 
@@ -110,17 +133,22 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       appBar: AppBar(
         title: const Text(
           'Chi Tiết Đặt Xe',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
-        backgroundColor: Colors.blueAccent,
+        centerTitle: true, // Đặt tiêu đề nằm giữa
+        backgroundColor: const Color(0xFFF49C21),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+          ),
           onPressed: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => NotificationListByUser(
-                    email: FirebaseAuth.instance.currentUser?.email ?? ''),
+                // builder: (context) => NotificationListByUser(
+                //     email: FirebaseAuth.instance.currentUser?.email ?? ''),
+                builder: (context) => NotificationListScreen(),
               ),
             );
           },
@@ -142,16 +170,6 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Center(
-                        child: const Text(
-                          'Thông tin đặt xe',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blueAccent,
-                          ),
-                        ),
-                      ),
                       const SizedBox(height: 40),
                       Card(
                         elevation: 4,
@@ -208,20 +226,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                 : const Icon(Icons.check),
                             label: const Text('Chấp nhận'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                              textStyle: const TextStyle(fontSize: 16),
-                            ),
-                          ),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              // Handle Reject action
-                            },
-                            icon: const Icon(Icons.close),
-                            label: const Text('Từ chối'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
+                              backgroundColor: const Color(0xFFF49C21),
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 24, vertical: 12),
                               textStyle: const TextStyle(fontSize: 16),

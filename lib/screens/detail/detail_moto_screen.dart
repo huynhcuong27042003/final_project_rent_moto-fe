@@ -1,9 +1,10 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, use_build_context_synchronously, annotate_overrides
 import 'package:final_project_rent_moto_fe/screens/map/location_of-moto.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/get_user_data_service.dart';
 import 'package:final_project_rent_moto_fe/services/bookingMoto/addbookingService.dart';
 import 'package:final_project_rent_moto_fe/services/fcm/fcm_service.dart';
 import 'package:final_project_rent_moto_fe/services/notification/notification_service.dart';
+import 'package:final_project_rent_moto_fe/services/promo/apply_promo_service.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_appbar.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/calendar_rental.dart';
@@ -97,26 +98,23 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
     required DateTime? pickupDateTime,
     required DateTime? returnDateTime,
   }) async {
-    // Get the current authenticated user
     User? user = FirebaseAuth.instance.currentUser;
 
-    // Get the email of the motorcycle owner
     String email = widget.motorcycle['email'] ?? 'No email';
 
-    // Check if the user is logged in and email does not match the motorcycle owner's email
     if (user != null && user.email != email) {
       if (pickupDateTime != null && returnDateTime != null) {
         int numberOfRentalDay =
             returnDateTime.difference(pickupDateTime).inDays;
 
         if (numberOfRentalDay > 0) {
-          // Call service to add booking
           Map<String, dynamic> response = await _addBookingService.addBooking(
             email: user.email!, // Use the current user's email
             numberPlate: numberPlate,
             bookingDate: pickupDateTime,
             returnDate: returnDateTime,
             numberOfRentalDay: numberOfRentalDay,
+            totalAmount: originalTotalAmount,
           );
 
           String bookingId = response['id'];
@@ -124,9 +122,12 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
           String accountOwner = widget.motorcycle['email'] ?? 'No email';
 
           if (fcmToken.isNotEmpty) {
-            // Send push notification to the motorcycle owner
-            await fcmService.sendPushNotification(fcmToken, 'Yêu cầu đặt xe',
-                'Xe máy của bạn đã được đặt!', accountOwner);
+            await fcmService.sendPushNotification(
+                fcmToken,
+                'Yêu cầu đặt xe',
+                'Xe máy của bạn đã được đặt!',
+                accountOwner,
+                'NotificationListScreen');
 
             await NotificationService().addNotification(
                 title: 'Yêu cầu đặt xe',
@@ -134,7 +135,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                 email: accountOwner,
                 bookingId: bookingId,
                 bookingDate: pickupDateTime,
-                returnDate: returnDate);
+                returnDate: returnDateTime);
           } else {
             await NotificationService().addNotification(
                 title: 'Yêu cầu đặt xe',
@@ -142,7 +143,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                 email: accountOwner,
                 bookingId: bookingId,
                 bookingDate: pickupDateTime,
-                returnDate: returnDate);
+                returnDate: returnDateTime);
           }
         } else {
           print('Return date must be after the pickup date!');
@@ -224,7 +225,6 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
           children: [
             Column(
               children: [
-                // Image section with dynamic image loading
                 Container(
                     decoration: BoxDecoration(
                       color: Colors.grey[200],
@@ -555,6 +555,96 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                         ),
                       ),
                     ],
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          TextEditingController discountController =
+                              TextEditingController();
+                          ApplyPromoService promoService = ApplyPromoService();
+
+                          return AlertDialog(
+                            title: const Text('Nhập Mã Giảm Giá'),
+                            content: TextField(
+                              controller: discountController,
+                              decoration: const InputDecoration(
+                                hintText: 'Nhập mã giảm giá của bạn',
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () async {
+                                  String promoCode =
+                                      discountController.text.trim();
+
+                                  try {
+                                    // Kiểm tra xem mã giảm giá đã được áp dụng chưa
+                                    if (promoCode == appliedPromoCode) {
+                                      promoService.showSnackbar(
+                                        context,
+                                        'Mã giảm giá này đã được áp dụng!',
+                                        isError: true,
+                                      );
+                                      Navigator.of(context).pop();
+                                      return;
+                                    }
+                                    // Gọi service để xử lý áp dụng mã khuyến mãi
+                                    await promoService.applyPromoHandler(
+                                      context,
+                                      promoCode,
+                                      originalTotalAmount,
+                                    );
+
+                                    // Lấy lại tổng tiền sau khi áp dụng khuyến mãi
+                                    Map<String, dynamic>? promoDetails =
+                                        await promoService
+                                            .fetchPromoDetails(promoCode);
+
+                                    if (promoDetails != null) {
+                                      int newTotal =
+                                          await promoService.applyPromo(
+                                        promoCode: promoCode,
+                                        totalAmount: originalTotalAmount,
+                                        promoDetails: promoDetails,
+                                      );
+                                      setState(() {
+                                        totalAmount =
+                                            newTotal; // Cập nhật tổng tiền
+                                        appliedPromoCode =
+                                            promoCode; // Lưu mã đã áp dụng
+                                      });
+                                    }
+
+                                    Navigator.of(context).pop();
+                                  } catch (e) {
+                                    promoService.showSnackbar(
+                                      context,
+                                      e.toString(),
+                                      isError: true,
+                                    );
+                                  }
+                                },
+                                child: const Text('Áp Dụng'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('Hủy'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    },
+                    child: const Text(
+                      'Mã Giảm Giá',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
                   ),
                 ],
               ),

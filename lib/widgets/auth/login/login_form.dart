@@ -5,7 +5,6 @@ import 'package:final_project_rent_moto_fe/screens/admin/admin_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/forgot_password/forgot_password_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_enter_email_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
-import 'package:final_project_rent_moto_fe/screens/notification/notification_list_by_user.dart';
 import 'package:final_project_rent_moto_fe/services/auth/login_service.dart';
 import 'package:final_project_rent_moto_fe/services/auth/validator_service.dart';
 import 'package:final_project_rent_moto_fe/services/fcm/fcm_service.dart';
@@ -13,7 +12,6 @@ import 'package:final_project_rent_moto_fe/widgets/auth/button_auth.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/button_link_auth.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/text_field_password_auth.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/text_field_username_auth.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

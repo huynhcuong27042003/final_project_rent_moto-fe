@@ -1,7 +1,10 @@
+// ignore_for_file: avoid_print, unused_element
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/admin/admin_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/notification/notification_list_screen.dart';
 import 'package:final_project_rent_moto_fe/services/fcm/fcm_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -15,14 +18,6 @@ Future<void> main() async {
   final FCMService fcmService = FCMService();
   fcmService.initializeFCM();
 
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    if (message.notification != null) {
-      print('Message Title: ${message.notification?.title}');
-      print('Message Body: ${message.notification?.body}');
-      // Gọi hiển thị notification bằng flutter_local_notifications
-    }
-  });
-
   runApp(const MyApp());
 }
 
@@ -35,6 +30,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Widget? _homeScreen;
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
@@ -104,6 +100,18 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+
+  // Hàm xử lý khi người dùng nhấp vào thông báo
+  void _handleNotificationClick(RemoteMessage message) {
+    final screen = message.data['screen'];
+    if (screen == 'NotificationListScreen') {
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(
+          builder: (context) => NotificationListScreen(),
+        ),
+      );
+    }
   }
 
   @override

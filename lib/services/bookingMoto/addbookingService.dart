@@ -10,12 +10,18 @@ class AddBookingService {
     required DateTime bookingDate,
     required DateTime returnDate,
     required int numberOfRentalDay,
+    required int totalAmount,
     bool isAccept = false,
     bool isHide = false,
   }) async {
     final url = Uri.parse(baseUrl);
-    final adjustedBookingDate = bookingDate.toUtc().add(Duration(hours: 7));
-    final adjustedReturnDate = returnDate.toUtc().add(Duration(hours: 7));
+
+    // Convert booking and return dates to ISO format, keeping Vietnam timezone
+    final adjustedBookingDate =
+        bookingDate.toUtc(); // Không cần add 7 giờ vì backend tự xử lý múi giờ
+    final adjustedReturnDate =
+        returnDate.toUtc(); // Không cần add 7 giờ vì backend tự xử lý múi giờ
+
     try {
       final response = await http.post(
         url,
@@ -25,15 +31,17 @@ class AddBookingService {
         body: jsonEncode({
           'email': email,
           'numberPlate': numberPlate,
-          'bookingDate':
-              adjustedBookingDate.toIso8601String(), // ISO 8601 cho UTC
+          'bookingDate': adjustedBookingDate.toIso8601String(),
           'returnDate': adjustedReturnDate.toIso8601String(),
           'numberOfRentalDay': numberOfRentalDay,
+          'totalAmount': totalAmount,
+          'isAccept': isAccept,
+          'isHide': isHide,
         }),
       );
 
       if (response.statusCode == 201) {
-        return jsonDecode(response.body);
+        return jsonDecode(response.body); // Return the response as a map
       } else {
         throw Exception('Failed to add booking: ${response.body}');
       }

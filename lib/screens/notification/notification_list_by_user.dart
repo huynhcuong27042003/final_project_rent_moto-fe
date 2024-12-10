@@ -1,10 +1,11 @@
-// ignore_for_file: use_key_in_widget_constructors
+// ignore_for_file: use_key_in_widget_constructors, depend_on_referenced_packages
 import 'package:final_project_rent_moto_fe/screens/booking/booking_details_screen.dart';
-import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/services/notification/notification_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/standalone.dart' as tz;
 
 class NotificationListByUser extends StatelessWidget {
   final String email;
@@ -16,25 +17,11 @@ class NotificationListByUser extends StatelessWidget {
     final User? currentUser = FirebaseAuth.instance.currentUser;
     final String email = currentUser?.email ?? '';
 
+    tz.initializeTimeZones();
+
+    final tz.Location vietnamLocation = tz.getLocation('Asia/Ho_Chi_Minh');
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Thông báo',
-          style: TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 25, color: Colors.white),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back), // Back button
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => Dashboard()),
-            );
-          },
-        ),
-        centerTitle: true,
-        backgroundColor: const Color(0xFFF49C21),
-      ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: NotificationService().getNotificationsByEmail(email),
         builder: (context, snapshot) {
@@ -46,14 +33,10 @@ class NotificationListByUser extends StatelessWidget {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          // if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          //   return Center(child: Text('No notifications found.'));
-          // }
-
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return FutureBuilder(
               future:
-                  Future.delayed(const Duration(seconds: 2)), // Độ trễ 2 giây
+                  Future.delayed(const Duration(seconds: 1)), // Độ trễ 2 giây
               builder: (context, snapshotFuture) {
                 if (snapshotFuture.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -93,15 +76,21 @@ class NotificationListByUser extends StatelessWidget {
               String id =
                   notification['id']; // This is the document ID from Firestore
 
-              // Parse and format dates
+              // Parse dates and convert to Vietnam timezone
               DateTime bookingDate =
                   DateTime.parse(notification['bookingDate']);
               DateTime returnDate = DateTime.parse(notification['returnDate']);
 
+              final bookingDateInVietnam =
+                  tz.TZDateTime.from(bookingDate, vietnamLocation);
+              final returnDateInVietnam =
+                  tz.TZDateTime.from(returnDate, vietnamLocation);
+
+              // Format dates
               String formattedBookingDate =
-                  DateFormat('yyyy-MM-dd – HH:mm').format(bookingDate);
+                  DateFormat('yyyy-MM-dd – HH:mm').format(bookingDateInVietnam);
               String formattedReturnDate =
-                  DateFormat('yyyy-MM-dd – HH:mm').format(returnDate);
+                  DateFormat('yyyy-MM-dd – HH:mm').format(returnDateInVietnam);
 
               return Card(
                 margin: EdgeInsets.symmetric(vertical: 8),

@@ -118,8 +118,8 @@ class FCMService {
     }
   }
 
-  Future<void> sendPushNotification(
-      String fcmToken, String title, String message, String email) async {
+  Future<void> sendPushNotification(String fcmToken, String title,
+      String message, String email, String screen) async {
     const String backendEndpoint = 'http://10.0.2.2:3000/api/send-notification';
 
     try {
@@ -134,7 +134,10 @@ class FCMService {
             'title': title,
             'body': message,
           },
-          'accountInfo': {'email': email},
+          'accountInfo': {
+            'email': email,
+          },
+          'screen': screen, // Thêm màn hình vào dữ liệu gửi đi
         }),
       );
 

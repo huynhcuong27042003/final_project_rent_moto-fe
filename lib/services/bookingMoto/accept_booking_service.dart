@@ -13,7 +13,15 @@ class AcceptBookingService {
 
       if (response.statusCode == 200) {
         // If the server returns a successful response
-        return json.decode(response.body); // Return the response body as a map
+        final responseData =
+            json.decode(response.body); // Decode the response body
+
+        // You can handle the response like this:
+        return {
+          'message': responseData['message'], // Message from backend
+          'acceptTime': DateTime.parse(responseData[
+              'acceptTime']), // Convert timestamp to DateTime object
+        };
       } else {
         // If the response is not successful, return an error message
         return {'error': 'Failed to accept the booking.'};
