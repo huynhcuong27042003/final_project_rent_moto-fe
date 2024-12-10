@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project_rent_moto_fe/screens/admin/admin_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/forgot_password/forgot_password_screen.dart';
@@ -5,6 +7,7 @@ import 'package:final_project_rent_moto_fe/screens/auth/signup/signup_enter_emai
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/services/auth/login_service.dart';
 import 'package:final_project_rent_moto_fe/services/auth/validator_service.dart';
+import 'package:final_project_rent_moto_fe/services/fcm/fcm_service.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/button_auth.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/button_link_auth.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/text_field_password_auth.dart';
@@ -26,6 +29,7 @@ class _LoginFormState extends State<LoginForm> {
   bool _obscureText = true;
   final _validatorService = ValidatorService();
   final LoginService _loginService = LoginService();
+  FCMService fcmService = FCMService();
 
   void _login() async {
     final email = _controllerUserEmail.text;
@@ -52,13 +56,13 @@ class _LoginFormState extends State<LoginForm> {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.setBool('isLogin', true);
 
+          await fcmService.storeFcmTokenForMotorcycleOwner();
+
           // Điều hướng dựa trên role
           if (role == 'user') {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                builder: (context) => Dashboard(),
-              ),
+              MaterialPageRoute(builder: (context) => Dashboard()),
             );
           } else if (role == 'admin') {
             Navigator.pushReplacement(

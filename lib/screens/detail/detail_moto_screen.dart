@@ -1,5 +1,9 @@
+// ignore_for_file: avoid_print, use_build_context_synchronously, annotate_overrides
 import 'package:final_project_rent_moto_fe/screens/map/location_of-moto.dart';
+import 'package:final_project_rent_moto_fe/services/MotorCycle/get_user_data_service.dart';
 import 'package:final_project_rent_moto_fe/services/bookingMoto/addbookingService.dart';
+import 'package:final_project_rent_moto_fe/services/fcm/fcm_service.dart';
+import 'package:final_project_rent_moto_fe/services/notification/notification_service.dart';
 import 'package:final_project_rent_moto_fe/services/promo/apply_promo_service.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_appbar.dart';
@@ -34,6 +38,8 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
   final _addBookingService = AddBookingService();
   LatLng? _mapCoordinates;
   String? appliedPromoCode;
+  Map<String, dynamic>? userData;
+  final FCMService fcmService = FCMService();
   void initState() {
     super.initState();
     pickupDate = DateTime.now();
@@ -41,6 +47,8 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
     _updateDateTimes(); // Cập nhật giá trị pickupDateTime và returnDateTime ngay khi khởi tạo
     _calculateTotalAmount();
     _fetchCoordinates();
+    String email = widget.motorcycle['email'] ?? 'Không có email';
+    getUserData(email);
   }
 
   // Phương thức cập nhật pickupDateTime và returnDateTime
@@ -90,28 +98,63 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
     required DateTime? pickupDateTime,
     required DateTime? returnDateTime,
   }) async {
-    // Lấy thông tin người dùng đang đăng nhập
     User? user = FirebaseAuth.instance.currentUser;
 
-    if (user != null && pickupDateTime != null && returnDateTime != null) {
-      String email = user.email!;
+    String email = widget.motorcycle['email'] ?? 'No email';
 
-      int numberOfRentalDay = returnDateTime.difference(pickupDateTime).inDays;
+    if (user != null && user.email != email) {
+      if (pickupDateTime != null && returnDateTime != null) {
+        int numberOfRentalDay =
+            returnDateTime.difference(pickupDateTime).inDays;
 
-      if (numberOfRentalDay > 0) {
-        // Gọi service để thêm booking
-        await _addBookingService.addBooking(
-          email: email,
-          numberPlate: numberPlate,
-          bookingDate: pickupDateTime,
-          returnDate: returnDateTime,
-          numberOfRentalDay: numberOfRentalDay,
-        );
+        if (numberOfRentalDay > 0) {
+          Map<String, dynamic> response = await _addBookingService.addBooking(
+            email: user.email!, // Use the current user's email
+            numberPlate: numberPlate,
+            bookingDate: pickupDateTime,
+            returnDate: returnDateTime,
+            numberOfRentalDay: numberOfRentalDay,
+            totalAmount: originalTotalAmount,
+          );
+
+          String bookingId = response['id'];
+          String fcmToken = await fcmService.getFcmTokenForOwner(email);
+          String accountOwner = widget.motorcycle['email'] ?? 'No email';
+
+          if (fcmToken.isNotEmpty) {
+            await fcmService.sendPushNotification(
+                fcmToken,
+                'Yêu cầu đặt xe',
+                'Xe máy của bạn đã được đặt!',
+                accountOwner,
+                'NotificationListScreen');
+
+            await NotificationService().addNotification(
+                title: 'Yêu cầu đặt xe',
+                body: 'Xe máy của bạn đã được đặt!',
+                email: accountOwner,
+                bookingId: bookingId,
+                bookingDate: pickupDateTime,
+                returnDate: returnDateTime);
+          } else {
+            await NotificationService().addNotification(
+                title: 'Yêu cầu đặt xe',
+                body: 'Xe máy của bạn đã được đặt!',
+                email: accountOwner,
+                bookingId: bookingId,
+                bookingDate: pickupDateTime,
+                returnDate: returnDateTime);
+          }
+        } else {
+          print('Return date must be after the pickup date!');
+        }
       } else {
-        print('Ngày trả xe phải sau ngày thuê!');
+        print(
+            'Incomplete information: Please check the pickup or return date!');
       }
     } else {
-      print('Thông tin không đầy đủ: Vui lòng kiểm tra email hoặc ngày thuê!');
+      // If the emails match, do not allow booking
+      print('Booking cannot be added, email is not allowed.');
     }
   }
 
@@ -151,7 +194,17 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
       });
     } catch (e) {
       print('Lỗi khi lấy tọa độ: $e');
-      // Xử lý lỗi nếu không lấy được tọa độ
+    }
+  }
+
+  void getUserData(String email) async {
+    UserService userService = UserService();
+    Map<String, dynamic>? data = await userService.getUserData(email);
+
+    if (data != null) {
+      setState(() {
+        userData = data;
+      });
     }
   }
 
@@ -161,6 +214,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
     var address = widget.motorcycle['address'] ?? {};
     String district = address['district'];
     String city = address['city'];
+    String email = widget.motorcycle['email'] ?? 'Không có email';
 
     return Scaffold(
       appBar: DetailMotoAppBar(motorcycle: widget.motorcycle),
@@ -171,45 +225,36 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
           children: [
             Column(
               children: [
-                // Image section with dynamic image loading
                 Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Builder(
-                      builder: (context) {
-                        // Kiểm tra URL của ảnh trước khi load
-                        String imageUrl = (info['images'] != null &&
-                                info['images'].isNotEmpty)
-                            ? info['images']
-                                [0] // Nếu có ảnh thì dùng ảnh đầu tiên
-                            : 'assets/images/xe1.jpg'; // Nếu không có ảnh thì dùng ảnh mặc định từ assets
-
-                        // Kiểm tra URL hợp lệ cho Image.network
-                        Uri? uri = Uri.tryParse(imageUrl);
-                        if (uri != null && uri.isAbsolute) {
-                          // Nếu URL hợp lệ (URL mạng), sử dụng NetworkImage
-                          return Image.network(
-                            imageUrl,
-                            height: 200,
-                            width: double.infinity,
-                            fit: BoxFit.contain,
-                          );
-                        } else {
-                          // Nếu không phải URL hợp lệ, sử dụng AssetImage từ thư mục assets
-                          return Image.asset(
-                            imageUrl, // Dùng ảnh từ thư mục assets
-                            height: 200,
-                            width: double.infinity,
-                            fit: BoxFit.cover,
-                          );
-                        }
-                      },
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
                     ),
-                  ),
-                ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Builder(
+                        builder: (context) {
+                          String imageUrl = (info['images'] != null &&
+                                  info['images'].isNotEmpty)
+                              ? info['images'][0]
+                              : 'assets/images/xe1.jpg';
+                          Uri? uri = Uri.tryParse(imageUrl);
+                          if (uri != null && uri.isAbsolute) {
+                            return Image.network(
+                              imageUrl,
+                              height: 200,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            );
+                          } else {
+                            return Image.asset(
+                              imageUrl,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            );
+                          }
+                        },
+                      ),
+                    )),
                 Padding(
                   padding: const EdgeInsets.all(2.0),
                   child: Column(
@@ -418,6 +463,58 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
               ],
             ),
             const SizedBox(height: 16),
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundImage: userData?['information']['avatar'] != null &&
+                          userData?['information']['avatar'].isNotEmpty
+                      ? NetworkImage(userData?['information']
+                          ['avatar']) // Nếu có URL hợp lệ
+                      : AssetImage('assets/images/xe1.jpg')
+                          as ImageProvider, // Nếu không, dùng ảnh mặc định từ assets
+                ),
+
+                const SizedBox(width: 8),
+
+                // User's name, Rating, and number of trips
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      userData?['information']['name'] ?? 'User Name',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Row(
+                      children: const [
+                        Icon(Icons.star, color: Colors.yellow, size: 16),
+                        SizedBox(width: 4),
+                        Text(
+                          '5.0', // Đánh giá (Có thể lấy từ dữ liệu nếu có)
+                          style: TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(Icons.directions_car, size: 16),
+                        SizedBox(width: 4),
+                        Text(
+                          '36 chuyến', // Số chuyến (Có thể lấy từ dữ liệu nếu có)
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Center(
+              child: Text(
+                "Email: $email", // Display email, or fallback if not available
+                style: TextStyle(fontSize: 14, color: Colors.black54),
+              ),
+            ),
+            const SizedBox(height: 16),
             const DetailMotoBodyEvaluate(),
           ],
         ),
@@ -512,7 +609,6 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                                         totalAmount: originalTotalAmount,
                                         promoDetails: promoDetails,
                                       );
-
                                       setState(() {
                                         totalAmount =
                                             newTotal; // Cập nhật tổng tiền

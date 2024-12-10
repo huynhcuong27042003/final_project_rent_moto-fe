@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:final_project_rent_moto_fe/app_icons_icons.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
@@ -33,7 +35,7 @@ class _SearchMotoScreenState extends State<SearchMotoScreen> {
   late String userEmail; // Store the user's email
   Map<String, bool> motorcycleFavoriteState = {};
   late LatLng userLocation;
-  bool isLoading = true; // Dùng để kiểm tra trạng thái tải dữ liệu
+  bool isLoading = true;
   Map<String, double> distances = {};
   List<dynamic> sortedMotorcycles = [];
   @override
