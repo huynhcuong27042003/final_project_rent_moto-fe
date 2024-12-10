@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:final_project_rent_moto_fe/app_icons_icons.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';

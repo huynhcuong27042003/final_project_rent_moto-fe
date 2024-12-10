@@ -1,6 +1,9 @@
+// ignore_for_file: avoid_print
+
 import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycle_list_by_user.dart';
 import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
+import 'package:final_project_rent_moto_fe/services/fcm/fcm_service.dart';
 import 'package:final_project_rent_moto_fe/widgets/users/user_infor_change_password.dart';
 import 'package:final_project_rent_moto_fe/screens/favorite_list/list_favorite_by_user.dart';
 import 'package:final_project_rent_moto_fe/widgets/users/user_infor_myaccount_form.dart';
@@ -166,6 +169,8 @@ class _UserInforBodyState extends State<UserInforBody> {
                       SizedBox(height: 10),
                       ElevatedButton.icon(
                         onPressed: () async {
+                          await FCMService().removeFcmTokenOnSignOut();
+
                           final prefs = await SharedPreferences.getInstance();
                           await prefs.setBool('isLogin', false);
                           await FirebaseAuth.instance.signOut();

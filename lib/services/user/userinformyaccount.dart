@@ -1,4 +1,6 @@
 // lib/services/user_infor_myaccount_service.dart
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
