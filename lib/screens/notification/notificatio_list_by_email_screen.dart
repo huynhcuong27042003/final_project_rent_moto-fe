@@ -1,5 +1,9 @@
+// ignore_for_file: avoid_print, use_build_context_synchronously
+
 import 'package:final_project_rent_moto_fe/services/bookingMoto/get_booking_service.dart';
 import 'package:final_project_rent_moto_fe/services/bookingMoto/update_is_hide_booking_service.dart';
+import 'package:final_project_rent_moto_fe/services/invoice/invoice_service.dart';
+import 'package:final_project_rent_moto_fe/services/momo/momo_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -26,6 +30,78 @@ class _NotificatioListByEmailScreenState
     final User? currentUser = FirebaseAuth.instance.currentUser;
     final String email = currentUser?.email ?? '';
     _bookings = GetBookingService().getBookingsByEmail(email);
+  }
+
+  Future<void> handlePayment(BuildContext context, dynamic booking) async {
+    MomoService momoService = MomoService();
+    String? orderId = await momoService.initiateMoMoPayment(
+      amount: booking['motorbikeRentalDeposit'].toString(),
+    );
+
+    if (orderId == null) {
+      print('OrderId is null. Payment initialization failed.');
+      return;
+    }
+
+    const int maxRetries = 5;
+    const Duration retryInterval = Duration(seconds: 3);
+    int attempt = 0;
+    Map<String, dynamic>? transactionResult;
+
+    while (attempt < maxRetries) {
+      attempt++;
+      transactionResult =
+          await momoService.checkTransactionStatus(orderId: orderId);
+
+      if (transactionResult != null) {
+        if (transactionResult['resultCode'] == 0) {
+          try {
+            String invoiceId = await InvoiceService.addInvoice(
+              booking['id'],
+              booking['totalAmount'].toString(),
+              booking['motorbikeRentalDeposit'].toString(),
+            );
+            await UpdateIsHideBookingService().hideBooking(booking['id']);
+            print('Invoice created successfully: $invoiceId');
+          } catch (e) {
+            print('Error creating invoice: $e');
+          }
+          return;
+        } else if (transactionResult['resultCode'] == 1000) {
+          print('Transaction is pending. Waiting for confirmation.');
+        } else {
+          print(
+              'Transaction failed. Result code: ${transactionResult['resultCode']}');
+          break;
+        }
+      } else {
+        print('Transaction result is null. Retrying...');
+      }
+
+      await Future.delayed(retryInterval);
+    }
+
+    print('Transaction failed or timed out after $maxRetries attempts.');
+  }
+
+  void showLoadingDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        content: Row(
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(width: 16),
+            Expanded(child: Text(message)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void hideLoadingDialog(BuildContext context) {
+    Navigator.of(context).pop();
   }
 
   @override
@@ -149,13 +225,15 @@ class _NotificatioListByEmailScreenState
                               )
                             : Center(
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                    // Xử lý thanh toán ở đây
-                                    print('Thanh toán cho booking');
+                                  onPressed: () async {
+                                    showLoadingDialog(
+                                        context, 'Đang kiểm tra thanh toán...');
+                                    await handlePayment(context, booking);
+                                    hideLoadingDialog(context);
                                   },
                                   child: const Text('Thanh toán'),
                                 ),
-                              ),
+                              )
                       ],
                     ),
                   ),

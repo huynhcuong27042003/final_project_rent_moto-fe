@@ -10,6 +10,7 @@ plugins {
 
 android {
     namespace = "com.example.final_project_rent_moto_fe"
+    
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
