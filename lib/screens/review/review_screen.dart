@@ -1,3 +1,5 @@
+import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
+import 'package:final_project_rent_moto_fe/services/motorCycle/motorcycle_service.dart';
 import 'package:final_project_rent_moto_fe/services/review/add_review_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -15,15 +17,27 @@ class _ReviewScreenState extends State<ReviewScreen> {
   final _controllerComment = TextEditingController();
   final _addReviewService = AddReviewService();
   // Thông tin xe máy
-  String bikeModel = "Yamaha R15";
-  String bikePlate = "70D1-754.91";
-  String bikeType = "Xe thể thao";
-  String bikeImageUrl =
-      "https://firebasestorage.googleapis.com/v0/b/final-project-e5878.appspot.com/o/motorcycle_images%2F1732703289897.jpg?alt=media&token=3473540b-ef74-4cb5-b6db-de4d7aa91cf9"; // Thay đường dẫn ảnh thật
+  final MotorcycleService _motorcycleService = MotorcycleService();
+  Map<String, dynamic>? motorcycleData;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _loadMotorcycleData();
+  }
 
   void updateRating(int newRating) {
     setState(() {
       rating = newRating;
+    });
+  }
+
+  Future<void> _loadMotorcycleData() async {
+    Map<String, dynamic>? data =
+        await _motorcycleService.getMotorcycleByNumberPlate(widget.numberPlate);
+    setState(() {
+      motorcycleData = data;
     });
   }
 
@@ -36,6 +50,13 @@ class _ReviewScreenState extends State<ReviewScreen> {
           widget.numberPlate,
           rating,
           _controllerComment.text.trim(),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                const Dashboard(initialIndex: 1), // Chỉ số UserInforScreen
+          ),
         );
         print("Đánh giá thành công");
       } else {
@@ -79,7 +100,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: Image.network(
-                          bikeImageUrl,
+                          motorcycleData?['informationMoto']['images'][0] ?? '',
                           width: double.infinity,
                           height: 200,
                           fit: BoxFit.cover,
@@ -95,9 +116,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
                         ),
                       ),
                       SizedBox(height: 10),
-                      Text("Mẫu xe: $bikeModel"),
-                      Text("Biển số: $bikePlate"),
-                      Text("Loại xe: $bikeType"),
+                      Text(
+                          "Mẫu xe: ${motorcycleData?['informationMoto']['nameMoto'] ?? 'Không có'}"),
+                      Text(
+                          "Biển số: ${motorcycleData?['numberPlate'] ?? 'Không có'}"),
+                      Text(
+                          "Loại xe: ${motorcycleData?['category']['name'] ?? 'Không có'}"),
                     ],
                   ),
                 ),

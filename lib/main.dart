@@ -62,9 +62,7 @@ class _MyAppState extends State<MyApp> {
           // Điều hướng dựa trên role
           if (role == 'user') {
             setState(() {
-              _homeScreen = ReviewScreen(
-                numberPlate: "70D1-754.91",
-              );
+              _homeScreen = Dashboard();
             });
           } else if (role == 'admin') {
             setState(() {
