@@ -16,8 +16,8 @@ class RentHomeSearchByLocation extends StatefulWidget {
 
 class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
   late Future<List<dynamic>> motorcyclesByLocation;
-  final ApplyPromoByCompanyService applyPromoService =
-      ApplyPromoByCompanyService(); // Khai báo service applyPromoByCompanyService
+  final ApplyPromoByCompanyService _applyPromoService =
+      ApplyPromoByCompanyService(); // Tạo đối tượng dịch vụ
 
   @override
   void initState() {
@@ -60,18 +60,22 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
             .toList();
       }
 
-      // Lấy khuyến mãi từ ApplyPromoByCompanyService
-      final promotedMotorcycles =
-          await applyPromoService.getPromotedMotorcycles();
-
-      // Ghép thông tin khuyến mãi với xe máy
+      // Tính toán giá sau khuyến mãi cho từng xe
       for (var motorcycle in motorcycles) {
-        for (var promo in promotedMotorcycles) {
-          if (motorcycle['companyMoto']['name'] ==
-              promo['companyMoto']['name']) {
-            motorcycle['promotion'] = promo['promotion'];
-          }
+        var info = motorcycle['informationMoto'] ?? {};
+        double originalPrice = (info['price'] ?? 0.0).toDouble();
+        double discountedPrice = originalPrice;
+
+        // Gọi dịch vụ áp dụng khuyến mãi
+        try {
+          discountedPrice =
+              await _applyPromoService.applyPromotion(motorcycle['id']);
+        } catch (e) {
+          print("Lỗi khi áp dụng khuyến mãi cho xe ${motorcycle['id']}: $e");
         }
+
+        // Cập nhật giá đã tính vào dữ liệu
+        motorcycle['discountedPrice'] = discountedPrice;
       }
 
       return motorcycles;
@@ -109,15 +113,8 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                 var info = motorcycle['informationMoto'] ?? {};
                 var address = motorcycle['address'] ?? {};
                 double originalPrice = (info['price'] ?? 0.0).toDouble();
-                double discountedPrice = originalPrice;
-
-                // Kiểm tra và tính giá sau khuyến mãi
-                if (motorcycle['promotion'] != null) {
-                  double discountPercentage =
-                      (motorcycle['promotion']['percentage'] ?? 0.0).toDouble();
-                  discountedPrice = originalPrice -
-                      (originalPrice * discountPercentage / 100);
-                }
+                double discountedPrice =
+                    motorcycle['discountedPrice'] ?? originalPrice;
 
                 return InkWell(
                   onTap: () async {
@@ -153,67 +150,60 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Hiển thị hình ảnh xe
-                          Container(
-                            width: double.infinity,
-                            height: 200,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                width: 0.2,
-                                color: Colors.black,
-                              ),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: (info['images'] != null &&
-                                      info['images'].isNotEmpty)
-                                  ? Image.network(
-                                      info['images'][0],
-                                      fit: BoxFit.contain,
-                                    )
-                                  : Image.asset(
-                                      "assets/images/logo.png",
-                                      fit: BoxFit.contain,
-                                    ),
-                            ),
-                          ),
-
-                          // Hiển thị nhãn khuyến mãi
-                          if (motorcycle['promotion'] != null)
-                            Positioned(
-                              bottom: 8,
-                              right: 8,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
+                          // Sử dụng Stack để chồng phần trăm giảm giá lên hình ảnh
+                          Stack(
+                            children: [
+                              // Hiển thị hình ảnh xe
+                              Container(
+                                width: double.infinity,
+                                height: 200,
                                 decoration: BoxDecoration(
-                                  color: Colors.red.withOpacity(0.8),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  'Giảm ${motorcycle['promotion']['percentage']}%',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    width: 0.2,
+                                    color: Colors.black,
                                   ),
                                 ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: (info['images'] != null &&
+                                          info['images'].isNotEmpty)
+                                      ? Image.network(
+                                          info['images'][0],
+                                          fit: BoxFit.contain,
+                                        )
+                                      : Image.asset(
+                                          "assets/images/logo.png",
+                                          fit: BoxFit.contain,
+                                        ),
+                                ),
                               ),
-                            ),
+                              // Hiển thị nhãn khuyến mãi
+                              if (motorcycle['discountedPrice'] !=
+                                  originalPrice)
+                                Positioned(
+                                  bottom: 8,
+                                  right: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withOpacity(0.8),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      'Giảm ${(originalPrice - discountedPrice) / originalPrice * 100}%',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
 
                           // Hiển thị thông tin loại xe, tên xe, địa chỉ, và giá
-                          Container(
-                            margin: const EdgeInsets.only(top: 5),
-                            padding: const EdgeInsets.all(5),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: const Color.fromARGB(129, 255, 173, 21),
-                            ),
-                            child: Text(
-                              "${motorcycle['category']?['name'] ?? 'Unknown'}",
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                          ),
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 5),
                             child: Text(
@@ -279,7 +269,8 @@ class _RentHomeSearchByLocationState extends State<RentHomeSearchByLocation> {
                                   padding: const EdgeInsets.only(left: 10),
                                   child: Row(
                                     children: [
-                                      if (motorcycle['promotion'] != null)
+                                      if (motorcycle['discountedPrice'] !=
+                                          originalPrice)
                                         Text(
                                           NumberFormat("#,###", "vi_VN")
                                               .format(originalPrice),

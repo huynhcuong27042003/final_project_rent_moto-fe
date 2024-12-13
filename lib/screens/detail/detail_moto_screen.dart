@@ -1,6 +1,7 @@
 import 'package:final_project_rent_moto_fe/screens/map/location_of-moto.dart';
 import 'package:final_project_rent_moto_fe/services/bookingMoto/addbookingService.dart';
 import 'package:final_project_rent_moto_fe/services/promo/apply_promo_service.dart';
+import 'package:final_project_rent_moto_fe/services/promoByCompany/applyPromoByCompany.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_appbar.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/calendar_rental.dart';
@@ -21,6 +22,7 @@ class DetailMotoScreen extends StatefulWidget {
 
 class _DetailMotoScreenState extends State<DetailMotoScreen> {
   // Nhận dữ liệu từ constructor
+  final ApplyPromoByCompanyService promoService = ApplyPromoByCompanyService();
   String _selectedPickupOption = 'self_pickup'; // Default pickup option
 
   late DateTime pickupDate; // Khai báo ngày nhận
@@ -34,6 +36,9 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
   final _addBookingService = AddBookingService();
   LatLng? _mapCoordinates;
   String? appliedPromoCode;
+  double priceIsDiscount = 0.0;
+  double originalPrice = 0.0;
+  double percentage = 0.0;
   void initState() {
     super.initState();
     pickupDate = DateTime.now();
@@ -41,6 +46,22 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
     _updateDateTimes(); // Cập nhật giá trị pickupDateTime và returnDateTime ngay khi khởi tạo
     _calculateTotalAmount();
     _fetchCoordinates();
+    _applyPromo();
+  }
+
+  Future<void> _applyPromo() async {
+    try {
+      var motorcycleId = widget.motorcycle['id']; // Assuming you have an 'id'
+      double discountedPrice = await promoService.applyPromotion(motorcycleId);
+      setState(() {
+        percentage = discountedPrice != originalPrice
+            ? ((originalPrice - discountedPrice) / originalPrice) * 100
+            : 0.0;
+        priceIsDiscount = discountedPrice;
+      });
+    } catch (e) {
+      print("Error applying promotion: $e");
+    }
   }
 
   // Phương thức cập nhật pickupDateTime và returnDateTime
@@ -66,7 +87,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
   }
 
   // Tính tổng tiền
-  void _calculateTotalAmount() {
+  void _calculateTotalAmount() async {
     if (pickupDateTime != null && returnDateTime != null) {
       // Tính số ngày thuê
       int rentalDays = returnDateTime!.difference(pickupDateTime!).inDays;
@@ -74,14 +95,26 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
       // Lấy giá thuê từ thông tin xe
       var info = widget.motorcycle['informationMoto'] ?? {};
       String priceXe = info['price'].toString();
-      String priceXeTemp = priceXe;
-      int numberPirceXe = int.parse(priceXeTemp);
-
-      // Tính tổng tiền
-      setState(() {
-        totalAmount = (rentalDays * numberPirceXe);
-        originalTotalAmount = totalAmount;
-      });
+      // Lấy giá đã áp dụng khuyến mãi từ service
+      try {
+        double discountedPrice = await promoService
+            .applyPromotion(widget.motorcycle['id']); // Lấy id của xe máy
+        setState(() {
+          // Nếu có khuyến mãi, dùng giá đã giảm, nếu không dùng giá gốc
+          priceXe = discountedPrice.toString();
+          // Tính tổng tiền sau khuyến mãi
+          int numberPirceXe = discountedPrice.toInt();
+          totalAmount = (rentalDays * numberPirceXe);
+          originalTotalAmount = totalAmount;
+        });
+      } catch (e) {
+        // Nếu không áp dụng khuyến mãi, sử dụng giá gốc
+        setState(() {
+          int numberPirceXe = int.parse(priceXe);
+          totalAmount = (rentalDays * numberPirceXe);
+          originalTotalAmount = totalAmount;
+        });
+      }
     }
   }
 
@@ -161,7 +194,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
     var address = widget.motorcycle['address'] ?? {};
     String district = address['district'];
     String city = address['city'];
-
+    // ignore: unused_local_variable
     return Scaffold(
       appBar: DetailMotoAppBar(motorcycle: widget.motorcycle),
       body: SingleChildScrollView(
@@ -208,23 +241,58 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                             ),
                             Row(
                               children: [
-                                Text(
-                                  NumberFormat("#,###", "vi_VN")
-                                      .format(info['price']),
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                                // Kiểm tra nếu giá gốc và giá sau khuyến mãi giống nhau
+                                if (info['price'] == priceIsDiscount)
+                                  // Hiển thị giá gốc với màu đen
+                                  Text(
+                                    NumberFormat("#,###", "vi_VN")
+                                        .format(info['price']),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          Colors.black, // Màu đen cho giá gốc
+                                    ),
+                                  )
+                                else ...[
+                                  // Hiển thị giá gốc với dấu gạch ngang
+                                  Text(
+                                    NumberFormat("#,###", "vi_VN")
+                                        .format(info['price']),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors
+                                          .black54, // Màu xám nhạt cho giá gốc
+                                      decoration: TextDecoration
+                                          .lineThrough, // Dấu gạch ngang
+                                    ),
                                   ),
-                                ),
-                                Text(
+                                  const SizedBox(
+                                      width:
+                                          10), // Khoảng cách giữa giá gốc và giá giảm
+
+                                  // Hiển thị giá đã áp dụng khuyến mãi
+                                  Text(
+                                    NumberFormat("#,###", "vi_VN")
+                                        .format(priceIsDiscount),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors
+                                          .red, // Màu đỏ cho giá sau khuyến mãi
+                                    ),
+                                  ),
+                                ],
+                                const Text(
                                   ' đ/day',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ],
-                            ),
+                            )
                           ],
                         ),
                       ),

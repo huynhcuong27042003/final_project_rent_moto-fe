@@ -4,9 +4,11 @@ import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/add_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/delete_favoritelist_service.dart';
+import 'package:final_project_rent_moto_fe/services/promoByCompany/applyPromoByCompany.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/get_favorite_list_by_user.dart';
+import 'package:intl/intl.dart';
 
 class ListFavoriteByUser extends StatefulWidget {
   const ListFavoriteByUser({super.key});
@@ -17,6 +19,8 @@ class ListFavoriteByUser extends StatefulWidget {
 
 class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
   Future<List<Map<String, dynamic>>>? favoriteList;
+  final ApplyPromoByCompanyService _applyPromoService =
+      ApplyPromoByCompanyService();
   Map<String, bool> motorcycleFavoriteState =
       {}; // To track favorite state for each motorcycle
 
@@ -153,14 +157,16 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
                   future: favoriteList,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(
+                          child: SizedBox
+                              .shrink()); // Không hiển thị vòng tròn chờ
                     } else if (snapshot.hasError) {
                       return Center(child: Text('Error: ${snapshot.error}'));
                     } else if (snapshot.hasData) {
                       var data = snapshot.data!;
                       if (data.isEmpty) {
                         return const Center(
-                          child: Text('Dách sách xe yêu thích trông'),
+                          child: Text('Danh sách xe yêu thích trống'),
                         );
                       }
 
@@ -168,251 +174,288 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
                         children: data.map((motorcycle) {
                           var info = motorcycle['informationMoto'] ?? {};
                           String motorcycleId = motorcycle['id'] ?? '';
-                          bool isFavorite =
-                              motorcycleFavoriteState[motorcycleId] ?? false;
 
-                          return InkWell(
-                            onTap: () async {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DetailMotoScreen(
-                                    motorcycle: motorcycle,
-                                  ),
-                                ),
-                              );
-                              if (result != null &&
-                                  result['motorcycleId'] == motorcycleId) {
-                                setState(() {
-                                  motorcycleFavoriteState[motorcycleId] =
-                                      result['isFavorite'];
-                                  // If the motorcycle was removed, update the list
-                                  if (!result['isFavorite']) {
-                                    favoriteList = favoriteList!.then((list) {
-                                      return list
-                                          .where((motorcycle) =>
-                                              motorcycle['id'] != motorcycleId)
-                                          .toList();
-                                    });
-                                  }
-                                });
-                              }
-                            },
-                            child: Container(
-                              width: MediaQuery.of(context).size.width * 0.9,
-                              margin: const EdgeInsets.only(bottom: 20),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  width: 0.2,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Motorcycle Image
-                                    Container(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.9,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          width: 0.2,
-                                          color: Colors.black,
+                          return FutureBuilder<double>(
+                            future:
+                                _applyPromoService.applyPromotion(motorcycleId),
+                            builder: (context, promoSnapshot) {
+                              // Nếu không có dữ liệu khuyến mãi, không cần hiển thị vòng tròn chờ
+                              if (promoSnapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const SizedBox
+                                    .shrink(); // Không hiển thị vòng tròn chờ
+                              } else if (promoSnapshot.hasError) {
+                                // Nếu có lỗi, hiển thị thông báo lỗi
+                                if (promoSnapshot.error.toString() ==
+                                    "Khuyến mãi không hợp lệ cho hôm nay") {
+                                  return const SizedBox
+                                      .shrink(); // Không hiển thị gì khi không có khuyến mãi
+                                }
+                                return Center(
+                                    child:
+                                        Text('Error: ${promoSnapshot.error}'));
+                              } else if (promoSnapshot.hasData) {
+                                double discountedPrice = promoSnapshot.data!;
+                                bool hasDiscount =
+                                    discountedPrice != info['price'];
+
+                                return InkWell(
+                                  onTap: () async {
+                                    final result = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => DetailMotoScreen(
+                                          motorcycle: motorcycle,
                                         ),
                                       ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: (info['images'] != null &&
-                                                info['images'].isNotEmpty)
-                                            ? Image.network(
-                                                info['images'][0],
-                                                fit: BoxFit.contain,
-                                              )
-                                            : Image.asset(
-                                                "assets/images/xe1.jpg",
-                                                fit: BoxFit.contain,
-                                              ),
-                                      ),
+                                    );
+                                    if (result != null &&
+                                        result['motorcycleId'] ==
+                                            motorcycleId) {
+                                      setState(() {
+                                        motorcycleFavoriteState[motorcycleId] =
+                                            result['isFavorite'];
+                                        if (!result['isFavorite']) {
+                                          favoriteList =
+                                              favoriteList!.then((list) {
+                                            return list
+                                                .where((motorcycle) =>
+                                                    motorcycle['id'] !=
+                                                    motorcycleId)
+                                                .toList();
+                                          });
+                                        }
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.9,
+                                    margin: const EdgeInsets.only(bottom: 20),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                          width: 0.2, color: Colors.black),
                                     ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                          margin: const EdgeInsets.only(top: 5),
-                                          padding: const EdgeInsets.all(3),
-                                          decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            color: const Color.fromARGB(
-                                                129, 255, 173, 21),
-                                          ),
-                                          child: Text(
-                                            "Category: ${motorcycle['category']?['name'] ?? 'Unknown'}",
-                                            style:
-                                                const TextStyle(fontSize: 12),
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: Icon(
-                                            isFavorite
-                                                ? Icons.favorite
-                                                : Icons.favorite_border,
-                                            color: isFavorite
-                                                ? Colors.red
-                                                : Colors.black,
-                                            size: 18,
-                                          ),
-                                          onPressed: () {
-                                            toggleFavorite(
-                                              motorcycleId,
-                                            ); // Truyền 2 tham số
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 5),
-                                      child: Text(
-                                        info['nameMoto'] ?? "Automatic moto",
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                    ),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.location_on),
-                                        SizedBox(width: 5),
-                                        Expanded(
-                                          child: Text(
-                                            "Address: ${motorcycle['address']?['streetName'] ?? 'Unknown'}, "
-                                            "${motorcycle['address']?['district'] ?? 'Unknown'}, "
-                                            "${motorcycle['address']?['city'] ?? 'Unknown'}, "
-                                            "${motorcycle['address']?['country'] ?? 'Unknown'}",
-                                            style:
-                                                const TextStyle(fontSize: 16),
-                                            overflow: TextOverflow
-                                                .ellipsis, // Optionally, use this to show ellipsis for overflow
-                                            softWrap:
-                                                true, // Ensures the text will wrap onto the next line if necessary
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          vertical: 10),
-                                      decoration: const BoxDecoration(
-                                        border: Border(
-                                          top: BorderSide(width: 1),
-                                        ),
-                                      ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(10),
                                       child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Row(
-                                            children: const [
-                                              Row(
-                                                children: [
-                                                  Icon(
-                                                    Icons.star,
-                                                    color: Colors.yellow,
-                                                    size: 30,
-                                                  ),
-                                                  SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                  Text(
-                                                    "5.0",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        fontSize: 18),
-                                                  )
-                                                ],
-                                              ),
-                                              SizedBox(width: 100),
-                                              Row(
-                                                children: [
-                                                  Icon(Icons.business_center),
-                                                  SizedBox(
-                                                    width: 5,
-                                                  ),
-                                                  Text(
-                                                    "10 trips",
-                                                    style: TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        fontSize: 18),
-                                                  )
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsets.only(left: 10),
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  "${info['price'] ?? "111.000"}",
-                                                  style: const TextStyle(
-                                                    color: Color.fromARGB(
-                                                        255, 253, 101, 20),
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 25,
-                                                  ),
+                                          Stack(
+                                            children: [
+                                              Container(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.9,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  border: Border.all(
+                                                      width: 0.2,
+                                                      color: Colors.black),
                                                 ),
-                                                const Padding(
-                                                  padding:
-                                                      EdgeInsets.only(left: 5),
-                                                  child: Text(
-                                                    "VND/day",
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      fontSize: 18,
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  child: (info['images'] !=
+                                                              null &&
+                                                          info['images']
+                                                              .isNotEmpty)
+                                                      ? Image.network(
+                                                          info['images'][0],
+                                                          fit: BoxFit.contain)
+                                                      : Image.asset(
+                                                          "assets/images/xe1.jpg",
+                                                          fit: BoxFit.contain),
+                                                ),
+                                              ),
+                                              if (hasDiscount)
+                                                Positioned(
+                                                  bottom: 10,
+                                                  right: 10,
+                                                  child: Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 4),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.red,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                    ),
+                                                    child: Text(
+                                                      'Giảm: ${((info['price'] - discountedPrice) / info['price']) * 100}% ',
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 14,
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
-                                              ],
+                                            ],
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Container(
+                                                margin: const EdgeInsets.only(
+                                                    top: 5),
+                                                padding:
+                                                    const EdgeInsets.all(3),
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  color: const Color.fromARGB(
+                                                      129, 255, 173, 21),
+                                                ),
+                                                child: Text(
+                                                  "Category: ${motorcycle['category']?['name'] ?? 'Unknown'}",
+                                                  style: const TextStyle(
+                                                      fontSize: 12),
+                                                ),
+                                              ),
+                                              IconButton(
+                                                icon: Icon(
+                                                  motorcycleFavoriteState[
+                                                              motorcycleId] ??
+                                                          false
+                                                      ? Icons.favorite
+                                                      : Icons.favorite_border,
+                                                  color: motorcycleFavoriteState[
+                                                              motorcycleId] ??
+                                                          false
+                                                      ? Colors.red
+                                                      : Colors.black,
+                                                  size: 18,
+                                                ),
+                                                onPressed: () {
+                                                  toggleFavorite(motorcycleId);
+                                                },
+                                              ),
+                                            ],
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 5),
+                                            child: Text(
+                                              info['nameMoto'] ??
+                                                  "Automatic moto",
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 18),
                                             ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Icon(Icons.location_on),
+                                              SizedBox(width: 5),
+                                              Expanded(
+                                                child: Text(
+                                                  "${motorcycle['address']?['district'] ?? 'Unknown'}, ${motorcycle['address']?['city'] ?? 'Unknown'}, ",
+                                                  style: const TextStyle(
+                                                      fontSize: 16),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  softWrap: true,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const Divider(
+                                              color: Colors.black,
+                                              thickness: 1.5),
+                                          Row(
+                                            children: [
+                                              const Icon(
+                                                Icons.star,
+                                                color: Colors.yellow,
+                                                size: 20,
+                                              ),
+                                              const SizedBox(width: 5),
+                                              Text(
+                                                "${info['rating'] ?? '5.0'}",
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 16),
+                                              ),
+                                            ],
+                                          ),
+                                          Column(
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  if (hasDiscount)
+                                                    Text(
+                                                      NumberFormat(
+                                                              "#,###", "vi_VN")
+                                                          .format(
+                                                              info['price']),
+                                                      style: const TextStyle(
+                                                        decoration:
+                                                            TextDecoration
+                                                                .lineThrough,
+                                                        fontSize: 20,
+                                                        color: Colors.grey,
+                                                      ),
+                                                    ),
+                                                  Text(
+                                                    NumberFormat(
+                                                            "#,###", "vi_VN")
+                                                        .format(
+                                                            discountedPrice),
+                                                    style: const TextStyle(
+                                                      color: Color.fromARGB(
+                                                          255, 253, 101, 20),
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontSize: 25,
+                                                    ),
+                                                  ),
+                                                  const Text(
+                                                    "VND/day",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        fontSize: 18),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            ),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                return const SizedBox
+                                    .shrink(); // Không hiển thị gì nếu không có khuyến mãi
+                              }
+                            },
                           );
                         }).toList(),
                       );
                     } else {
                       return const Center(
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment
-                              .center, // Căn giữa theo chiều dọc
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Biểu tượng tải hình tròn chuyển động
                             SizedBox(
                               height: 50,
                               width: 50,
                               child: CircularProgressIndicator(
-                                strokeWidth: 4, // Độ dày của vòng tải
-                                color: Colors.blueAccent, // Màu của biểu tượng
+                                strokeWidth: 4,
+                                color: Colors.blueAccent,
                               ),
                             ),
-                            SizedBox(
-                                height:
-                                    10), // Khoảng cách giữa biểu tượng và văn bản
-                            // Văn bản hiển thị
+                            SizedBox(height: 10),
                             Text(
                               "Đang tải...",
                               style: TextStyle(

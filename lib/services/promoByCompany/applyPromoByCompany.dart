@@ -3,59 +3,67 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ApplyPromoByCompanyService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Lấy thông tin khuyến mãi theo công ty
-  Future<List<Map<String, dynamic>>> getPromotedMotorcycles() async {
-    List<Map<String, dynamic>> promotedMotorcycles = [];
-    try {
-      final DateTime now = DateTime.now();
+  ApplyPromoByCompanyService();
 
-      QuerySnapshot promotionsSnapshot = await _firestore
+  Future<double> applyPromotion(String motorcycleId) async {
+    try {
+      // Lấy dữ liệu xe máy từ Firestore
+      DocumentSnapshot motorcycleDoc =
+          await _firestore.collection('motorcycles').doc(motorcycleId).get();
+
+      if (!motorcycleDoc.exists) {
+        throw Exception("Xe máy không tồn tại");
+      }
+
+      Map<String, dynamic> motorcycleData =
+          motorcycleDoc.data() as Map<String, dynamic>;
+      String motorcycleCompanyName =
+          motorcycleData['companyMoto']?['name'] ?? '';
+
+      if (motorcycleCompanyName.isEmpty) {
+        throw Exception("Tên hãng xe máy không có sẵn");
+      }
+
+      // Lấy giá gốc của xe
+      double originalPrice =
+          (motorcycleData['informationMoto']?['price'] ?? 0.0).toDouble();
+
+      // Lấy danh sách khuyến mãi của công ty từ Firestore
+      QuerySnapshot promoSnapshot = await _firestore
           .collection('promotionsByCompany')
-          .where('endDate', isGreaterThanOrEqualTo: now.toIso8601String())
+          .where('companyMoto.name', isEqualTo: motorcycleCompanyName)
+          .where('isHide', isEqualTo: false) // Khuyến mãi đang hoạt động
           .get();
 
-      // Duyệt qua danh sách khuyến mãi
-      for (var promoDoc in promotionsSnapshot.docs) {
-        final promoData = promoDoc.data() as Map<String, dynamic>;
-        final companyName = promoData['companyMoto']['name'];
-
-        // Lấy ngày bắt đầu khuyến mãi
-        DateTime startDate = DateTime.parse(promoData['startDate']);
-
-        // Kiểm tra nếu ngày bắt đầu khuyến mãi sau ngày hôm nay thì bỏ qua khuyến mãi này
-        if (startDate.isAfter(now)) {
-          continue; // Bỏ qua khuyến mãi này nếu ngày bắt đầu sau ngày hôm nay
-        }
-
-        // Kiểm tra thuộc tính 'ishide', nếu là true thì bỏ qua khuyến mãi này
-        if (promoData['isHide'] == true) {
-          continue; // Bỏ qua khuyến mãi này nếu 'ishide' là true
-        }
-
-        // Lấy danh sách xe từ bộ sưu tập `motorcycles` khớp với công ty
-        QuerySnapshot motorcycleSnapshot = await _firestore
-            .collection('motorcycles')
-            .where('companyMoto.name', isEqualTo: companyName)
-            .get();
-
-        // Duyệt qua danh sách xe và thêm thông tin khuyến mãi
-        for (var motoDoc in motorcycleSnapshot.docs) {
-          final motoData = motoDoc.data() as Map<String, dynamic>;
-
-          // Thêm thông tin khuyến mãi vào dữ liệu xe
-          motoData['promotion'] = {
-            'promoName': promoData['promoName'],
-            'percentage': promoData['percentage'],
-            'endDate': promoData['endDate'],
-          };
-
-          promotedMotorcycles.add(motoData);
-        }
+      if (promoSnapshot.docs.isEmpty) {
+        // Không tìm thấy khuyến mãi, trả về giá gốc
+        return originalPrice;
       }
-    } catch (e) {
-      print('Error fetching promoted motorcycles: $e');
-    }
 
-    return promotedMotorcycles;
+      // Tìm khuyến mãi hợp lệ nhất (nếu có nhiều khuyến mãi)
+      DocumentSnapshot promoDoc = promoSnapshot.docs.first;
+      Map<String, dynamic> promoData = promoDoc.data() as Map<String, dynamic>;
+
+      // Kiểm tra ngày bắt đầu và kết thúc
+      DateTime startDate = DateTime.parse(promoData['startDate']);
+      DateTime endDate = DateTime.parse(promoData['endDate']);
+      DateTime currentDate = DateTime.now();
+
+      if (currentDate.isBefore(startDate) || currentDate.isAfter(endDate)) {
+        // Nếu không có khuyến mãi hợp lệ, trả về giá gốc
+        return originalPrice;
+      }
+
+      // Chuyển đổi percentage thành double
+      double percentage = (promoData['percentage']?.toDouble() ?? 0.0);
+
+      // Tính giá tiền sau khi áp dụng khuyến mãi
+      double discountedPrice = originalPrice * (1 - percentage / 100);
+
+      return discountedPrice;
+    } catch (e) {
+      print("Lỗi khi áp dụng khuyến mãi: $e");
+      rethrow;
+    }
   }
 }
