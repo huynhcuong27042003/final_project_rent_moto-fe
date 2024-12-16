@@ -7,7 +7,7 @@ const String apiUrl =
 
 class InvoiceService {
   static Future<String> addInvoice(String bookingId, String totalAmount,
-      String motorbikeRentalDeposit) async {
+      String motorbikeRentalDeposit, String email) async {
     try {
       final response = await http.post(
         Uri.parse(apiUrl),
@@ -16,6 +16,7 @@ class InvoiceService {
           'bookingId': bookingId,
           'totalAmount': totalAmount,
           'motorbikeRentalDeposit': motorbikeRentalDeposit,
+          'email': email
         }),
       );
 
@@ -27,6 +28,32 @@ class InvoiceService {
       }
     } catch (e) {
       throw Exception('Error: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getInvoicesByEmail(String email) async {
+    try {
+      // Construct the URL with the email parameter
+      final response = await http.get(Uri.parse('$apiUrl?email=$email'));
+
+      // Check if the response status code is 200 (OK)
+      if (response.statusCode == 200) {
+        // Parse the response body as JSON
+        final Map<String, dynamic> data = jsonDecode(response.body);
+
+        // Check if the response contains invoices
+        if (data['invoices'] != null) {
+          // Return the list of invoices
+          return List<Map<String, dynamic>>.from(data['invoices']);
+        } else {
+          throw Exception('No invoices found for this email');
+        }
+      } else {
+        throw Exception('Failed to load invoices');
+      }
+    } catch (error) {
+      // Handle any errors that occur during the HTTP request
+      throw Exception('Error fetching invoices: $error');
     }
   }
 }

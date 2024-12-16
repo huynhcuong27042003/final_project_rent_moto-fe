@@ -56,10 +56,15 @@ class _NotificatioListByEmailScreenState
       if (transactionResult != null) {
         if (transactionResult['resultCode'] == 0) {
           try {
+            final User? currentUser = FirebaseAuth.instance.currentUser;
+
+            final String email = currentUser?.email ?? '';
+
             String invoiceId = await InvoiceService.addInvoice(
               booking['id'],
               booking['totalAmount'].toString(),
               booking['motorbikeRentalDeposit'].toString(),
+              email, // Truyền email vào đúng vị trí tham số
             );
             await UpdateIsHideBookingService().hideBooking(booking['id']);
             print('Invoice created successfully: $invoiceId');
