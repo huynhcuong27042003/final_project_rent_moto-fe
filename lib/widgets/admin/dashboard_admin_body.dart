@@ -3,6 +3,8 @@ import 'package:final_project_rent_moto_fe/screens/CompanyMoto/list_company_scre
 import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycles_list_by_admin_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/promo/promo_list_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/promoByCompany/promobycompany_list_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/promoByCompany/promobycompay_add_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/users/user_list_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -92,6 +94,7 @@ class DashboardAdmin extends StatelessWidget {
     'Xe',
     'Tài khoản',
     'Khuyến mãi',
+    'Khuyến mãi theo loại xe',
     // 'Profile',
     // 'Revenue',
   ];
@@ -102,6 +105,7 @@ class DashboardAdmin extends StatelessWidget {
     const MotorcyclesListByAdminScreen(),
     const UserListScreen(),
     const PromoListScreen(),
+    const PromobycompanyListScreen(),
     // const ProductList(),
   ];
 

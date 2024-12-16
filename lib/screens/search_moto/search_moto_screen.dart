@@ -9,6 +9,7 @@ import 'package:final_project_rent_moto_fe/services/favorite_list/add_favoriteli
 import 'package:final_project_rent_moto_fe/services/favorite_list/delete_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/get_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/map/map_service.dart';
+import 'package:final_project_rent_moto_fe/services/promoByCompany/applyPromoByCompany.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -38,12 +39,19 @@ class _SearchMotoScreenState extends State<SearchMotoScreen> {
   bool isLoading = true;
   Map<String, double> distances = {};
   List<dynamic> sortedMotorcycles = [];
+  final ApplyPromoByCompanyService promoService =
+      ApplyPromoByCompanyService(); // Khởi tạo service áp dụng khuyến mãi
+  Map<String, double> discountedPrices =
+      {}; // Lưu giá tiền sau khi áp dụng khuyến mãi
+  Map<String, double> discountValues = {}; // Lưu giá trị khuyến mãi
+  Map<String, double> discountPercentages = {};
   @override
   void initState() {
     super.initState();
     motorcycles = fetchMotorcycleWithFilter();
     _loadUserFavoriteState();
     _getUserLocation();
+    _applyPromotions();
   }
 
   Future<void> _getUserLocation() async {
@@ -53,6 +61,38 @@ class _SearchMotoScreenState extends State<SearchMotoScreen> {
       await _calculateDistances(); // Tính toán khoảng cách sau khi lấy tọa độ
     } catch (e) {
       print("Failed to get user location: $e");
+    }
+  }
+
+  Future<void> _applyPromotions() async {
+    try {
+      List<dynamic> motorcycleList = await motorcycles;
+      for (var motorcycle in motorcycleList) {
+        String motorcycleId = motorcycle['id'] ?? '';
+        double originalPrice =
+            (motorcycle['informationMoto']?['price'] ?? 0.0).toDouble();
+
+        try {
+          // Áp dụng khuyến mãi
+          double discountedPrice =
+              await promoService.applyPromotion(motorcycleId);
+
+          setState(() {
+            discountedPrices[motorcycleId] = discountedPrice;
+            discountValues[motorcycleId] = originalPrice - discountedPrice;
+            discountPercentages[motorcycleId] =
+                ((originalPrice - discountedPrice) / originalPrice) * 100;
+          });
+        } catch (e) {
+          // Nếu không có khuyến mãi, giữ nguyên giá gốc
+          setState(() {
+            discountedPrices[motorcycleId] = originalPrice;
+            discountPercentages[motorcycleId] = 0.0;
+          });
+        }
+      }
+    } catch (e) {
+      print("Lỗi khi áp dụng khuyến mãi: $e");
     }
   }
 
@@ -245,7 +285,11 @@ class _SearchMotoScreenState extends State<SearchMotoScreen> {
                       String motorcycleId = motorcycle['id'] ?? '';
                       bool isFavorite =
                           motorcycleFavoriteState[motorcycleId] ?? false;
-
+                      double originalPrice = (info['price'] ?? 0.0).toDouble();
+                      double discountedPrice =
+                          discountedPrices[motorcycleId] ?? originalPrice;
+                      double discountPercentage =
+                          discountPercentages[motorcycleId] ?? 0.0;
                       return InkWell(
                         onTap: () async {
                           // Chờ kết quả từ DetailMotoScreen
@@ -282,29 +326,56 @@ class _SearchMotoScreenState extends State<SearchMotoScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  width: MediaQuery.of(context).size.width,
-                                  height: 200,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      width: 0.2,
-                                      color: Colors.black,
+                                Stack(
+                                  children: [
+                                    Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.9,
+                                      height: 200,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          width: 0.2,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: (info['images'] != null &&
+                                                info['images'].isNotEmpty)
+                                            ? Image.network(
+                                                info['images'][0],
+                                                fit: BoxFit.contain,
+                                              )
+                                            : Image.asset(
+                                                "assets/images/xe1.jpg",
+                                                fit: BoxFit.contain,
+                                              ),
+                                      ),
                                     ),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: (info['images'] != null &&
-                                            info['images'].isNotEmpty)
-                                        ? Image.network(
-                                            info['images'][0],
-                                            fit: BoxFit.contain,
-                                          )
-                                        : Image.asset(
-                                            "assets/images/xe1.jpg",
-                                            fit: BoxFit.contain,
+                                    if (discountPercentage > 0)
+                                      Positioned(
+                                        bottom: 8,
+                                        right: 8,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
-                                  ),
+                                          child: Text(
+                                            "Giảm: ${discountPercentage.toStringAsFixed(0)}%",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                                 Row(
                                   mainAxisAlignment:
@@ -427,9 +498,21 @@ class _SearchMotoScreenState extends State<SearchMotoScreen> {
                                             const EdgeInsets.only(left: 10),
                                         child: Row(
                                           children: [
+                                            if (discountPercentage > 0)
+                                              Text(
+                                                NumberFormat("#,###", "vi_VN")
+                                                    .format(originalPrice),
+                                                style: const TextStyle(
+                                                  color: Colors.grey,
+                                                  fontSize: 18,
+                                                  decoration: TextDecoration
+                                                      .lineThrough,
+                                                ),
+                                              ),
+                                            // Giá khuyến mãi
                                             Text(
                                               NumberFormat("#,###", "vi_VN")
-                                                  .format(info['price'] ?? 0),
+                                                  .format(discountedPrice),
                                               style: const TextStyle(
                                                 color: Color.fromARGB(
                                                     255, 253, 101, 20),

@@ -2,6 +2,7 @@
 
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
+import 'package:final_project_rent_moto_fe/services/promoByCompany/applyPromoByCompany.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/fetch_motorcycle_isaccept_service.dart';
 import 'package:final_project_rent_moto_fe/app_icons_icons.dart';
@@ -24,12 +25,51 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
       FetchMotorcycleIsacceptService();
   late String userEmail; // Store the user's email
   Map<String, bool> motorcycleFavoriteState = {};
-
+  final ApplyPromoByCompanyService promoService =
+      ApplyPromoByCompanyService(); // Khởi tạo service áp dụng khuyến mãi
+  Map<String, double> discountedPrices =
+      {}; // Lưu giá tiền sau khi áp dụng khuyến mãi
+  Map<String, double> discountValues = {}; // Lưu giá trị khuyến mãi
+  Map<String, double> discountPercentages = {}; // Lưu phần trăm khuyến mãi
   @override
   void initState() {
     super.initState();
     motorcycles = motorcycleService.fetchMotorcycle();
-    _loadUserFavoriteState(); // Load the user's favorite state when the widget is initialized
+    _loadUserFavoriteState();
+    _applyPromotions(); // Gọi hàm áp dụng khuyến mãi
+  }
+
+  // Áp dụng khuyến mãi
+  Future<void> _applyPromotions() async {
+    try {
+      List<dynamic> motorcycleList = await motorcycles;
+      for (var motorcycle in motorcycleList) {
+        String motorcycleId = motorcycle['id'] ?? '';
+        double originalPrice =
+            (motorcycle['informationMoto']?['price'] ?? 0.0).toDouble();
+
+        try {
+          // Áp dụng khuyến mãi
+          double discountedPrice =
+              await promoService.applyPromotion(motorcycleId);
+
+          setState(() {
+            discountedPrices[motorcycleId] = discountedPrice;
+            discountValues[motorcycleId] = originalPrice - discountedPrice;
+            discountPercentages[motorcycleId] =
+                ((originalPrice - discountedPrice) / originalPrice) * 100;
+          });
+        } catch (e) {
+          // Nếu không có khuyến mãi, giữ nguyên giá gốc
+          setState(() {
+            discountedPrices[motorcycleId] = originalPrice;
+            discountPercentages[motorcycleId] = 0.0;
+          });
+        }
+      }
+    } catch (e) {
+      print("Lỗi khi áp dụng khuyến mãi: $e");
+    }
   }
 
   Future<void> _loadUserFavoriteState() async {
@@ -140,9 +180,15 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                       bool isFavorite =
                           motorcycleFavoriteState[motorcycleId] ?? false;
 
+                      // Lấy giá sau khuyến mãi và giá trị khuyến mãi
+                      double originalPrice = (info['price'] ?? 0.0).toDouble();
+                      double discountedPrice =
+                          discountedPrices[motorcycleId] ?? originalPrice;
+                      double discountPercentage =
+                          discountPercentages[motorcycleId] ?? 0.0;
+
                       return InkWell(
                         onTap: () async {
-                          // Wait for the result from DetailMotoScreen
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -151,12 +197,9 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                               ),
                             ),
                           );
-
-                          // Check if result is not null and the motorcycleId matches
                           if (result != null &&
                               result['motorcycleId'] == motorcycleId) {
                             setState(() {
-                              // Update the favorite state based on the result
                               motorcycleFavoriteState[motorcycleId] =
                                   result['isFavorite'];
                             });
@@ -177,30 +220,56 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.9,
-                                  height: 200,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      width: 0.2,
-                                      color: Colors.black,
+                                Stack(
+                                  children: [
+                                    Container(
+                                      width: MediaQuery.of(context).size.width *
+                                          0.9,
+                                      height: 200,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          width: 0.2,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: (info['images'] != null &&
+                                                info['images'].isNotEmpty)
+                                            ? Image.network(
+                                                info['images'][0],
+                                                fit: BoxFit.contain,
+                                              )
+                                            : Image.asset(
+                                                "assets/images/xe1.jpg",
+                                                fit: BoxFit.contain,
+                                              ),
+                                      ),
                                     ),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: (info['images'] != null &&
-                                            info['images'].isNotEmpty)
-                                        ? Image.network(
-                                            info['images'][0],
-                                            fit: BoxFit.contain,
-                                          )
-                                        : Image.asset(
-                                            "assets/images/xe1.jpg",
-                                            fit: BoxFit.contain,
+                                    if (discountPercentage > 0)
+                                      Positioned(
+                                        bottom: 8,
+                                        right: 8,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red,
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
-                                  ),
+                                          child: Text(
+                                            "Giảm: ${discountPercentage.toStringAsFixed(0)}%",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
                                 ),
                                 Row(
                                   mainAxisAlignment:
@@ -248,10 +317,10 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                 ),
                                 Row(
                                   children: [
-                                    Icon(Icons.location_on),
-                                    SizedBox(width: 5),
+                                    const Icon(Icons.location_on),
+                                    const SizedBox(width: 5),
                                     Text(
-                                        "${address['district']}, ${address['city']}"),
+                                        "${address['district']}, ${address['city']}")
                                   ],
                                 ),
                                 Container(
@@ -264,82 +333,89 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                   ),
                                   child: Column(
                                     children: [
-                                      Row(
-                                        children: const [
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.star,
-                                                color: Colors.yellow,
-                                                size: 30,
-                                              ),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                "5.0",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 18),
-                                              )
-                                            ],
-                                          ),
-                                          SizedBox(width: 100),
-                                          Row(
-                                            children: [
-                                              Icon(AppIcons.suitcase),
-                                              SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                "10 chuyến",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 18),
-                                              )
-                                            ],
-                                          )
-                                        ],
-                                      ),
                                       Padding(
                                         padding:
                                             const EdgeInsets.only(left: 10),
-                                        child: Row(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            Text(
-                                              NumberFormat("#,###", "vi_VN")
-                                                  .format(info['price'] ?? 0),
-                                              style: const TextStyle(
-                                                color: Color.fromARGB(
-                                                    255, 253, 101, 20),
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 25,
-                                              ),
-                                            ),
-                                            Text(
-                                              "đ",
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                            const Padding(
-                                              padding: EdgeInsets.only(top: 10),
-                                              child: Text(
-                                                "/ngày",
-                                                style: TextStyle(
-                                                  color: Color.fromARGB(
-                                                      255, 83, 83, 83),
-                                                  fontWeight: FontWeight.w500,
+                                            // Hiển thị đánh giá bằng ngôi sao
+                                            Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.star,
+                                                  color: Colors.yellow,
+                                                  size: 20,
                                                 ),
-                                              ),
+                                                const SizedBox(width: 5),
+                                                Text(
+                                                  "${info['rating'] ?? '5.0'}", // Thay thế `5.0` bằng dữ liệu thực tế từ API
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
+                                            const SizedBox(
+                                                height:
+                                                    5), // Khoảng cách giữa đánh giá và giá
+                                            // Giá gốc (gạch chân)
+                                            Row(
+                                              children: [
+                                                // Giá gốc
+                                                if (discountPercentage > 0)
+                                                  Text(
+                                                    NumberFormat(
+                                                            "#,###", "vi_VN")
+                                                        .format(originalPrice),
+                                                    style: const TextStyle(
+                                                      color: Colors.grey,
+                                                      fontSize: 18,
+                                                      decoration: TextDecoration
+                                                          .lineThrough,
+                                                    ),
+                                                  ),
+                                                // Giá khuyến mãi
+                                                Text(
+                                                  NumberFormat("#,###", "vi_VN")
+                                                      .format(discountedPrice),
+                                                  style: const TextStyle(
+                                                    color: Color.fromARGB(
+                                                        255, 253, 101, 20),
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 25,
+                                                  ),
+                                                ),
+                                                const Text(
+                                                  "đ",
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 18,
+                                                  ),
+                                                ),
+                                                const Padding(
+                                                  padding:
+                                                      EdgeInsets.only(top: 10),
+                                                  child: Text(
+                                                    "/ngày",
+                                                    style: TextStyle(
+                                                      color: Color.fromARGB(
+                                                          255, 83, 83, 83),
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            )
                                           ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                )
+                                ),
                               ],
                             ),
                           ),
