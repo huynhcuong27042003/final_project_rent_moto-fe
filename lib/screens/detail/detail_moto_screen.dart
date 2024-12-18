@@ -6,7 +6,7 @@ import 'package:final_project_rent_moto_fe/services/fcm/fcm_service.dart';
 import 'package:final_project_rent_moto_fe/services/notification/notification_service.dart';
 import 'package:final_project_rent_moto_fe/services/promo/apply_promo_service.dart';
 import 'package:final_project_rent_moto_fe/services/promoByCompany/applyPromoByCompany.dart';
-import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto.dart';
+import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_review.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_appbar.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/calendar_rental.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -583,7 +583,9 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            const DetailMotoBodyEvaluate(),
+            DetailMotoReview(
+              numberPlate: widget.motorcycle['numberPlate'],
+            ),
           ],
         ),
       ),

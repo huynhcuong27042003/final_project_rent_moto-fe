@@ -341,23 +341,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             // Hiển thị đánh giá bằng ngôi sao
-                                            Row(
-                                              children: [
-                                                const Icon(
-                                                  Icons.star,
-                                                  color: Colors.yellow,
-                                                  size: 20,
-                                                ),
-                                                const SizedBox(width: 5),
-                                                Text(
-                                                  "${info['rating'] ?? '5.0'}", // Thay thế `5.0` bằng dữ liệu thực tế từ API
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+
                                             const SizedBox(
                                                 height:
                                                     5), // Khoảng cách giữa đánh giá và giá
