@@ -99,12 +99,52 @@ class _ReviewScreenState extends State<ReviewScreen> {
                       // Hình ảnh xe
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          motorcycleData?['informationMoto']['images'][0] ?? '',
-                          width: double.infinity,
-                          height: 200,
-                          fit: BoxFit.cover,
-                        ),
+                        child: motorcycleData?['informationMoto']['images'] !=
+                                    null &&
+                                motorcycleData?['informationMoto']['images']
+                                        [0] !=
+                                    null &&
+                                motorcycleData?['informationMoto']['images'][0]
+                                    .isNotEmpty
+                            ? Image.network(
+                                motorcycleData?['informationMoto']['images'][0],
+                                width: double.infinity,
+                                height: 200,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (BuildContext context,
+                                    Widget child,
+                                    ImageChunkEvent? loadingProgress) {
+                                  if (loadingProgress == null) {
+                                    return child; // Hình ảnh đã tải xong
+                                  }
+                                  return Center(
+                                    child: CircularProgressIndicator(
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  (loadingProgress
+                                                          .expectedTotalBytes ??
+                                                      1)
+                                              : null, // Hiển thị tiến trình tải
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (BuildContext context,
+                                    Object error, StackTrace? stackTrace) {
+                                  return Center(
+                                    child: Text(
+                                      'Không thể tải ảnh',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                  ); // Xử lý khi URL không hợp lệ
+                                },
+                              )
+                            : Center(
+                                child:
+                                    CircularProgressIndicator(), // Hiển thị loading nếu `images` là null
+                              ),
                       ),
                       SizedBox(height: 10),
                       Text(
