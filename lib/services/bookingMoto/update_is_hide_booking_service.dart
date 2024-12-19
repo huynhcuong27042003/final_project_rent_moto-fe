@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class UpdateIsHideBookingService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -19,6 +20,7 @@ class UpdateIsHideBookingService {
       // Nếu tài liệu tồn tại, cập nhật isHide
       await _firestore.collection('bookings').doc(bookingId).update({
         'isHide': true,
+        'isAccept': false,
       });
       print('Booking $bookingId has been successfully hidden.');
     } catch (e) {
