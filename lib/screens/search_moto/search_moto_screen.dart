@@ -460,39 +460,7 @@ class _SearchMotoScreenState extends State<SearchMotoScreen> {
                                   ),
                                   child: Column(
                                     children: [
-                                      Row(
-                                        children: const [
-                                          Row(
-                                            children: [
-                                              Icon(
-                                                Icons.star,
-                                                color: Colors.yellow,
-                                                size: 30,
-                                              ),
-                                              SizedBox(width: 5),
-                                              Text(
-                                                "5.0",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 18),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(width: 100),
-                                          Row(
-                                            children: [
-                                              Icon(AppIcons.suitcase),
-                                              SizedBox(width: 5),
-                                              Text(
-                                                "10 chuyến",
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.w500,
-                                                    fontSize: 18),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
+                                      
                                       Padding(
                                         padding:
                                             const EdgeInsets.only(left: 10),
