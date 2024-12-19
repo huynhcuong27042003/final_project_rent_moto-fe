@@ -3,7 +3,6 @@
 import 'package:final_project_rent_moto_fe/screens/search_moto/search_moto_screen.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/search_location.dart';
 import 'package:final_project_rent_moto_fe/widgets/notification/error_notification.dart';
-import 'package:final_project_rent_moto_fe/widgets/notification/success_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/calendar_rental.dart';
 import 'package:intl/intl.dart';

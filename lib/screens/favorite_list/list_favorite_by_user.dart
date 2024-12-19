@@ -1,10 +1,12 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, unused_element
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/add_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/delete_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/promoByCompany/applyPromoByCompany.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/error_notification.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/success_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/get_favorite_list_by_user.dart';
@@ -78,18 +80,12 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
       if (motorcycleFavoriteState[motorcycleId]!) {
         await addFavoriteList(email, [motorcycleId]);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text("Xe đã được thêm vào danh sách yêu thích!")),
-          );
+          _showSuccessMessage(context, 'Đã thêm xe vào danh sách yêu thích!');
         }
       } else {
         await deleteFavoriteListService(email, motorcycleId);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text("Xe bị xóa trong danh sách yêu thích!")),
-          );
+          _showErrorMessage(context, 'Đã xóa xe khỏi danh sách yêu thích!');
         }
 
         setState(() {
@@ -110,9 +106,7 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
             !(motorcycleFavoriteState[motorcycleId] ?? false);
       });
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to update favorite list: $error")),
-        );
+        _showErrorMessage(context, 'Không thể cập nhật danh sách yêu thích');
       }
     }
   }
@@ -475,6 +469,18 @@ class _ListFavoriteByUserState extends State<ListFavoriteByUser> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showErrorMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      ErrorNotification(text: message).buildSnackBar(),
+    );
+  }
+
+  void _showSuccessMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SuccessNotification(text: message).buildSnackBar(),
     );
   }
 }

@@ -1,5 +1,6 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously, annotate_overrides
+// ignore_for_file: avoid_print, use_build_context_synchronously, annotate_overrides, unused_element
 import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
+import 'package:final_project_rent_moto_fe/screens/booking/future_bookings_widget.dart';
 import 'package:final_project_rent_moto_fe/screens/map/location_of-moto.dart';
 import 'package:final_project_rent_moto_fe/screens/messages/messages_sender.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/get_user_data_service.dart';
@@ -7,10 +8,10 @@ import 'package:final_project_rent_moto_fe/services/bookingMoto/addbookingServic
 import 'package:final_project_rent_moto_fe/services/fcm/fcm_service.dart';
 import 'package:final_project_rent_moto_fe/services/notification/notification_service.dart';
 import 'package:final_project_rent_moto_fe/services/promo/apply_promo_service.dart';
-import 'package:final_project_rent_moto_fe/services/promoByCompany/applyPromoByCompany.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_review.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_appbar.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/calendar_rental.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/error_notification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -96,57 +97,81 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
     }
   }
 
+  void _showErrorMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      ErrorNotification(text: message).buildSnackBar(),
+    );
+  }
+
   Future<void> _addBooking({
     required String numberPlate,
     required DateTime? pickupDateTime,
     required DateTime? returnDateTime,
   }) async {
     User? user = FirebaseAuth.instance.currentUser;
-
     String email = widget.motorcycle['email'] ?? 'No email';
 
+    // Ensure the user is logged in and their email is not the same as the motorcycle owner
     if (user != null && user.email != email) {
       if (pickupDateTime != null && returnDateTime != null) {
+        // Calculate the number of rental days
         int numberOfRentalDay =
             returnDateTime.difference(pickupDateTime).inDays;
 
+        // Ensure the rental days are positive
         if (numberOfRentalDay > 0) {
-          Map<String, dynamic> response = await _addBookingService.addBooking(
-            email: user.email!, // Use the current user's email
-            numberPlate: numberPlate,
-            bookingDate: pickupDateTime,
-            returnDate: returnDateTime,
-            numberOfRentalDay: numberOfRentalDay,
-            totalAmount: originalTotalAmount,
-          );
+          try {
+            // Make the request to the backend to add the booking
+            Map<String, dynamic> response = await _addBookingService.addBooking(
+              email: user.email!, // Use the current user's email
+              numberPlate: numberPlate,
+              bookingDate: pickupDateTime,
+              returnDate: returnDateTime,
+              numberOfRentalDay: numberOfRentalDay,
+              totalAmount: originalTotalAmount,
+            );
 
-          String bookingId = response['id'];
-          String fcmToken = await fcmService.getFcmTokenForOwner(email);
-          String accountOwner = widget.motorcycle['email'] ?? 'No email';
+            // Debug: Log the response to check if the conflict message is returned properly
+            print("Response from backend: $response");
 
-          if (fcmToken.isNotEmpty) {
-            await fcmService.sendPushNotification(
+            // Handle the case when the backend detects a booking conflict
+            if (response['message'] ==
+                'Conflict detected: Vehicle is already booked.') {
+              _showErrorMessage(context, 'Xe đang được thuê');
+
+              return; // Exit the function if there's a conflict
+            }
+
+            // If no conflict, proceed with the normal booking flow
+            String bookingId = response['id'];
+
+            // Send a push notification to the motorcycle owner
+            String fcmToken = await fcmService.getFcmTokenForOwner(email);
+            String accountOwner = widget.motorcycle['email'] ?? 'No email';
+
+            if (fcmToken.isNotEmpty) {
+              // Send push notification
+              await fcmService.sendPushNotification(
                 fcmToken,
                 'Yêu cầu đặt xe',
                 'Xe máy của bạn đã được đặt!',
                 accountOwner,
-                'NotificationListScreen');
+                'NotificationListScreen',
+              );
+            }
 
+            // Add a notification to the database
             await NotificationService().addNotification(
-                title: 'Yêu cầu đặt xe',
-                body: 'Xe máy của bạn đã được đặt!',
-                email: accountOwner,
-                bookingId: bookingId,
-                bookingDate: pickupDateTime,
-                returnDate: returnDateTime);
-          } else {
-            await NotificationService().addNotification(
-                title: 'Yêu cầu đặt xe',
-                body: 'Xe máy của bạn đã được đặt!',
-                email: accountOwner,
-                bookingId: bookingId,
-                bookingDate: pickupDateTime,
-                returnDate: returnDateTime);
+              title: 'Yêu cầu đặt xe',
+              body: 'Xe máy của bạn đã được đặt!',
+              email: accountOwner,
+              bookingId: bookingId,
+              bookingDate: pickupDateTime,
+              returnDate: returnDateTime,
+            );
+          } catch (error) {
+            // Handle any errors from the backend or API call
+            print('Error occurred while adding booking: $error');
           }
         } else {
           print('Return date must be after the pickup date!');
@@ -466,6 +491,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
               ],
             ),
             const SizedBox(height: 16),
+            Row(),
             Row(
               children: [
                 CircleAvatar(
@@ -563,6 +589,9 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
               ),
             ),
             const SizedBox(height: 16),
+            FutureBookingsWidget(
+              numberPlate: widget.motorcycle['numberPlate'],
+            ),
             DetailMotoReview(
               numberPlate: widget.motorcycle['numberPlate'],
             ),

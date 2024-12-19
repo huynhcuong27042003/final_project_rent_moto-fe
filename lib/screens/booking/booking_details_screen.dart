@@ -1,9 +1,11 @@
-// ignore_for_file: avoid_print, sort_child_properties_last
+// ignore_for_file: avoid_print, sort_child_properties_last, unused_element
 
 import 'package:final_project_rent_moto_fe/screens/notification/notification_list_screen.dart';
 import 'package:final_project_rent_moto_fe/services/bookingMoto/accept_booking_service.dart';
 import 'package:final_project_rent_moto_fe/services/bookingMoto/get_booking_service.dart';
 import 'package:final_project_rent_moto_fe/services/notification/update_is_hide_service.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/error_notification.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/success_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -86,11 +88,17 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
   void _showErrorMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      ErrorNotification(text: message).buildSnackBar(),
     );
   }
 
-  Future<void> _acceptBooking() async {
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SuccessNotification(text: message).buildSnackBar(),
+    );
+  }
+
+  Future<Map<String, dynamic>> _acceptBooking() async {
     setState(() {
       isAccepting = true;
     });
@@ -101,15 +109,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       isAccepting = false;
     });
 
-    if (result['error'] != null) {
-      _showErrorMessage(result['error']);
-    } else {
-      setState(() {
-        acceptTime =
-            DateFormat('yyyy-MM-dd HH:mm:ss').format(result['acceptTime']);
-      });
-      _showErrorMessage(result['message']);
-    }
+    return result; // Return the result so it can be used later
   }
 
   Future<void> _updateIsHide(String notificationId, bool isHide) async {
@@ -120,10 +120,10 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       if (result.containsKey('error')) {
         _showErrorMessage(result['error']);
       } else {
-        _showErrorMessage('Notification updated successfully!');
+        print('Notification updated successfully!');
       }
     } catch (error) {
-      _showErrorMessage('Error updating notification: $error');
+      print('Error updating notification!');
     }
   }
 
@@ -216,13 +216,22 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                             onPressed: isAccepting
                                 ? null
                                 : () async {
-                                    await _acceptBooking();
-                                    await _updateIsHide(notificationId, true);
+                                    // Attempt to accept the booking first
+                                    final result = await _acceptBooking();
+
+                                    // If the booking was accepted successfully (check if there is an acceptTime in result)
+                                    if (result['error'] == null) {
+                                      _showSuccessMessage(
+                                          'Bạn đã chập nhận yêu cầu thuê xe');
+                                      await _updateIsHide(notificationId, true);
+                                    } else {
+                                      _showErrorMessage(
+                                          'Xe đang được cho thuê');
+                                    }
                                   },
                             icon: isAccepting
                                 ? const CircularProgressIndicator(
-                                    color: Colors.white,
-                                  )
+                                    color: Colors.white)
                                 : const Icon(Icons.check),
                             label: const Text('Chấp nhận'),
                             style: ElevatedButton.styleFrom(

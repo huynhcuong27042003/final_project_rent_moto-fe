@@ -177,7 +177,7 @@ class _UserInforBodyState extends State<UserInforBody> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => Dashboard()),
+                                builder: (context) => ListFavoriteByUser()),
                           );
                         },
                         icon: Icon(Icons.logout, color: Colors.red),
@@ -242,9 +242,10 @@ class _UserInforBodyState extends State<UserInforBody> {
           );
         } else if (title == 'Danh sách xe yêu thích') {
           // Navigate to the list of favorite motorcycles
+
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ListFavoriteByUser()),
+            MaterialPageRoute(builder: (context) => Dashboard()),
           );
         }
       },
