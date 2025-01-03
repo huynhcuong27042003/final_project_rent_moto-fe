@@ -1,11 +1,12 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, unused_element
 
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
 import 'package:final_project_rent_moto_fe/services/promoByCompany/applyPromoByCompany.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/error_notification.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/success_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/fetch_motorcycle_isaccept_service.dart';
-import 'package:final_project_rent_moto_fe/app_icons_icons.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
 import 'package:final_project_rent_moto_fe/services/favorite_list/get_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/add_favoritelist_service.dart';
@@ -37,6 +38,18 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
     motorcycles = motorcycleService.fetchMotorcycle();
     _loadUserFavoriteState();
     _applyPromotions(); // Gọi hàm áp dụng khuyến mãi
+  }
+
+  void _showErrorMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      ErrorNotification(text: message).buildSnackBar(),
+    );
+  }
+
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SuccessNotification(text: message).buildSnackBar(),
+    );
   }
 
   // Áp dụng khuyến mãi
@@ -121,24 +134,18 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
       if (motorcycleFavoriteState[motorcycleId]!) {
         // Add motorcycle to favorite list
         await addFavoriteList(email, [motorcycleId]);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Đã thêm vào danh sách yêu thích!")),
-        );
+        _showSuccessMessage('Đã thêm xe vào danh sách yêu thích!');
       } else {
         // Remove motorcycle from favorite list
         await deleteFavoriteListService(email, motorcycleId);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Đã xóa khỏi danh sách yêu thích!")),
-        );
+        _showErrorMessage('Đã xóa xe khỏi danh sách yêu thích!');
       }
     } catch (error) {
       setState(() {
         motorcycleFavoriteState[motorcycleId] =
             !motorcycleFavoriteState[motorcycleId]!;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to update favorite list: $error")),
-      );
+      _showErrorMessage('Không thể cập nhật danh sách yêu thích');
     }
   }
 
@@ -150,7 +157,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Xe máy danh cho bạn",
+            "Xe máy dành cho bạn",
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 16,

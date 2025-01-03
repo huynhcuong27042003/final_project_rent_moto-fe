@@ -1,5 +1,8 @@
 // ignore_for_file: avoid_print, use_build_context_synchronously, annotate_overrides
-import 'package:final_project_rent_moto_fe/screens/auth/login/login_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
+import 'package:final_project_rent_moto_fe/screens/booking/future_bookings_widget.dart';
+
 import 'package:final_project_rent_moto_fe/screens/map/location_of-moto.dart';
 import 'package:final_project_rent_moto_fe/screens/messages/messages_sender.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/get_user_data_service.dart';
@@ -11,6 +14,7 @@ import 'package:final_project_rent_moto_fe/services/promoByCompany/applyPromoByC
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_review.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_appbar.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/calendar_rental.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/error_notification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -39,10 +43,17 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
   DateTime? pickupDateTime;
   DateTime? returnDateTime;
   final _addBookingService = AddBookingService();
+  final ApplyPromoByCompanyService promoService = ApplyPromoByCompanyService();
   LatLng? _mapCoordinates;
   String? appliedPromoCode;
   Map<String, dynamic>? userData;
   final FCMService fcmService = FCMService();
+  double averageRating = 0.0;
+  int totalTrips = 0;
+  double priceIsDiscount = 0.0;
+  double originalPrice = 0.0;
+  double percentage = 0.0;
+  bool isLoading = true;
   void initState() {
     super.initState();
     pickupDate = DateTime.now();
@@ -52,6 +63,103 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
     _fetchCoordinates();
     String email = widget.motorcycle['email'] ?? 'Không có email';
     getUserData(email);
+    fetchAverageRating();
+    fetchTotalTrips();
+    _applyPromo();
+  }
+
+  Future<void> _applyPromo() async {
+    try {
+      var motorcycleId = widget.motorcycle['id']; // Assuming you have an 'id'
+      double discountedPrice = await promoService.applyPromotion(motorcycleId);
+      setState(() {
+        percentage = discountedPrice != originalPrice
+            ? ((originalPrice - discountedPrice) / originalPrice) * 100
+            : 0.0;
+        priceIsDiscount = discountedPrice;
+      });
+    } catch (e) {
+      print("Error applying promotion: $e");
+    }
+  }
+
+  Future<void> fetchTotalTrips() async {
+    try {
+      print('fetchTotalTrips() được gọi'); // Debug xem hàm có chạy không
+      // Truy vấn bookings để lấy danh sách bookingId theo numberPlate
+      final bookingsQuery = await FirebaseFirestore.instance
+          .collection('bookings')
+          .where('numberPlate', isEqualTo: widget.motorcycle['numberPlate'])
+          .get();
+
+      if (bookingsQuery.docs.isNotEmpty) {
+        // Lấy danh sách bookingId
+        final bookingIds = bookingsQuery.docs.map((doc) => doc.id).toList();
+
+        int count = 0;
+        // Kiểm tra từng bookingId trong invoices
+        for (String bookingId in bookingIds) {
+          final invoiceQuery = await FirebaseFirestore.instance
+              .collection('invoices')
+              .where('bookingId', isEqualTo: bookingId)
+              .get();
+
+          if (invoiceQuery.docs.isNotEmpty) {
+            count++;
+          }
+        }
+
+        setState(() {
+          totalTrips = count;
+          isLoading = false;
+        });
+      } else {
+        // Không có bookings nào
+        setState(() {
+          totalTrips = 0;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching trips: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<void> fetchAverageRating() async {
+    try {
+      // Lấy danh sách reviews dựa trên numberPlate
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('reviews')
+          .where('numberPlate', isEqualTo: widget.motorcycle['numberPlate'])
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final ratings = querySnapshot.docs
+            .map((doc) => doc.data()['numberStars'] as int)
+            .toList();
+
+        // Tính trung bình số sao
+        final totalStars = ratings.fold(0, (sum, star) => sum + star);
+        setState(() {
+          averageRating = totalStars / ratings.length;
+          isLoading = false;
+        });
+      } else {
+        // Không có đánh giá
+        setState(() {
+          averageRating = 5.0;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching reviews: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   // Phương thức cập nhật pickupDateTime và returnDateTime
@@ -77,7 +185,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
   }
 
   // Tính tổng tiền
-  void _calculateTotalAmount() {
+  void _calculateTotalAmount() async {
     if (pickupDateTime != null && returnDateTime != null) {
       // Tính số ngày thuê
       int rentalDays = returnDateTime!.difference(pickupDateTime!).inDays;
@@ -85,15 +193,33 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
       // Lấy giá thuê từ thông tin xe
       var info = widget.motorcycle['informationMoto'] ?? {};
       String priceXe = info['price'].toString();
-      String priceXeTemp = priceXe;
-      int numberPirceXe = int.parse(priceXeTemp);
-
-      // Tính tổng tiền
-      setState(() {
-        totalAmount = (rentalDays * numberPirceXe);
-        originalTotalAmount = totalAmount;
-      });
+      // Lấy giá đã áp dụng khuyến mãi từ service
+      try {
+        double discountedPrice = await promoService
+            .applyPromotion(widget.motorcycle['id']); // Lấy id của xe máy
+        setState(() {
+          // Nếu có khuyến mãi, dùng giá đã giảm, nếu không dùng giá gốc
+          priceXe = discountedPrice.toString();
+          // Tính tổng tiền sau khuyến mãi
+          int numberPirceXe = discountedPrice.toInt();
+          totalAmount = (rentalDays * numberPirceXe);
+          originalTotalAmount = totalAmount;
+        });
+      } catch (e) {
+        // Nếu không áp dụng khuyến mãi, sử dụng giá gốc
+        setState(() {
+          int numberPirceXe = int.parse(priceXe);
+          totalAmount = (rentalDays * numberPirceXe);
+          originalTotalAmount = totalAmount;
+        });
+      }
     }
+  }
+
+  void _showErrorMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      ErrorNotification(text: message).buildSnackBar(),
+    );
   }
 
   Future<void> _addBooking({
@@ -102,51 +228,69 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
     required DateTime? returnDateTime,
   }) async {
     User? user = FirebaseAuth.instance.currentUser;
-
     String email = widget.motorcycle['email'] ?? 'No email';
 
+    // Ensure the user is logged in and their email is not the same as the motorcycle owner
     if (user != null && user.email != email) {
       if (pickupDateTime != null && returnDateTime != null) {
+        // Calculate the number of rental days
         int numberOfRentalDay =
             returnDateTime.difference(pickupDateTime).inDays;
 
+        // Ensure the rental days are positive
         if (numberOfRentalDay > 0) {
-          Map<String, dynamic> response = await _addBookingService.addBooking(
-            email: user.email!, // Use the current user's email
-            numberPlate: numberPlate,
-            bookingDate: pickupDateTime,
-            returnDate: returnDateTime,
-            numberOfRentalDay: numberOfRentalDay,
-            totalAmount: originalTotalAmount,
-          );
+          try {
+            // Make the request to the backend to add the booking
+            Map<String, dynamic> response = await _addBookingService.addBooking(
+              email: user.email!, // Use the current user's email
+              numberPlate: numberPlate,
+              bookingDate: pickupDateTime,
+              returnDate: returnDateTime,
+              numberOfRentalDay: numberOfRentalDay,
+              totalAmount: originalTotalAmount,
+            );
 
-          String bookingId = response['id'];
-          String fcmToken = await fcmService.getFcmTokenForOwner(email);
-          String accountOwner = widget.motorcycle['email'] ?? 'No email';
+            // Debug: Log the response to check if the conflict message is returned properly
+            print("Response from backend: $response");
 
-          if (fcmToken.isNotEmpty) {
-            await fcmService.sendPushNotification(
+            // Handle the case when the backend detects a booking conflict
+            if (response['message'] ==
+                'Conflict detected: Vehicle is already booked.') {
+              _showErrorMessage(context, 'Xe đang được thuê');
+
+              return; // Exit the function if there's a conflict
+            }
+
+            // If no conflict, proceed with the normal booking flow
+            String bookingId = response['id'];
+
+            // Send a push notification to the motorcycle owner
+            String fcmToken = await fcmService.getFcmTokenForOwner(email);
+            String accountOwner = widget.motorcycle['email'] ?? 'No email';
+
+            if (fcmToken.isNotEmpty) {
+              // Send push notification
+              await fcmService.sendPushNotification(
                 fcmToken,
                 'Yêu cầu đặt xe',
                 'Xe máy của bạn đã được đặt!',
                 accountOwner,
-                'NotificationListScreen');
+                'NotificationListScreen',
+              );
+            }
 
+            // Add a notification to the database
             await NotificationService().addNotification(
-                title: 'Yêu cầu đặt xe',
-                body: 'Xe máy của bạn đã được đặt!',
-                email: accountOwner,
-                bookingId: bookingId,
-                bookingDate: pickupDateTime,
-                returnDate: returnDateTime);
-          } else {
-            await NotificationService().addNotification(
-                title: 'Yêu cầu đặt xe',
-                body: 'Xe máy của bạn đã được đặt!',
-                email: accountOwner,
-                bookingId: bookingId,
-                bookingDate: pickupDateTime,
-                returnDate: returnDateTime);
+              title: 'Yêu cầu đặt xe',
+              body: 'Xe máy của bạn đã được đặt!',
+              email: accountOwner,
+              bookingId: bookingId,
+              bookingDate: pickupDateTime,
+              returnDate: returnDateTime,
+            );
+          } catch (error) {
+            // Handle any errors from the backend or API call
+            print('Error occurred while adding booking: $error');
           }
         } else {
           print('Return date must be after the pickup date!');
@@ -277,17 +421,52 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                             ),
                             Row(
                               children: [
-                                Text(
-                                  NumberFormat("#,###", "vi_VN")
-                                      .format(info['price']),
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                                // Kiểm tra nếu giá gốc và giá sau khuyến mãi giống nhau
+                                if (info['price'] == priceIsDiscount)
+                                  // Hiển thị giá gốc với màu đen
+                                  Text(
+                                    NumberFormat("#,###", "vi_VN")
+                                        .format(info['price']),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          Colors.black, // Màu đen cho giá gốc
+                                    ),
+                                  )
+                                else ...[
+                                  // Hiển thị giá gốc với dấu gạch ngang
+                                  Text(
+                                    NumberFormat("#,###", "vi_VN")
+                                        .format(info['price']),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors
+                                          .black54, // Màu xám nhạt cho giá gốc
+                                      decoration: TextDecoration
+                                          .lineThrough, // Dấu gạch ngang
+                                    ),
                                   ),
-                                ),
-                                Text(
+                                  const SizedBox(
+                                      width:
+                                          10), // Khoảng cách giữa giá gốc và giá giảm
+
+                                  // Hiển thị giá đã áp dụng khuyến mãi
+                                  Text(
+                                    NumberFormat("#,###", "vi_VN")
+                                        .format(priceIsDiscount),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors
+                                          .red, // Màu đỏ cho giá sau khuyến +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++mãi
+                                    ),
+                                  ),
+                                ],
+                                const Text(
                                   ' đ/day',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -466,6 +645,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
               ],
             ),
             const SizedBox(height: 16),
+            Row(),
             Row(
               children: [
                 CircleAvatar(
@@ -481,26 +661,12 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      userData?['information']['name'] ?? 'User Name',
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
                     Row(
                       children: [
-                        const Icon(Icons.star, color: Colors.yellow, size: 16),
-                        const SizedBox(width: 4),
-                        const Text(
-                          '5.0', // Đánh giá (Có thể lấy từ dữ liệu nếu có)
-                          style: TextStyle(
-                              fontSize: 14, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(width: 8),
-                        const Icon(Icons.directions_car, size: 16),
-                        const SizedBox(width: 4),
-                        const Text(
-                          '36 chuyến', // Số chuyến (Có thể lấy từ dữ liệu nếu có)
-                          style: TextStyle(fontSize: 14),
+                        Text(
+                          userData?['information']['name'] ?? 'User Name',
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(width: 8),
                         GestureDetector(
@@ -512,7 +678,8 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                               Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => LoginScreen(),
+                                  builder: (context) =>
+                                      Dashboard(initialIndex: 2),
                                 ),
                               );
                               return;
@@ -552,17 +719,52 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                         ),
                       ],
                     ),
+                    Row(
+                      children: [
+                        if (totalTrips > 0) ...[
+                          const Icon(Icons.star,
+                              color: Colors.yellow, size: 16),
+                          const SizedBox(width: 4),
+                          isLoading
+                              ? const Text(
+                                  'Đang tải...',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              : Text(
+                                  "${averageRating.toStringAsFixed(1)}", // Hiển thị rating trung bình
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                        ],
+                        if (totalTrips > 0) const SizedBox(width: 8),
+                        const Icon(Icons.directions_car, size: 16),
+                        const SizedBox(width: 4),
+                        isLoading
+                            ? const Text(
+                                'Đang tải...',
+                                style: TextStyle(fontSize: 14),
+                              )
+                            : Text(
+                                totalTrips > 0
+                                    ? '$totalTrips chuyến'
+                                    : 'Chưa có chuyến', // Hiển thị kết quả
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                      ],
+                    ),
                   ],
                 ),
               ],
             ),
-            Center(
-              child: Text(
-                "Email: $email", // Display email, or fallback if not available
-                style: TextStyle(fontSize: 14, color: Colors.black54),
-              ),
-            ),
             const SizedBox(height: 16),
+            FutureBookingsWidget(
+              numberPlate: widget.motorcycle['numberPlate'],
+            ),
             DetailMotoReview(
               numberPlate: widget.motorcycle['numberPlate'],
             ),

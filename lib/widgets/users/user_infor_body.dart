@@ -242,9 +242,10 @@ class _UserInforBodyState extends State<UserInforBody> {
           );
         } else if (title == 'Danh sách xe yêu thích') {
           // Navigate to the list of favorite motorcycles
+
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ListFavoriteByUser()),
+            MaterialPageRoute(builder: (context) => Dashboard()),
           );
         }
       },

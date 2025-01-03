@@ -28,10 +28,10 @@ class MomoService {
 
       if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);
-        print('Payment initialized. deeplink: ${responseBody['deeplink']}');
+        print('Payment initialized. deeplink: ${responseBody['qrCodeUrl']}');
 
         // Lấy deeplink và orderId từ response
-        String payUrl = responseBody['deeplink'];
+        String payUrl = responseBody['qrCodeUrl'];
         String orderId = responseBody['requestId'];
 
         // Kiểm tra và mở deeplink trong trình duyệt

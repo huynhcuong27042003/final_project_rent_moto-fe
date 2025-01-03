@@ -43,8 +43,8 @@ class _NotificatioListByEmailScreenState
       return;
     }
 
-    const int maxRetries = 5;
-    const Duration retryInterval = Duration(seconds: 3);
+    const int maxRetries = 7;
+    const Duration retryInterval = Duration(seconds: 4);
     int attempt = 0;
     Map<String, dynamic>? transactionResult;
 
@@ -66,7 +66,7 @@ class _NotificatioListByEmailScreenState
               booking['motorbikeRentalDeposit'].toString(),
               email, // Truyền email vào đúng vị trí tham số
             );
-            await UpdateIsHideBookingService().hideBooking(booking['id']);
+            await UpdateIsHideBookingService().updateBooking(booking['id']);
             print('Invoice created successfully: $invoiceId');
           } catch (e) {
             print('Error creating invoice: $e');

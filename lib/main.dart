@@ -17,6 +17,13 @@ Future<void> main() async {
 
   final FCMService fcmService = FCMService();
   fcmService.initializeFCM();
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    if (message.notification != null) {
+      print('Message Title: ${message.notification?.title}');
+      print('Message Body: ${message.notification?.body}');
+      // Gọi hiển thị notification bằng flutter_local_notifications
+    }
+  });
 
   runApp(const MyApp());
 }

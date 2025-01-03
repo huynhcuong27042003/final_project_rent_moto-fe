@@ -1,7 +1,11 @@
+// ignore_for_file: unused_element
+
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/add_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/delete_favoritelist_service.dart';
 import 'package:final_project_rent_moto_fe/services/favorite_list/get_favoritelist_service.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/error_notification.dart';
+import 'package:final_project_rent_moto_fe/widgets/notification/success_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase Auth
 
@@ -28,6 +32,18 @@ class _DetailMotoAppBarState extends State<DetailMotoAppBar> {
     super.initState();
     motorcycleId = widget.motorcycle['id'] ?? 'No motorcycle ID available';
     _loadUserFavoriteState(); // Check if the motorcycle is a favorite for the logged-in user
+  }
+
+  void _showErrorMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      ErrorNotification(text: message).buildSnackBar(),
+    );
+  }
+
+  void _showSuccessMessage(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SuccessNotification(text: message).buildSnackBar(),
+    );
   }
 
   // Load the user's favorite state from the backend or local storage
@@ -82,16 +98,12 @@ class _DetailMotoAppBarState extends State<DetailMotoAppBar> {
       if (isFavorite) {
         await addFavoriteList(email, [motorcycleId]);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Motorcycle added to favorites!")),
-          );
+          _showSuccessMessage(context, 'Đã thêm xe vào danh sách yêu thích!');
         }
       } else {
         await deleteFavoriteListService(email, motorcycleId);
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Motorcycle removed from favorites!")),
-          );
+          _showErrorMessage(context, 'Đã xóa xe khỏi danh sách yêu thích!');
         }
       }
     } catch (error) {
