@@ -86,7 +86,7 @@ class _DetailMotoAppBarState extends State<DetailMotoAppBar> {
       }
       return;
     }
-    final String email = currentUser?.email ?? 'No email available';
+    final String email = currentUser.email ?? 'No email available';
     final String motorcycleId =
         widget.motorcycle['id'] ?? 'No motorcycle ID available';
     // Show loading indicator or any visual feedback

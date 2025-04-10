@@ -243,7 +243,7 @@ class _RentHomeSearchMotosState extends State<RentHomeSearchMotos> {
                           ),
                           child: TextButton(
                             onPressed: () {
-                              if (!locationController.text.trim().isEmpty) {
+                              if (locationController.text.trim().isNotEmpty) {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(

@@ -204,10 +204,10 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     // Xử lý khi người dùng gửi đánh giá
                     _addReview();
                   },
-                  child: Text('Gửi Đánh Giá'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFFFAD15),
                   ),
+                  child: Text('Gửi Đánh Giá'),
                 ),
               ),
             ],

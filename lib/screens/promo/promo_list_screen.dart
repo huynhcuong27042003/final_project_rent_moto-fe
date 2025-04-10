@@ -27,7 +27,7 @@ class _PromoListScreenState extends State<PromoListScreen> {
       final snapshot = await _firestore.collection('promotions').get();
       return snapshot.docs.map((doc) {
         // Add the document ID to each promo data
-        var promoData = doc.data() as Map<String, dynamic>;
+        var promoData = doc.data();
         promoData['id'] = doc.id; // Adding the document ID
         return promoData;
       }).toList();

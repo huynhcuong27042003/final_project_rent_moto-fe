@@ -1,4 +1,3 @@
-import 'package:final_project_rent_moto_fe/services/auth/signup_service.dart';
 import 'package:final_project_rent_moto_fe/services/auth/validator_service.dart';
 import 'package:final_project_rent_moto_fe/services/setting/setting_service.dart';
 import 'package:final_project_rent_moto_fe/widgets/auth/button_auth.dart';

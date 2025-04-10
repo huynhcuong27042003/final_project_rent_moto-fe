@@ -7,7 +7,7 @@ class LocationOfMotoScreen extends StatelessWidget {
   final double latitude;
   final double longitude;
 
-  LocationOfMotoScreen({required this.latitude, required this.longitude});
+  const LocationOfMotoScreen({super.key, required this.latitude, required this.longitude});
 
   @override
   Widget build(BuildContext context) {

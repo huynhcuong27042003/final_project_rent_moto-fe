@@ -27,7 +27,7 @@ class SendMailService {
       // Cấu hình thông tin email
       String username = 'caokyanh122@gmail.com'; // Thay thế bằng email của bạn
       String appPassword =
-          'wypb fhgx synr nkty'; // Thay thế bằng mật khẩu ứng dụng
+          'fmpo subp dzob seqf'; // Thay thế bằng mật khẩu ứng dụng
       final smtpServer = gmail(username, appPassword);
 
       final message = Message()

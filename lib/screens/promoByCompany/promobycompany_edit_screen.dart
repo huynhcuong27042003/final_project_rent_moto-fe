@@ -8,10 +8,10 @@ class PromobycompanyEditScreen extends StatefulWidget {
   final Map<String, dynamic> promoData; // Dữ liệu khuyến mãi
 
   const PromobycompanyEditScreen({
-    Key? key,
+    super.key,
     required this.promoId,
     required this.promoData,
-  }) : super(key: key);
+  });
 
   @override
   State<PromobycompanyEditScreen> createState() =>

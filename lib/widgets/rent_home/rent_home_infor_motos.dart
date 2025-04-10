@@ -123,7 +123,7 @@ class _RentHomeInforMotosState extends State<RentHomeInforMotos> {
       }
       return;
     }
-    final String email = currentUser?.email ?? 'No email available';
+    final String email = currentUser.email ?? 'No email available';
 
     try {
       setState(() {

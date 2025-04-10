@@ -4,7 +4,6 @@ import 'package:final_project_rent_moto_fe/screens/MotorCycle/motorcycles_list_b
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/promo/promo_list_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/promoByCompany/promobycompany_list_screen.dart';
-import 'package:final_project_rent_moto_fe/screens/promoByCompany/promobycompay_add_screen.dart';
 import 'package:final_project_rent_moto_fe/screens/users/user_list_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

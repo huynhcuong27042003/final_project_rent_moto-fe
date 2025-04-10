@@ -10,6 +10,7 @@ import 'package:final_project_rent_moto_fe/services/bookingMoto/addbookingServic
 import 'package:final_project_rent_moto_fe/services/fcm/fcm_service.dart';
 import 'package:final_project_rent_moto_fe/services/notification/notification_service.dart';
 import 'package:final_project_rent_moto_fe/services/promo/apply_promo_service.dart';
+import 'package:final_project_rent_moto_fe/services/promoByCompany/applyPromoByCompany.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_review.dart';
 import 'package:final_project_rent_moto_fe/widgets/detail_moto/detail_moto_appbar.dart';
 import 'package:final_project_rent_moto_fe/widgets/modals/calendar_rental.dart';
@@ -31,7 +32,8 @@ class DetailMotoScreen extends StatefulWidget {
 
 class _DetailMotoScreenState extends State<DetailMotoScreen> {
   // Nhận dữ liệu từ constructor
-  String _selectedPickupOption = 'self_pickup'; // Default pickup option
+    final ApplyPromoByCompanyService promoService = ApplyPromoByCompanyService();
+  final String _selectedPickupOption = 'self_pickup'; // Default pickup option
 
   late DateTime pickupDate; // Khai báo ngày nhận
   late DateTime returnDate; // Khai báo ngày trả
@@ -44,6 +46,9 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
   final _addBookingService = AddBookingService();
   LatLng? _mapCoordinates;
   String? appliedPromoCode;
+  double priceIsDiscount = 0.0;
+  double originalPrice = 0.0;
+  double percentage = 0.0;
   Map<String, dynamic>? userData;
   final FCMService fcmService = FCMService();
   double averageRating = 0.0;
@@ -56,6 +61,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
     _updateDateTimes(); // Cập nhật giá trị pickupDateTime và returnDateTime ngay khi khởi tạo
     _calculateTotalAmount();
     _fetchCoordinates();
+    _applyPromo();
     String email = widget.motorcycle['email'] ?? 'Không có email';
     getUserData(email);
     fetchAverageRating();
@@ -140,9 +146,22 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
       });
     }
   }
-
+ Future<void> _applyPromo() async {
+    try {
+      var motorcycleId = widget.motorcycle['id']; // Assuming you have an 'id'
+      double discountedPrice = await promoService.applyPromotion(motorcycleId);
+      setState(() {
+        percentage = discountedPrice != originalPrice
+            ? ((originalPrice - discountedPrice) / originalPrice) * 100
+            : 0.0;
+        priceIsDiscount = discountedPrice;
+      });
+    } catch (e) {
+      print("Error applying promotion: $e");
+    }
+  }
   // Phương thức cập nhật pickupDateTime và returnDateTime
-  void _updateDateTimes() {
+   void _updateDateTimes() {
     List<String> pickupTimeParts = pickupTime.split(":");
     List<String> returnTimeParts = returnTime.split(":");
 
@@ -164,7 +183,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
   }
 
   // Tính tổng tiền
-  void _calculateTotalAmount() {
+  void _calculateTotalAmount() async {
     if (pickupDateTime != null && returnDateTime != null) {
       // Tính số ngày thuê
       int rentalDays = returnDateTime!.difference(pickupDateTime!).inDays;
@@ -172,14 +191,26 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
       // Lấy giá thuê từ thông tin xe
       var info = widget.motorcycle['informationMoto'] ?? {};
       String priceXe = info['price'].toString();
-      String priceXeTemp = priceXe;
-      int numberPirceXe = int.parse(priceXeTemp);
-
-      // Tính tổng tiền
-      setState(() {
-        totalAmount = (rentalDays * numberPirceXe);
-        originalTotalAmount = totalAmount;
-      });
+      // Lấy giá đã áp dụng khuyến mãi từ service
+      try {
+        double discountedPrice = await promoService
+            .applyPromotion(widget.motorcycle['id']); // Lấy id của xe máy
+        setState(() {
+          // Nếu có khuyến mãi, dùng giá đã giảm, nếu không dùng giá gốc
+          priceXe = discountedPrice.toString();
+          // Tính tổng tiền sau khuyến mãi
+          int numberPirceXe = discountedPrice.toInt();
+          totalAmount = (rentalDays * numberPirceXe);
+          originalTotalAmount = totalAmount;
+        });
+      } catch (e) {
+        // Nếu không áp dụng khuyến mãi, sử dụng giá gốc
+        setState(() {
+          int numberPirceXe = int.parse(priceXe);
+          totalAmount = (rentalDays * numberPirceXe);
+          originalTotalAmount = totalAmount;
+        });
+      }
     }
   }
 
@@ -388,17 +419,49 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                             ),
                             Row(
                               children: [
-                                Text(
-                                  NumberFormat("#,###", "vi_VN")
-                                      .format(info['price']),
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
+                                if (info['price'] == priceIsDiscount)
+                                  // Hiển thị giá gốc với màu đen
+                                  Text(
+                                    NumberFormat("#,###", "vi_VN")
+                                        .format(info['price']),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color:
+                                          Colors.black, // Màu đen cho giá gốc
+                                    ),
+                                  )
+                                  else ...[
+                                  // Hiển thị giá gốc với dấu gạch ngang
+                                  Text(
+                                    NumberFormat("#,###", "vi_VN")
+                                        .format(info['price']),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors
+                                          .black54, // Màu xám nhạt cho giá gốc
+                                      decoration: TextDecoration
+                                          .lineThrough, // Dấu gạch ngang
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  ' đ/ngày',
-                                  style: const TextStyle(
+                                  const SizedBox(
+                                      width:
+                                          10), 
+                                 Text(
+                                    NumberFormat("#,###", "vi_VN")
+                                        .format(priceIsDiscount),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors
+                                          .red, // Màu đỏ cho giá sau khuyến mãi
+                                    ),
+                                  ),
+                                ],
+                                const Text(
+                                  ' đ/day',
+                                  style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -561,7 +624,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  '${district}, ${city}',
+                  '$district, $city',
                   style: TextStyle(
                     color: Colors.black54,
                     fontWeight: FontWeight.w500,
@@ -666,7 +729,7 @@ class _DetailMotoScreenState extends State<DetailMotoScreen> {
                                   ),
                                 )
                               : Text(
-                                  "${averageRating.toStringAsFixed(1)}", // Hiển thị rating trung bình
+                                  averageRating.toStringAsFixed(1), // Hiển thị rating trung bình
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                     fontSize: 16,

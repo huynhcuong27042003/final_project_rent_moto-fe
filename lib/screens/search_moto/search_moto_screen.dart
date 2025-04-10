@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_print
 
-import 'package:final_project_rent_moto_fe/app_icons_icons.dart';
 import 'package:final_project_rent_moto_fe/screens/dashboard.dart';
 import 'package:final_project_rent_moto_fe/screens/detail/detail_moto_screen.dart';
 import 'package:final_project_rent_moto_fe/services/MotorCycle/fetch_motorcycle_isaccept_service.dart';
@@ -223,7 +222,7 @@ class _SearchMotoScreenState extends State<SearchMotoScreen> {
       }
       return;
     }
-    final String email = currentUser?.email ?? 'No email available';
+    final String email = currentUser.email ?? 'No email available';
 
     try {
       setState(() {

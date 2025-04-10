@@ -14,7 +14,7 @@ class ImagePickerService {
     try {
       final List<XFile> pickedImages = await imagePicker.pickMultiImage();
 
-      if (pickedImages != null && pickedImages.isNotEmpty) {
+      if (pickedImages.isNotEmpty) {
         selectedImages = pickedImages.map((e) => File(e.path)).toList();
       }
     } catch (error) {

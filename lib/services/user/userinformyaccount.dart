@@ -20,7 +20,7 @@ class UserInforMyAccountService {
       if (user != null) {
         QuerySnapshot querySnapshot = await _firestore
             .collection('users')
-            .where('email', isEqualTo: user!.email)
+            .where('email', isEqualTo: user.email)
             .limit(1)
             .get();
 

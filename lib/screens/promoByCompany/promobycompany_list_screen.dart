@@ -19,7 +19,7 @@ class _PromobycompanyListScreenState extends State<PromobycompanyListScreen> {
     try {
       final snapshot = await _firestore.collection('promotionsByCompany').get();
       return snapshot.docs.map((doc) {
-        final promoData = doc.data() as Map<String, dynamic>;
+        final promoData = doc.data();
         promoData['id'] = doc.id;
         return promoData;
       }).toList()
